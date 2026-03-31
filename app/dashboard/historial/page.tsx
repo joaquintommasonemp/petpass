@@ -11,6 +11,7 @@ function Badge({ children, color = "#60a5fa" }: any) {
 }
 
 export default function Historial() {
+  const [mascotas, setMascotas] = useState<any[]>([]);
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -23,15 +24,22 @@ export default function Historial() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: mascotas } = await supabase.from("mascotas").select("*").eq("user_id", user.id).limit(1);
-      if (mascotas && mascotas[0]) {
-        setMascota(mascotas[0]);
-        const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", mascotas[0].id).order("created_at", { ascending: false });
-        setHistorial(hist || []);
+      const { data: ms } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
+      if (ms && ms.length > 0) {
+        setMascotas(ms);
+        await selectMascota(ms[0]);
       }
     }
     load();
   }, []);
+
+  async function selectMascota(m: any) {
+    setMascota(m);
+    setHistorial([]);
+    setUploaded([]);
+    const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false });
+    setHistorial(hist || []);
+  }
 
   async function addEntry() {
     if (!form.title || !mascota) return;
@@ -60,7 +68,7 @@ export default function Historial() {
       {mascota && (
         <div style={{
           background: "#181c27", border: "1px solid #4ade8033", borderRadius: 16,
-          padding: "14px 16px", marginBottom: 20,
+          padding: "14px 16px", marginBottom: mascotas.length > 1 ? 12 : 20,
           display: "flex", alignItems: "center", gap: 14,
         }}>
           <div style={{
@@ -83,6 +91,28 @@ export default function Historial() {
             background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
             borderRadius: 20, padding: "3px 10px", fontSize: 10, fontWeight: 800,
           }}>Historia clínica</span>
+        </div>
+      )}
+
+      {/* Selector de mascota si hay más de una */}
+      {mascotas.length > 1 && (
+        <div style={{ display: "flex", gap: 8, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
+          {mascotas.map(m => (
+            <button key={m.id} onClick={() => selectMascota(m)} style={{
+              background: mascota?.id === m.id ? "#4ade8022" : "#181c27",
+              border: `1px solid ${mascota?.id === m.id ? "#4ade80" : "#252a3a"}`,
+              borderRadius: 20, padding: "6px 14px",
+              color: mascota?.id === m.id ? "#4ade80" : "#7a8299",
+              fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              {m.photo_url
+                ? <img src={m.photo_url} style={{ width: 18, height: 18, borderRadius: "50%", objectFit: "cover" }} />
+                : <span>{m.breed?.toLowerCase().includes("gato") ? "🐱" : "🐕"}</span>
+              }
+              {m.name}
+            </button>
+          ))}
         </div>
       )}
 

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 
@@ -85,7 +85,10 @@ function TabPerdidas() {
     pet_name: "", breed: "", color: "", zone: "", phone: "", description: "",
     lat: -34.6037, lng: -58.3816,
   });
+  const [fotosForm, setFotosForm] = useState<File[]>([]);
+  const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -115,12 +118,43 @@ function TabPerdidas() {
     setFotos(fotoMap);
   }
 
+  function handleFotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setFotosForm(prev => [...prev, ...files]);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => setFotoPreviews(prev => [...prev, ev.target?.result as string]);
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleReport() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
     const { data } = await supabase.from("perdidas").insert({ ...form, user_id: user.id }).select();
-    if (data) setPerdidas(prev => [data[0], ...prev]);
+    if (data?.[0]) {
+      const id = data[0].id;
+      const urls: string[] = [];
+      for (const file of fotosForm) {
+        const path = `perdidas/${id}/${Date.now()}_${file.name}`;
+        const { error } = await supabase.storage.from("comunidad").upload(path, file);
+        if (!error) {
+          const { data: urlData } = supabase.storage.from("comunidad").getPublicUrl(path);
+          urls.push(urlData.publicUrl);
+        }
+      }
+      if (urls.length > 0) {
+        await supabase.from("perdidas").update({ photo_urls: JSON.stringify(urls) }).eq("id", id);
+        data[0].photo_urls = JSON.stringify(urls);
+      }
+      setPerdidas(prev => [data[0], ...prev]);
+    }
+    setForm({ pet_name: "", breed: "", color: "", zone: "", phone: "", description: "", lat: form.lat, lng: form.lng });
+    setFotosForm([]);
+    setFotoPreviews([]);
+    if (fileRef.current) fileRef.current.value = "";
     setReporting(false);
     setLoading(false);
   }
@@ -158,6 +192,30 @@ function TabPerdidas() {
             <textarea placeholder="Descripción adicional..." rows={2} value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff", resize: "none" }} />
+            {/* Fotos */}
+            <div>
+              <div style={{ fontSize: 12, color: "#7a8299", marginBottom: 8 }}>Fotos de la mascota</div>
+              {fotoPreviews.length > 0 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  {fotoPreviews.map((src, i) => (
+                    <div key={i} style={{ position: "relative" }}>
+                      <img src={src} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: "1px solid #f8717133" }} />
+                      <button onClick={() => { setFotosForm(p => p.filter((_, idx) => idx !== i)); setFotoPreviews(p => p.filter((_, idx) => idx !== i)); }} style={{
+                        position: "absolute", top: -6, right: -6, background: "#f87171", color: "#fff",
+                        border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
+                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => fileRef.current?.click()} style={{
+                background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+                borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+              }}>📷 Agregar fotos</button>
+              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFotos} />
+            </div>
+
             <button onClick={handleReport} disabled={loading} style={{
               background: "#f87171", color: "#fff", border: "none",
               borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1,
@@ -179,20 +237,32 @@ function TabPerdidas() {
         const isGato = p.breed?.toLowerCase().includes("gato") || p.breed?.toLowerCase().includes("cat");
         const days = daysSince(p.created_at);
 
+        const uploadedPhotos: string[] = (() => { try { return JSON.parse(p.photo_urls || "[]"); } catch { return []; } })();
+
         return (
           <Card key={i} style={{ border: "1px solid #f8717122" }}>
-            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-              {/* Foto de la mascota */}
-              <div style={{
-                width: 64, height: 64, borderRadius: 12, flexShrink: 0,
-                background: "#252a3a", border: "2px solid #f8717133",
-                display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
-              }}>
-                {foto
-                  ? <img src={foto} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ fontSize: 32 }}>{isGato ? "🐱" : "🐶"}</span>
-                }
+            {/* Fotos subidas por el usuario */}
+            {uploadedPhotos.length > 0 && (
+              <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto" }}>
+                {uploadedPhotos.map((url, pi) => (
+                  <img key={pi} src={url} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", flexShrink: 0, border: "1px solid #f8717133" }} />
+                ))}
               </div>
+            )}
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              {/* Foto de perfil del dueño (si no hay fotos subidas) */}
+              {uploadedPhotos.length === 0 && (
+                <div style={{
+                  width: 64, height: 64, borderRadius: 12, flexShrink: 0,
+                  background: "#252a3a", border: "2px solid #f8717133",
+                  display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+                }}>
+                  {foto
+                    ? <img src={foto} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <span style={{ fontSize: 32 }}>{isGato ? "🐱" : "🐶"}</span>
+                  }
+                </div>
+              )}
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>

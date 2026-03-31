@@ -46,7 +46,7 @@ export default function Home() {
         {[
           { icon: "🤖", title: "IA Veterinaria", desc: "Consultá con IA que conoce a tu mascota" },
           { icon: "🏥", title: "Historia clínica", desc: "Todo el historial en un solo lugar" },
-          { icon: "📍", title: "Mascotas perdidas", desc: "Alertas geolocalrizadas en tu zona" },
+          { icon: "👥", title: "Comunidad", desc: "Adopciones, mascotas perdidas y descuentos" },
           { icon: "💉", title: "Recordatorios", desc: "Nunca más olvidés una vacuna" },
         ].map((f, i) => (
           <div key={i} style={{
