@@ -15,7 +15,6 @@ export default function Historial() {
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploaded, setUploaded] = useState<{ name: string; url: string }[]>([]);
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
   const [adding, setAdding] = useState(false);
   const supabase = createClient();
@@ -50,15 +49,27 @@ export default function Historial() {
   }
 
   async function handleFile(e: any) {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file || !mascota) return;
     setUploading(true);
     const path = `${mascota.id}/${Date.now()}_${file.name}`;
     const { error } = await supabase.storage.from("documentos").upload(path, file);
     if (!error) {
       const { data: urlData } = supabase.storage.from("documentos").getPublicUrl(path);
-      setUploaded(prev => [...prev, { name: file.name, url: urlData.publicUrl }]);
+      const entry = {
+        mascota_id: mascota.id,
+        title: "📄 Documento",
+        summary: `${file.name}::${urlData.publicUrl}`,
+        date: new Date().toLocaleDateString("es-AR"),
+        vet: "",
+      };
+      const { data: saved } = await supabase.from("historial").insert(entry).select();
+      if (saved) setHistorial(prev => [saved[0], ...prev]);
+    } else {
+      console.error("Upload error:", error.message);
+      alert("Error al subir el archivo: " + error.message);
     }
+    if (e.target) e.target.value = "";
     setUploading(false);
   }
 
@@ -148,7 +159,7 @@ export default function Historial() {
         </Card>
       )}
 
-      {historial.map((h: any, i: number) => (
+      {historial.filter((h: any) => h.title !== "📄 Documento").map((h: any, i: number) => (
         <Card key={i}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontWeight: 700, fontSize: 14 }}>{h.title}</span>
@@ -169,17 +180,25 @@ export default function Historial() {
           <div style={{
             background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
             borderRadius: 10, padding: "8px 20px", fontSize: 13, fontWeight: 700, display: "inline-block",
-          }}>{uploading ? "Procesando..." : "Seleccionar archivo"}</div>
-          <input type="file" style={{ display: "none" }} onChange={handleFile} accept=".pdf,.jpg,.jpeg,.png" />
+          }}>{uploading ? "Subiendo..." : "Seleccionar archivo"}</div>
+          <input type="file" style={{ display: "none" }} onChange={handleFile} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
         </label>
       </Card>
 
-      {uploaded.map((f, i) => (
-        <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
-          <a href={f.url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#f0f4ff", textDecoration: "none" }}>📄 {f.name}</a>
-          <Badge color="#4ade80">Cargado</Badge>
-        </Card>
-      ))}
+      {historial.filter((h: any) => h.title === "📄 Documento").map((h: any, i: number) => {
+        const [name, url] = h.summary?.split("::") || [];
+        return (
+          <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
+            <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#f0f4ff", textDecoration: "none", flex: 1, marginRight: 8 }}>
+              📄 {name || "Documento"}
+            </a>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+              <span style={{ fontSize: 11, color: "#7a8299" }}>{h.date}</span>
+              <Badge color="#4ade80">Ver</Badge>
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }

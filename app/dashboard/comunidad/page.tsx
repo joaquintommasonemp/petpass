@@ -48,6 +48,18 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
 
 // ─── Tab: Descuentos ──────────────────────────────────────────────────────────
 function TabDescuentos() {
+  const [showForm, setShowForm] = useState(false);
+  const [bizForm, setBizForm] = useState({ nombre: "", rubro: "", email: "", descuento: "" });
+  const [sent, setSent] = useState(false);
+  const supabase = createClient();
+
+  async function handleSendBiz() {
+    if (!bizForm.nombre || !bizForm.email) return;
+    await supabase.from("descuento_requests").insert(bizForm).select();
+    setSent(true);
+    setShowForm(false);
+  }
+
   return (
     <div>
       <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 16 }}>
@@ -71,6 +83,48 @@ function TabDescuentos() {
           </div>
         </Card>
       ))}
+
+      {/* CTA para negocios */}
+      <div style={{ marginTop: 8 }}>
+        {sent ? (
+          <Card style={{ textAlign: "center", border: "1px solid #4ade8044" }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+            <div style={{ fontWeight: 800, marginBottom: 4 }}>¡Recibimos tu consulta!</div>
+            <div style={{ color: "#7a8299", fontSize: 13 }}>Te contactamos pronto para sumar tu negocio.</div>
+          </Card>
+        ) : (
+          <Card style={{ border: "1px solid #f472b633", background: "linear-gradient(135deg, #1a0f2a, #181c27)" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showForm ? 14 : 0 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, background: "#f472b622",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
+              }}>🏪</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>¿Tenés un negocio pet-friendly?</div>
+                <div style={{ color: "#7a8299", fontSize: 12 }}>Sumá tu descuento y llegá a miles de tutores</div>
+              </div>
+              <button onClick={() => setShowForm(!showForm)} style={{
+                background: "linear-gradient(135deg, #f472b6, #ec4899)",
+                color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px",
+                fontSize: 12, fontWeight: 800, cursor: "pointer", flexShrink: 0,
+              }}>Quiero aparecer</button>
+            </div>
+            {showForm && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input placeholder="Nombre del negocio *" value={bizForm.nombre} onChange={e => setBizForm(f => ({ ...f, nombre: e.target.value }))} />
+                <input placeholder="Rubro (ej: veterinaria, peluquería)" value={bizForm.rubro} onChange={e => setBizForm(f => ({ ...f, rubro: e.target.value }))} />
+                <input placeholder="Email de contacto *" type="email" value={bizForm.email} onChange={e => setBizForm(f => ({ ...f, email: e.target.value }))} />
+                <input placeholder="Descuento que ofrecés (ej: 15% en consultas)" value={bizForm.descuento} onChange={e => setBizForm(f => ({ ...f, descuento: e.target.value }))} />
+                <button onClick={handleSendBiz} style={{
+                  background: "linear-gradient(135deg, #f472b6, #ec4899)",
+                  color: "#fff", border: "none", borderRadius: 10, padding: 12,
+                  fontWeight: 800, fontSize: 14, cursor: "pointer",
+                }}>Enviar consulta →</button>
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
