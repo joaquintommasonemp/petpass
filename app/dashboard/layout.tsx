@@ -16,17 +16,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div style={{ maxWidth: 440, margin: "0 auto", minHeight: "100vh", position: "relative" }}>
       {/* Header */}
       <div style={{
-        background: "#181c27", borderBottom: "1px solid #252a3a",
+        background: "#181c27cc", backdropFilter: "blur(12px)",
+        borderBottom: "1px solid #252a3a",
         padding: "12px 20px", display: "flex", alignItems: "center",
         justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100,
       }}>
-        <div>
-          <div style={{ fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 20, color: "#4ade80" }}>PetPass 🐾</div>
-          <div style={{ color: "#7a8299", fontSize: 11 }}>Argentina · Tu mascota, siempre protegida</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 22 }}>🐾</span>
+          <div>
+            <div style={{
+              fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 18,
+              background: "linear-gradient(135deg, #f0f4ff, #4ade80)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>PetPass</div>
+            <div style={{ color: "#7a8299", fontSize: 10, marginTop: -1 }}>Tu mascota, siempre protegida</div>
+          </div>
         </div>
         <Link href="/mascota/nueva" style={{
-          background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
-          borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
+          background: "linear-gradient(135deg, #4ade80, #22c55e)",
+          color: "#000", border: "none",
+          borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 800, textDecoration: "none",
+          boxShadow: "0 2px 12px #4ade8030",
         }}>+ Mascota</Link>
       </div>
 
