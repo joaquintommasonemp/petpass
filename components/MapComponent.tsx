@@ -16,12 +16,13 @@ const icon = L.icon({
 
 interface Props {
   perdidas: any[];
+  center?: [number, number];
 }
 
-export default function MapComponent({ perdidas }: Props) {
+export default function MapComponent({ perdidas, center }: Props) {
   return (
     <MapContainer
-      center={[-34.6037, -58.3816]}
+      center={center ?? [-34.6037, -58.3816]}
       zoom={12}
       style={{ height: "220px", width: "100%", borderRadius: 16 }}
     >

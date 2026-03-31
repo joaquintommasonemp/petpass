@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [showBaja, setShowBaja] = useState(false);
   const [showPeso, setShowPeso] = useState(false);
   const [nuevoPeso, setNuevoPeso] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -41,6 +42,7 @@ export default function Dashboard() {
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
+    if (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) setIsAdmin(true);
     const { data } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
     if (data && data.length > 0) {
       setMascotas(data);
@@ -292,9 +294,17 @@ export default function Dashboard() {
         </div>
       )}
 
+      {isAdmin && (
+        <Link href="/admin" style={{
+          display: "block", width: "100%", background: "#f472b622", color: "#f472b6",
+          border: "1px solid #f472b644", borderRadius: 12, padding: 12, fontWeight: 700,
+          fontSize: 13, marginTop: 12, textAlign: "center", textDecoration: "none",
+        }}>⚙️ Panel admin</Link>
+      )}
+
       <button onClick={handleLogout} style={{
         width: "100%", background: "transparent", border: "1px solid #252a3a",
-        borderRadius: 12, padding: 12, color: "#7a8299", fontSize: 13, marginTop: 12, cursor: "pointer",
+        borderRadius: 12, padding: 12, color: "#7a8299", fontSize: 13, marginTop: 8, cursor: "pointer",
       }}>Cerrar sesión</button>
     </div>
   );

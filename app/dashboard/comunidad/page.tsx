@@ -1,44 +1,32 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 
-// ─── Supabase setup necesario ────────────────────────────────────────────────
-// 1. Crear tabla:
-//    CREATE TABLE analisis_fotos (
-//      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-//      mascota_id uuid REFERENCES mascotas(id),
-//      foto_path text,
-//      analisis text,
-//      created_at timestamp DEFAULT now()
-//    );
-//    ALTER TABLE analisis_fotos ENABLE ROW LEVEL SECURITY;
-//    CREATE POLICY "owner" ON analisis_fotos USING (
-//      mascota_id IN (SELECT id FROM mascotas WHERE user_id = auth.uid())
-//    );
-// 2. Crear bucket de storage llamado "fotos-mascotas" (privado)
-// ─────────────────────────────────────────────────────────────────────────────
-
-type Tab = "descuentos" | "analisis" | "adopciones";
+type Tab = "adopciones" | "perdidas" | "descuentos";
 
 const DESCUENTOS = [
-  { nombre: "Puppis", descuento: "10% OFF", descripcion: "En todos los productos de la tienda online", activo: true, icon: "🛍️", color: "#f472b6" },
-  { nombre: "Petco", descuento: "15% OFF", descripcion: "En alimentos premium seleccionados", activo: true, icon: "🦴", color: "#60a5fa" },
-  { nombre: "Clínicas veterinarias", descuento: "Próximamente", descripcion: "Descuentos en consultas y cirugías", activo: false, icon: "🏥", color: "#7a8299" },
-  { nombre: "Guardería canina", descuento: "Próximamente", descripcion: "Servicio de guardería y paseos diarios", activo: false, icon: "🏠", color: "#7a8299" },
-  { nombre: "Transporte de mascotas", descuento: "Próximamente", descripcion: "Traslado seguro a clínicas y aeropuertos", activo: false, icon: "🚗", color: "#7a8299" },
-  { nombre: "Peluquería canina", descuento: "Próximamente", descripcion: "Baño, corte y estética para tu mascota", activo: false, icon: "✂️", color: "#7a8299" },
+  { nombre: "Puppis", descripcion: "En todos los productos de la tienda online", icon: "🛍️" },
+  { nombre: "Petco", descripcion: "En alimentos premium seleccionados", icon: "🦴" },
+  { nombre: "Clínicas veterinarias", descripcion: "Descuentos en consultas y cirugías", icon: "🏥" },
+  { nombre: "Guardería canina", descripcion: "Servicio de guardería y paseos diarios", icon: "🏠" },
+  { nombre: "Transporte de mascotas", descripcion: "Traslado seguro a clínicas y aeropuertos", icon: "🚗" },
+  { nombre: "Peluquería canina", descripcion: "Baño, corte y estética para tu mascota", icon: "✂️" },
 ];
 
 function Card({ children, style = {} }: any) {
-  return <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>{children}</div>;
+  return (
+    <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
+      {children}
+    </div>
+  );
 }
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: "descuentos", label: "Descuentos", icon: "🎁" },
-    { key: "analisis", label: "Análisis IA", icon: "🔬" },
     { key: "adopciones", label: "Adopciones", icon: "❤️" },
+    { key: "perdidas", label: "Perdidas", icon: "📍" },
+    { key: "descuentos", label: "Descuentos", icon: "🎁" },
   ];
   return (
     <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "#0f1117", borderRadius: 12, padding: 4 }}>
@@ -58,7 +46,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
   );
 }
 
-// ─── Tab: Descuentos ─────────────────────────────────────────────────────────
+// ─── Tab: Descuentos ──────────────────────────────────────────────────────────
 function TabDescuentos() {
   return (
     <div>
@@ -66,25 +54,18 @@ function TabDescuentos() {
         Beneficios exclusivos para miembros PetPass 🐾
       </p>
       {DESCUENTOS.map((d, i) => (
-        <Card key={i} style={{
-          display: "flex", gap: 14, alignItems: "center",
-          opacity: d.activo ? 1 : 0.6,
-          border: d.activo ? `1px solid ${d.color}33` : "1px solid #252a3a",
-        }}>
+        <Card key={i} style={{ display: "flex", gap: 14, alignItems: "center", opacity: 0.6 }}>
           <div style={{
-            fontSize: 28, width: 48, height: 48, borderRadius: 12,
-            background: d.activo ? d.color + "22" : "#252a3a",
+            fontSize: 28, width: 48, height: 48, borderRadius: 12, background: "#252a3a",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>{d.icon}</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
               <span style={{ fontWeight: 700, fontSize: 14 }}>{d.nombre}</span>
               <span style={{
-                background: d.activo ? d.color + "22" : "#252a3a",
-                color: d.activo ? d.color : "#7a8299",
-                border: `1px solid ${d.activo ? d.color + "44" : "#252a3a"}`,
+                background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
                 borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800,
-              }}>{d.descuento}</span>
+              }}>Próximamente</span>
             </div>
             <div style={{ color: "#7a8299", fontSize: 12 }}>{d.descripcion}</div>
           </div>
@@ -94,192 +75,186 @@ function TabDescuentos() {
   );
 }
 
-// ─── Tab: Análisis IA ─────────────────────────────────────────────────────────
-function TabAnalisis() {
-  const [mascota, setMascota] = useState<any>(null);
-  const [analisis, setAnalisis] = useState<any[]>([]);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string>("");
-  const [fileData, setFileData] = useState<{ base64: string; mediaType: string } | null>(null);
+// ─── Tab: Mascotas Perdidas ───────────────────────────────────────────────────
+function TabPerdidas() {
+  const [perdidas, setPerdidas] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, any>>({});
+  const [fotos, setFotos] = useState<Record<string, string>>({});
+  const [reporting, setReporting] = useState(false);
+  const [form, setForm] = useState({
+    pet_name: "", breed: "", color: "", zone: "", phone: "", description: "",
+    lat: -34.6037, lng: -58.3816,
+  });
   const [loading, setLoading] = useState(false);
-  const [resultado, setResultado] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: mascotas } = await supabase.from("mascotas").select("*").eq("user_id", user.id).limit(1);
-      if (mascotas?.[0]) {
-        setMascota(mascotas[0]);
-        const { data } = await supabase
-          .from("analisis_fotos")
-          .select("*")
-          .eq("mascota_id", mascotas[0].id)
-          .order("created_at", { ascending: false });
-        setAnalisis(data || []);
-      }
-    }
+    navigator.geolocation?.getCurrentPosition(pos => {
+      setForm(f => ({ ...f, lat: pos.coords.latitude, lng: pos.coords.longitude }));
+    });
     load();
   }, []);
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    setResultado(null);
+  async function load() {
+    const { data: perdidasData } = await supabase
+      .from("perdidas").select("*").eq("active", true)
+      .order("created_at", { ascending: false });
+    if (!perdidasData?.length) { setPerdidas([]); return; }
+    setPerdidas(perdidasData);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setPreview(result);
-      const base64 = result.split(",")[1];
-      const mediaType = file.type as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
-      setFileData({ base64, mediaType });
-    };
-    reader.readAsDataURL(file);
-  }
+    const userIds = [...new Set(perdidasData.map((p: any) => p.user_id))];
+    const { data: profilesData } = await supabase.from("profiles").select("*").in("id", userIds);
+    setProfiles(Object.fromEntries((profilesData || []).map(p => [p.id, p])));
 
-  async function analizar() {
-    if (!fileData || !mascota) return;
-    setLoading(true);
-    setResultado(null);
-    try {
-      // 1. Llamar a Claude Vision
-      const res = await fetch("/api/analisis-foto", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64: fileData.base64,
-          mediaType: fileData.mediaType,
-          mascotaNombre: mascota.name,
-          mascotaEspecie: mascota.species,
-        }),
-      });
-      const { reply } = await res.json();
-
-      // 2. Subir foto a Supabase Storage
-      const filePath = `${mascota.id}/${Date.now()}_${fileName}`;
-      await supabase.storage.from("fotos-mascotas").upload(filePath, dataURLtoBlob(preview!), {
-        contentType: fileData.mediaType,
-      });
-
-      // 3. Guardar análisis en la tabla
-      const { data: saved } = await supabase.from("analisis_fotos").insert({
-        mascota_id: mascota.id,
-        foto_path: filePath,
-        analisis: reply,
-      }).select();
-
-      if (saved) setAnalisis(prev => [saved[0], ...prev]);
-      setResultado(reply);
-      setPreview(null);
-      setFileData(null);
-      setFileName("");
-      if (fileRef.current) fileRef.current.value = "";
-    } finally {
-      setLoading(false);
+    const { data: mascotasData } = await supabase
+      .from("mascotas").select("user_id, photo_url").in("user_id", userIds).eq("active", true);
+    const fotoMap: Record<string, string> = {};
+    for (const m of (mascotasData || [])) {
+      if (m.photo_url && !fotoMap[m.user_id]) fotoMap[m.user_id] = m.photo_url;
     }
+    setFotos(fotoMap);
   }
 
-  function dataURLtoBlob(dataURL: string) {
-    const arr = dataURL.split(",");
-    const mime = arr[0].match(/:(.*?);/)![1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new Blob([u8arr], { type: mime });
+  async function handleReport() {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoading(false); return; }
+    const { data } = await supabase.from("perdidas").insert({ ...form, user_id: user.id }).select();
+    if (data) setPerdidas(prev => [data[0], ...prev]);
+    setReporting(false);
+    setLoading(false);
   }
 
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" });
+  function daysSince(dateStr: string) {
+    return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
   }
+
+  const fields: [string, string][] = [
+    ["Nombre de la mascota", "pet_name"],
+    ["Raza", "breed"],
+    ["Color / descripción física", "color"],
+    ["Zona donde se perdió", "zone"],
+    ["Teléfono de contacto", "phone"],
+  ];
 
   return (
     <div>
-      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 16 }}>
-        Subí una foto de tu mascota y la IA veterinaria detectará si hay algo que revisar.
-      </p>
+      <button onClick={() => setReporting(!reporting)} style={{
+        width: "100%", background: "#f8717122", color: "#f87171",
+        border: "1px solid #f8717144", borderRadius: 12, padding: 12,
+        fontWeight: 700, fontSize: 14, marginBottom: 16,
+      }}>
+        📍 Reportar mascota perdida
+      </button>
 
-      {/* Uploader */}
-      <Card style={{ border: "2px dashed #252a3a", textAlign: "center" }}>
-        {preview ? (
-          <div>
-            <img src={preview} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12, maxHeight: 240, objectFit: "cover" }} />
-            <div style={{ fontSize: 12, color: "#7a8299", marginBottom: 12 }}>{fileName}</div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { setPreview(null); setFileData(null); setFileName(""); if (fileRef.current) fileRef.current.value = ""; }}
-                style={{ flex: 1, background: "#252a3a", color: "#7a8299", border: "none", borderRadius: 10, padding: 10, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                Cambiar
-              </button>
-              <button onClick={analizar} disabled={loading || !mascota} style={{
-                flex: 2, background: "#4ade80", color: "#000", border: "none", borderRadius: 10,
-                padding: 10, fontWeight: 800, fontSize: 13, cursor: "pointer",
-                opacity: loading || !mascota ? 0.6 : 1,
-              }}>
-                {loading ? "Analizando..." : "🔬 Analizar con IA"}
-              </button>
-            </div>
-            {!mascota && <div style={{ color: "#f87171", fontSize: 11, marginTop: 8 }}>Primero agregá una mascota desde el perfil.</div>}
+      {reporting && (
+        <Card style={{ border: "1px solid #f8717144" }}>
+          <div style={{ fontWeight: 700, color: "#f87171", marginBottom: 12 }}>Nueva alerta</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {fields.map(([label, key]) => (
+              <input key={key} placeholder={label} value={(form as any)[key]}
+                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} />
+            ))}
+            <textarea placeholder="Descripción adicional..." rows={2} value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff", resize: "none" }} />
+            <button onClick={handleReport} disabled={loading} style={{
+              background: "#f87171", color: "#fff", border: "none",
+              borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1,
+            }}>{loading ? "Publicando..." : "Publicar alerta"}</button>
           </div>
-        ) : (
-          <label style={{ cursor: "pointer", display: "block" }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>📷</div>
-            <div style={{ color: "#7a8299", fontSize: 13, marginBottom: 12 }}>Seleccioná una foto de tu mascota</div>
-            <div style={{
-              background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
-              borderRadius: 10, padding: "8px 20px", fontSize: 13, fontWeight: 700, display: "inline-block",
-            }}>Elegir foto</div>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
-          </label>
-        )}
-      </Card>
-
-      {/* Resultado del último análisis */}
-      {resultado && (
-        <Card style={{ border: "1px solid #4ade8044" }}>
-          <div style={{ fontWeight: 700, color: "#4ade80", marginBottom: 10, fontSize: 13 }}>🔬 Resultado del análisis</div>
-          <div style={{ fontSize: 13, color: "#f0f4ff", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{resultado}</div>
         </Card>
       )}
 
-      {/* Historial de análisis */}
-      {analisis.length > 0 && (
-        <>
-          <div style={{ color: "#7a8299", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "20px 0 10px" }}>
-            Análisis anteriores
-          </div>
-          {analisis.map((a: any, i: number) => (
-            <Card key={i}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 700 }}>🔬 Análisis</span>
-                <span style={{ fontSize: 11, color: "#7a8299" }}>{formatDate(a.created_at)}</span>
-              </div>
-              <div style={{ fontSize: 12, color: "#f0f4ff", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{a.analisis}</div>
-            </Card>
-          ))}
-        </>
+      {perdidas.length === 0 && !reporting && (
+        <Card style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 8 }}>🐾</div>
+          <p style={{ color: "#7a8299", fontSize: 13 }}>No hay mascotas perdidas reportadas.</p>
+        </Card>
       )}
+
+      {perdidas.map((p: any, i: number) => {
+        const owner = profiles[p.user_id];
+        const foto = fotos[p.user_id];
+        const isGato = p.breed?.toLowerCase().includes("gato") || p.breed?.toLowerCase().includes("cat");
+        const days = daysSince(p.created_at);
+
+        return (
+          <Card key={i} style={{ border: "1px solid #f8717122" }}>
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              {/* Foto de la mascota */}
+              <div style={{
+                width: 64, height: 64, borderRadius: 12, flexShrink: 0,
+                background: "#252a3a", border: "2px solid #f8717133",
+                display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+              }}>
+                {foto
+                  ? <img src={foto} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: 32 }}>{isGato ? "🐱" : "🐶"}</span>
+                }
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
+                  <span style={{
+                    background: days <= 2 ? "#f8717122" : "#fb923c22",
+                    color: days <= 2 ? "#f87171" : "#fb923c",
+                    borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700, flexShrink: 0,
+                  }}>hace {days}d</span>
+                </div>
+
+                <div style={{ color: "#7a8299", fontSize: 12, marginBottom: 2 }}>
+                  {p.breed}{p.color ? ` · ${p.color}` : ""}
+                </div>
+                {p.zone && (
+                  <div style={{ color: "#7a8299", fontSize: 12, marginBottom: 4 }}>📍 {p.zone}</div>
+                )}
+                {p.description && (
+                  <div style={{ fontSize: 12, color: "#f0f4ff", marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
+                )}
+
+                {/* Datos del dueño */}
+                <div style={{ background: "#0f1117", borderRadius: 10, padding: "8px 12px", marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Contacto</div>
+                  {owner?.full_name && (
+                    <div style={{ fontSize: 13, color: "#f0f4ff", marginBottom: 2 }}>👤 {owner.full_name}</div>
+                  )}
+                  {(p.phone || owner?.phone) && (
+                    <div style={{ fontSize: 12, color: "#7a8299" }}>📞 {p.phone || owner.phone}</div>
+                  )}
+                </div>
+
+                {p.phone && (
+                  <a href={"https://wa.me/" + p.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
+                    display: "inline-block", background: "#4ade8022", color: "#4ade80",
+                    border: "1px solid #4ade8044", borderRadius: 8, padding: "6px 14px",
+                    fontSize: 12, fontWeight: 700, textDecoration: "none",
+                  }}>💬 Contactar por WhatsApp</a>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Comunidad() {
-  const [tab, setTab] = useState<Tab>("descuentos");
+  const [tab, setTab] = useState<Tab>("adopciones");
 
   return (
     <div>
       <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
-      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Descuentos, análisis de salud y adopciones</p>
+      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Adopciones, mascotas perdidas y descuentos</p>
 
       <TabBar active={tab} onChange={setTab} />
 
-      {tab === "descuentos" && <TabDescuentos />}
-      {tab === "analisis" && <TabAnalisis />}
       {tab === "adopciones" && <Adopciones />}
+      {tab === "perdidas" && <TabPerdidas />}
+      {tab === "descuentos" && <TabDescuentos />}
     </div>
   );
 }

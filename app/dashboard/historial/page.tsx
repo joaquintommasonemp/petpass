@@ -14,7 +14,7 @@ export default function Historial() {
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploaded, setUploaded] = useState<string[]>([]);
+  const [uploaded, setUploaded] = useState<{ name: string; url: string }[]>([]);
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
   const [adding, setAdding] = useState(false);
   const supabase = createClient();
@@ -41,20 +41,53 @@ export default function Historial() {
     setAdding(false);
   }
 
-  function handleFile(e: any) {
+  async function handleFile(e: any) {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !mascota) return;
     setUploading(true);
-    setTimeout(() => {
-      setUploaded(prev => [...prev, file.name]);
-      setUploading(false);
-    }, 1500);
+    const path = `${mascota.id}/${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from("documentos").upload(path, file);
+    if (!error) {
+      const { data: urlData } = supabase.storage.from("documentos").getPublicUrl(path);
+      setUploaded(prev => [...prev, { name: file.name, url: urlData.publicUrl }]);
+    }
+    setUploading(false);
   }
 
   return (
     <div>
+      {/* Header de mascota activa */}
+      {mascota && (
+        <div style={{
+          background: "#181c27", border: "1px solid #4ade8033", borderRadius: 16,
+          padding: "14px 16px", marginBottom: 20,
+          display: "flex", alignItems: "center", gap: 14,
+        }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
+            background: "#252a3a", border: "2px solid #4ade8044",
+            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+          }}>
+            {mascota.photo_url
+              ? <img src={mascota.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              : <span style={{ fontSize: 26 }}>{mascota.breed?.toLowerCase().includes("gato") ? "🐱" : "🐕"}</span>
+            }
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: 17, fontFamily: "Georgia, serif" }}>{mascota.name}</div>
+            <div style={{ color: "#7a8299", fontSize: 12, marginTop: 2 }}>
+              {mascota.breed} · {mascota.age} · {mascota.sex}
+            </div>
+          </div>
+          <span style={{
+            background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+            borderRadius: 20, padding: "3px 10px", fontSize: 10, fontWeight: 800,
+          }}>Historia clínica</span>
+        </div>
+      )}
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800 }}>Historia clínica</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 800 }}>Consultas</h2>
         <button onClick={() => setAdding(!adding)} style={{
           background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
           borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700,
@@ -113,7 +146,7 @@ export default function Historial() {
 
       {uploaded.map((f, i) => (
         <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
-          <span style={{ fontSize: 13 }}>📄 {f}</span>
+          <a href={f.url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#f0f4ff", textDecoration: "none" }}>📄 {f.name}</a>
           <Badge color="#4ade80">Cargado</Badge>
         </Card>
       ))}

@@ -16,6 +16,7 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
 export default function Perdidas() {
   const [perdidas, setPerdidas] = useState<any[]>([]);
   const [reporting, setReporting] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [form, setForm] = useState({
     pet_name: "", breed: "", color: "", zone: "", phone: "", description: "",
     lat: -34.6037, lng: -58.3816,
@@ -27,6 +28,12 @@ export default function Perdidas() {
     supabase.from("perdidas").select("*").eq("active", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => setPerdidas(data || []));
+
+    navigator.geolocation?.getCurrentPosition(pos => {
+      const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+      setUserLocation(coords);
+      setForm(f => ({ ...f, lat: coords[0], lng: coords[1] }));
+    });
   }, []);
 
   async function handleReport() {
@@ -103,7 +110,7 @@ export default function Perdidas() {
       )}
 
       <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 16, height: 220 }}>
-        <MapComponent perdidas={perdidas} />
+        <MapComponent perdidas={perdidas} center={userLocation ?? undefined} />
       </div>
 
       <div style={{
@@ -116,7 +123,7 @@ export default function Perdidas() {
       {perdidas.length === 0 && (
         <Card>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 40 }}>ok</div>
+            <div style={{ fontSize: 40 }}>🐾</div>
             <p style={{ color: "#7a8299", fontSize: 13, marginTop: 8 }}>
               No hay mascotas perdidas reportadas en este momento.
             </p>
@@ -128,7 +135,7 @@ export default function Perdidas() {
         const days = daysSince(p.created_at);
         return (
           <Card key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-            <div style={{ fontSize: 36 }}>perro</div>
+            <div style={{ fontSize: 36 }}>{p.breed?.toLowerCase().includes("gato") || p.breed?.toLowerCase().includes("cat") ? "🐱" : "🐶"}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 15 }}>{p.pet_name}</div>
               <div style={{ color: "#7a8299", fontSize: 12 }}>{p.breed} - {p.color}</div>

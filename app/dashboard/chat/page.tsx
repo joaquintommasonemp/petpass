@@ -104,9 +104,26 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 160px)" }}>
-      <div style={{ background: "#4ade8022", border: "1px solid #4ade8033", borderRadius: 10, padding: "8px 14px", marginBottom: 12, fontSize: 12, color: "#4ade80" }}>
-        🤖 IA con historial de {mascota?.name || "tu mascota"} · Podés mandar fotos · No reemplaza al veterinario
+      <div style={{ background: "#4ade8022", border: "1px solid #4ade8033", borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12, color: "#4ade80" }}>
+        🤖 IA con historial de {mascota?.name || "tu mascota"} · No reemplaza al veterinario
       </div>
+
+      {/* Acceso rápido análisis de foto */}
+      <button
+        onClick={() => fileRef.current?.click()}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", gap: 12,
+          background: "#181c27", border: "1px solid #60a5fa33", borderRadius: 12,
+          padding: "10px 14px", marginBottom: 12, cursor: "pointer", textAlign: "left",
+        }}
+      >
+        <span style={{ fontSize: 26 }}>📷</span>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#60a5fa" }}>Analizar foto de {mascota?.name || "tu mascota"}</div>
+          <div style={{ fontSize: 11, color: "#7a8299", marginTop: 1 }}>Subí una foto y la IA detecta síntomas visibles</div>
+        </div>
+        <span style={{ marginLeft: "auto", color: "#60a5fa", fontSize: 18 }}>›</span>
+      </button>
 
       <div style={{ flex: 1, overflowY: "auto", paddingRight: 4 }}>
         {messages.map((m, i) => (
@@ -172,10 +189,6 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
             padding: "4px 12px", color: "#7a8299", fontSize: 11, cursor: "pointer",
           }}>{q}</button>
         ))}
-        <button onClick={() => fileRef.current?.click()} style={{
-          background: "transparent", border: "1px solid #4ade8044", borderRadius: 20,
-          padding: "4px 12px", color: "#4ade80", fontSize: 11, cursor: "pointer",
-        }}>📷 Analizar foto</button>
       </div>
     </div>
   );
