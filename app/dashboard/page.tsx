@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [mascotas, setMascotas] = useState<any[]>([]);
   const [vacunas, setVacunas] = useState<any[]>([]);
   const [historialPeso, setHistorialPeso] = useState<any[]>([]);
+  const [diagnosticos, setDiagnosticos] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -60,6 +61,11 @@ export default function Dashboard() {
     const { data: inicial } = await supabase.from("historial").select("*")
       .eq("mascota_id", m.id).eq("title", "Peso inicial").order("created_at", { ascending: false }).limit(1);
     setHistorialPeso([...(hist || []), ...(inicial || [])]);
+    const { data: diags } = await supabase.from("historial").select("*")
+      .eq("mascota_id", m.id)
+      .not("title", "in", '("Actualización de peso","Peso inicial")')
+      .order("created_at", { ascending: false }).limit(5);
+    setDiagnosticos(diags || []);
   }
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
@@ -183,9 +189,20 @@ export default function Dashboard() {
             {selected?.breed} · {selected?.age} · {selected?.sex}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {selected?.chip && <Badge color="#4ade80">Chip: ...{selected.chip.slice(-6)}</Badge>}
+            {selected?.chip && (
+              <a href={`/mascota/${selected.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+                <Badge color="#4ade80">🔗 Chip: ...{selected.chip.slice(-6)}</Badge>
+              </a>
+            )}
             {selected?.location && <Badge color="#60a5fa">{selected.location}</Badge>}
             {selected?.weight && <Badge color="#fb923c">{selected.weight}</Badge>}
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
+              fontSize: 11, color: "#4ade80", textDecoration: "none", fontWeight: 700,
+              background: "#4ade8012", border: "1px solid #4ade8030", borderRadius: 8,
+              padding: "4px 10px", display: "inline-block",
+            }}>🌐 Ver perfil público</a>
           </div>
         </div>
       </Card>
@@ -199,6 +216,44 @@ export default function Dashboard() {
         </div>
         {selected?.chip && <div style={{ marginTop: 8 }}><Badge color="#4ade80">Chip #{selected.chip}</Badge></div>}
       </Card>
+
+      {/* Resumen de salud */}
+      {(vacunas.length > 0 || diagnosticos.length > 0) && (() => {
+        const sorted = [...vacunas].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        const lastVac = sorted[0];
+        const nextVac = [...vacunas].filter(v => v.next_date).sort((a, b) => new Date(a.next_date).getTime() - new Date(b.next_date).getTime())[0];
+        return (
+          <Card style={{ border: "1px solid #4ade8022" }}>
+            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 12, color: "#4ade80" }}>💊 Resumen de salud</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {lastVac && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: "#7a8299" }}>Última vacuna</span>
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>{lastVac.name} · {lastVac.date}</span>
+                </div>
+              )}
+              {nextVac && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: "#7a8299" }}>Próxima vacuna</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>{nextVac.name} · {nextVac.next_date}</span>
+                </div>
+              )}
+              {diagnosticos.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, color: "#7a8299", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginTop: 4, marginBottom: 6 }}>Historial reciente</div>
+                  {diagnosticos.slice(0, 3).map((d: any, i: number) => (
+                    <div key={i} style={{ background: "#0f1117", borderRadius: 8, padding: "8px 10px", marginBottom: 6 }}>
+                      <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 2 }}>{d.title}</div>
+                      <div style={{ fontSize: 11, color: "#7a8299", lineHeight: 1.4 }}>{d.summary}</div>
+                      {d.date && <div style={{ fontSize: 10, color: "#4a5568", marginTop: 2 }}>{d.date}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        );
+      })()}
 
       {/* Peso con historial */}
       <Card>

@@ -1,21 +1,36 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 const RAZAS: Record<string, string[]> = {
   Perro: [
-    "Mestizo", "Labrador", "Golden Retriever", "Bulldog Francés", "Bulldog Inglés",
-    "Beagle", "Caniche/Poodle", "Chihuahua", "Dachshund", "Doberman",
-    "German Shepherd", "Husky Siberiano", "Maltés", "Pitbull", "Pomerania",
-    "Rottweiler", "Schnauzer", "Shih Tzu", "Yorkshire Terrier", "Boxer",
-    "Cocker Spaniel", "Dálmata", "Gran Danés", "Pastor Belga", "Samoyedo", "Otro",
+    "Mestizo",
+    // Populares en Argentina
+    "Labrador", "Golden Retriever", "Caniche/Poodle", "Beagle", "Bulldog Francés",
+    "Chihuahua", "Dachshund/Teckel", "Schnauzer", "Shih Tzu", "Yorkshire Terrier",
+    "Maltés", "Pomerania", "Cocker Spaniel", "Bichón Frisé",
+    // Medianos/grandes
+    "Pastor Alemán", "Border Collie", "Husky Siberiano", "Akita Inu", "Alaskan Malamute",
+    "American Staffordshire", "Boxer", "Bull Terrier", "Bulldog Inglés",
+    "Cavalier King Charles", "Chow Chow", "Dálmata", "Doberman",
+    "Fox Terrier", "Gran Danés", "Jack Russell Terrier", "Labradoodle",
+    "Lhasa Apso", "Malinois / Pastor Belga", "Mastín", "Perro de Agua",
+    "Pitbull", "Pinscher Miniatura", "Rottweiler", "Samoyedo", "Shar Pei",
+    "Shiba Inu", "Spitz Alemán", "Weimaraner", "West Highland Terrier",
+    "Boyero de Berna", "Setter Irlandés", "Vizsla", "Basenji",
+    "Otro",
   ],
   Gato: [
-    "Mestizo", "Persa", "Siamés", "Maine Coon", "Ragdoll", "British Shorthair",
-    "Bengalí", "Abisinio", "Sphynx", "Scottish Fold", "Angora", "Ruso Azul", "Otro",
+    "Mestizo",
+    "Abisinio", "Angora", "Bengalí", "British Shorthair", "Burmés",
+    "Devon Rex", "Himalayo", "Maine Coon", "Munchkin",
+    "Noruego de los Bosques", "Persa", "Ragamuffin", "Ragdoll",
+    "Ruso Azul", "Scottish Fold", "Siamés", "Sphynx",
+    "Tonquinés", "Turkish Van",
+    "Otro",
   ],
-  Otro: ["Conejo", "Hurón", "Hámster", "Tortuga", "Pájaro", "Reptil", "Otro"],
+  Otro: ["Conejo", "Hurón", "Hámster", "Tortuga", "Pájaro", "Reptil", "Pez", "Otro"],
 };
 
 const CABA_BARRIOS = [
@@ -37,8 +52,8 @@ const PBA_MUNICIPIOS = [
   "Hurlingham","Ituzaingó","José C. Paz","La Matanza","La Plata","Lanús",
   "Lomas de Zamora","Luján","Malvinas Argentinas","Marcos Paz","Mercedes",
   "Merlo","Moreno","Morón","Pergamino","Pilar","Presidente Perón","Quilmes",
-  "Ramallo","Rauch","San Fernando","San Isidro","San Miguel","San Nicolás",
-  "San Vicente","Tandil","Tigre","Tres de Febrero","Vicente López","Zárate",
+  "San Fernando","San Isidro","San Miguel","San Nicolás","San Vicente",
+  "Tandil","Tigre","Tres de Febrero","Vicente López","Zárate",
 ];
 
 const PROVINCIAS = [
@@ -54,8 +69,11 @@ export default function NuevaMascota() {
     weight: "", sex: "Macho", color: "", chip: "",
     zona_tipo: "", zona_valor: "", cp: "",
   });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -66,6 +84,15 @@ export default function NuevaMascota() {
       if (k === "zona_tipo") { next.zona_valor = ""; next.cp = ""; }
       return next;
     });
+  }
+
+  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
   }
 
   function calcAge() {
@@ -91,27 +118,42 @@ export default function NuevaMascota() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
+
     const age = calcAge();
     const location = buildLocation();
-    const { error: err } = await supabase.from("mascotas").insert({
+    const { data: mascotaData, error: err } = await supabase.from("mascotas").insert({
       name: form.name, breed: form.breed, age, weight: form.weight ? `${form.weight} kg` : "",
       sex: form.sex, color: form.color, chip: form.chip, location,
       photo_url: "", user_id: user.id,
-    });
+    }).select();
+
     if (err) { setError(err.message); setLoading(false); return; }
-    // Guardar peso inicial en historial de peso
-    if (form.weight) {
-      const { data: mascotas } = await supabase.from("mascotas").select("id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1);
-      if (mascotas && mascotas[0]) {
-        await supabase.from("historial").insert({
-          mascota_id: mascotas[0].id,
-          title: "Peso inicial",
-          summary: `${form.weight} kg`,
-          date: new Date().toLocaleDateString("es-AR"),
-          vet: "Registro inicial",
-        });
+
+    const mascota = mascotaData?.[0];
+
+    // Subir foto si se seleccionó
+    if (photoFile && mascota) {
+      const ext = photoFile.name.split(".").pop();
+      const path = `${mascota.id}/perfil.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("mascotas").upload(path, photoFile, { upsert: true });
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from("mascotas").getPublicUrl(path);
+        const url = urlData.publicUrl + "?t=" + Date.now();
+        await supabase.from("mascotas").update({ photo_url: url }).eq("id", mascota.id);
       }
     }
+
+    // Guardar peso inicial
+    if (form.weight && mascota) {
+      await supabase.from("historial").insert({
+        mascota_id: mascota.id,
+        title: "Peso inicial",
+        summary: `${form.weight} kg`,
+        date: new Date().toLocaleDateString("es-AR"),
+        vet: "Registro inicial",
+      });
+    }
+
     router.push("/dashboard");
     setLoading(false);
   }
@@ -141,6 +183,34 @@ export default function NuevaMascota() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
+        {/* Foto */}
+        <div>
+          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Foto de perfil</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div onClick={() => fileRef.current?.click()} style={{
+              width: 80, height: 80, borderRadius: "50%", cursor: "pointer",
+              background: "#181c27", border: "2px dashed #252a3a",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden", flexShrink: 0,
+            }}>
+              {photoPreview
+                ? <img src={photoPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontSize: 32 }}>📷</span>
+              }
+            </div>
+            <div>
+              <button onClick={() => fileRef.current?.click()} style={{
+                background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 700,
+              }}>
+                {photoPreview ? "Cambiar foto" : "Agregar foto"}
+              </button>
+              <div style={{ fontSize: 11, color: "#7a8299", marginTop: 4 }}>JPG o PNG · Opcional</div>
+            </div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
+        </div>
+
         {/* Tipo */}
         <div>
           <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Tipo de mascota *</label>
@@ -169,7 +239,7 @@ export default function NuevaMascota() {
         {/* Raza */}
         {form.type && sel("Raza *", "breed", RAZAS[form.type] || [])}
 
-        {/* Fecha de nacimiento */}
+        {/* Fecha nacimiento */}
         <div>
           <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Fecha de nacimiento</label>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -184,11 +254,7 @@ export default function NuevaMascota() {
               {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
-          {age && (
-            <div style={{ marginTop: 6, color: "#4ade80", fontSize: 12, fontWeight: 600 }}>
-              Edad actual: {age}
-            </div>
-          )}
+          {age && <div style={{ marginTop: 6, color: "#4ade80", fontSize: 12, fontWeight: 600 }}>Edad actual: {age}</div>}
         </div>
 
         {/* Sexo */}
@@ -249,12 +315,17 @@ export default function NuevaMascota() {
           )}
         </div>
 
-        {error && <p style={{ color: "#f87171", fontSize: 13 }}>{error}</p>}
+        {error && (
+          <div style={{ background: "#f8717115", border: "1px solid #f8717133", borderRadius: 10, padding: "10px 14px", color: "#f87171", fontSize: 13 }}>
+            {error}
+          </div>
+        )}
 
         <button onClick={handleSave} disabled={loading} style={{
-          background: "#4ade80", color: "#000", border: "none", borderRadius: 12,
+          background: "linear-gradient(135deg, #4ade80, #22c55e)",
+          color: "#000", border: "none", borderRadius: 12,
           padding: 14, fontWeight: 800, fontSize: 15, marginTop: 8,
-          opacity: loading ? 0.6 : 1, cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.6 : 1, boxShadow: "0 4px 20px #4ade8030",
         }}>{loading ? "Guardando..." : "Crear perfil 🐾"}</button>
       </div>
     </main>

@@ -76,11 +76,15 @@ function TabDescuentos() {
 }
 
 // ─── Tab: Mascotas Perdidas ───────────────────────────────────────────────────
+type SubTab = "perdidas" | "encontradas";
+
 function TabPerdidas() {
+  const [subTab, setSubTab] = useState<SubTab>("perdidas");
   const [perdidas, setPerdidas] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [reporting, setReporting] = useState(false);
+  const [reportingType, setReportingType] = useState<"perdida" | "encontrada">("perdida");
   const [form, setForm] = useState({
     pet_name: "", breed: "", color: "", zone: "", phone: "", description: "",
     lat: -34.6037, lng: -58.3816,
@@ -133,7 +137,7 @@ function TabPerdidas() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
-    const { data } = await supabase.from("perdidas").insert({ ...form, user_id: user.id }).select();
+    const { data } = await supabase.from("perdidas").insert({ ...form, user_id: user.id, tipo: reportingType }).select();
     if (data?.[0]) {
       const id = data[0].id;
       const urls: string[] = [];
@@ -171,19 +175,47 @@ function TabPerdidas() {
     ["Teléfono de contacto", "phone"],
   ];
 
+  const perdidasFiltradas = perdidas.filter(p =>
+    subTab === "perdidas" ? (!p.tipo || p.tipo === "perdida") : p.tipo === "encontrada"
+  );
+
   return (
     <div>
-      <button onClick={() => setReporting(!reporting)} style={{
-        width: "100%", background: "#f8717122", color: "#f87171",
-        border: "1px solid #f8717144", borderRadius: 12, padding: 12,
-        fontWeight: 700, fontSize: 14, marginBottom: 16,
-      }}>
-        📍 Reportar mascota perdida
-      </button>
+      {/* Sub-tabs Perdidas / Encontradas */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#0f1117", borderRadius: 12, padding: 4 }}>
+        {([["perdidas", "📍 Perdidas", "#f87171"], ["encontradas", "✅ Encontradas", "#4ade80"]] as const).map(([key, label, color]) => (
+          <button key={key} onClick={() => setSubTab(key)} style={{
+            flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
+            background: subTab === key ? "#252a3a" : "transparent",
+            color: subTab === key ? color : "#7a8299",
+            fontWeight: 700, fontSize: 12, cursor: "pointer",
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Botones de reporte */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <button onClick={() => { setReportingType("perdida"); setReporting(!reporting || reportingType !== "perdida"); }} style={{
+          flex: 1, background: "#f8717122", color: "#f87171",
+          border: "1px solid #f8717144", borderRadius: 12, padding: 12,
+          fontWeight: 700, fontSize: 13, cursor: "pointer",
+        }}>
+          📍 Reportar perdida
+        </button>
+        <button onClick={() => { setReportingType("encontrada"); setReporting(!reporting || reportingType !== "encontrada"); }} style={{
+          flex: 1, background: "#4ade8022", color: "#4ade80",
+          border: "1px solid #4ade8044", borderRadius: 12, padding: 12,
+          fontWeight: 700, fontSize: 13, cursor: "pointer",
+        }}>
+          ✅ Encontré una
+        </button>
+      </div>
 
       {reporting && (
-        <Card style={{ border: "1px solid #f8717144" }}>
-          <div style={{ fontWeight: 700, color: "#f87171", marginBottom: 12 }}>Nueva alerta</div>
+        <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#f8717144" : "#4ade8044"}` }}>
+          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#f87171" : "#4ade80", marginBottom: 12 }}>
+            {reportingType === "perdida" ? "📍 Nueva alerta de mascota perdida" : "✅ Reportar mascota encontrada"}
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {fields.map(([label, key]) => (
               <input key={key} placeholder={label} value={(form as any)[key]}
@@ -217,21 +249,24 @@ function TabPerdidas() {
             </div>
 
             <button onClick={handleReport} disabled={loading} style={{
-              background: "#f87171", color: "#fff", border: "none",
-              borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1,
-            }}>{loading ? "Publicando..." : "Publicar alerta"}</button>
+              background: reportingType === "perdida" ? "#f87171" : "#4ade80",
+              color: reportingType === "perdida" ? "#fff" : "#000", border: "none",
+              borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1, cursor: "pointer",
+            }}>{loading ? "Publicando..." : "Publicar"}</button>
           </div>
         </Card>
       )}
 
-      {perdidas.length === 0 && !reporting && (
+      {perdidasFiltradas.length === 0 && !reporting && (
         <Card style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🐾</div>
-          <p style={{ color: "#7a8299", fontSize: 13 }}>No hay mascotas perdidas reportadas.</p>
+          <div style={{ fontSize: 40, marginBottom: 8 }}>{subTab === "perdidas" ? "📍" : "✅"}</div>
+          <p style={{ color: "#7a8299", fontSize: 13 }}>
+            {subTab === "perdidas" ? "No hay mascotas perdidas reportadas." : "No hay mascotas encontradas reportadas."}
+          </p>
         </Card>
       )}
 
-      {perdidas.map((p: any, i: number) => {
+      {perdidasFiltradas.map((p: any, i: number) => {
         const owner = profiles[p.user_id];
         const foto = fotos[p.user_id];
         const isGato = p.breed?.toLowerCase().includes("gato") || p.breed?.toLowerCase().includes("cat");
@@ -239,8 +274,9 @@ function TabPerdidas() {
 
         const uploadedPhotos: string[] = (() => { try { return JSON.parse(p.photo_urls || "[]"); } catch { return []; } })();
 
+        const isEncontrada = p.tipo === "encontrada";
         return (
-          <Card key={i} style={{ border: "1px solid #f8717122" }}>
+          <Card key={i} style={{ border: `1px solid ${isEncontrada ? "#4ade8033" : "#f8717122"}` }}>
             {/* Fotos subidas por el usuario */}
             {uploadedPhotos.length > 0 && (
               <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto" }}>
@@ -266,7 +302,12 @@ function TabPerdidas() {
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                  <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
+                    {isEncontrada && (
+                      <span style={{ background: "#4ade8022", color: "#4ade80", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
+                    )}
+                  </div>
                   <span style={{
                     background: days <= 2 ? "#f8717122" : "#fb923c22",
                     color: days <= 2 ? "#f87171" : "#fb923c",
