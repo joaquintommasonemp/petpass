@@ -102,7 +102,7 @@ function TabPerdidas() {
     if (!perdidasData?.length) { setPerdidas([]); return; }
     setPerdidas(perdidasData);
 
-    const userIds = [...new Set(perdidasData.map((p: any) => p.user_id))];
+    const userIds = Array.from(new Set(perdidasData.map((p: any) => p.user_id)));
     const { data: profilesData } = await supabase.from("profiles").select("*").in("id", userIds);
     setProfiles(Object.fromEntries((profilesData || []).map(p => [p.id, p])));
 
