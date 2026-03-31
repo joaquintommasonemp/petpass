@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const { imageBase64, mediaType, mascotaNombre, mascotaEspecie } = await req.json();
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-opus-4-6",
+      max_tokens: 1000,
+      system: `Sos un veterinario experto en análisis visual. Analizás fotos de mascotas para detectar posibles problemas de salud visibles.
+Observá con atención: pelaje, ojos, piel, postura, signos de malestar, heridas, inflamaciones, u otras anomalías.
+Sé concreto, empático y siempre recomendá consultar al veterinario ante cualquier duda.
+Respondé siempre en español, estructurando tu respuesta en tres partes:
+1. **Lo que observo**: descripción breve de lo que ves en la foto.
+2. **¿Hay algo preocupante?**: indicá si detectás algo que amerite atención.
+3. **Recomendación**: consejo concreto para el dueño.`,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: mediaType,
+                data: imageBase64,
+              },
+            },
+            {
+              type: "text",
+              text: `Esta es una foto de ${mascotaNombre || "mi mascota"}${mascotaEspecie ? ` (${mascotaEspecie})` : ""}. ¿Ves algo que deba revisar o consultar con un veterinario?`,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  const data = await res.json();
+  const reply = data.content?.[0]?.text || "No pude analizar la imagen.";
+  return NextResponse.json({ reply });
+}
