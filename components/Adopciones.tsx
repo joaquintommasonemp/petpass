@@ -38,7 +38,10 @@ export default function Adopciones() {
   }
 
   async function handleAdd() {
-    if (!form.name || !form.phone) return;
+    if (!form.name || !form.phone || !form.zone) {
+      alert("Completá nombre, teléfono y zona");
+      return;
+    }
     setLoading(true);
     const { data } = await supabase.from("adopciones").insert(form).select();
     if (data?.[0]) {
@@ -84,7 +87,7 @@ export default function Adopciones() {
         <h3 style={{ fontSize: 16, fontWeight: 800 }}>Adopciones ❤️</h3>
         <button onClick={() => setAdding(!adding)} style={{
           background: "#f472b622", color: "#f472b6", border: "1px solid #f472b644",
-          borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700,
+          borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
         }}>+ Publicar</button>
       </div>
 
@@ -134,7 +137,7 @@ export default function Adopciones() {
 
             <button onClick={handleAdd} disabled={loading} style={{
               background: "#f472b6", color: "#fff", border: "none", borderRadius: 10, padding: 12, fontWeight: 800,
-              opacity: loading ? 0.6 : 1,
+              opacity: loading ? 0.6 : 1, cursor: "pointer",
             }}>{loading ? "Publicando..." : "Publicar adopción"}</button>
           </div>
         </Card>
@@ -169,7 +172,7 @@ export default function Adopciones() {
                 <div style={{ fontSize: 12, color: "#f0f4ff", marginTop: 6, lineHeight: 1.5 }}>{a.description}</div>
               )}
               {a.phone && (
-                <a href={`https://wa.me/${a.phone.replace(/\D/g, "")}`} target="_blank" style={{
+                <a href={`https://wa.me/${a.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
                   display: "inline-block", marginTop: 10, background: "#f472b622", color: "#f472b6",
                   border: "1px solid #f472b644", borderRadius: 8, padding: "6px 14px",
                   fontSize: 12, fontWeight: 700, textDecoration: "none",

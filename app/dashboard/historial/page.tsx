@@ -49,7 +49,10 @@ export default function Historial() {
   }
 
   async function addAlimentacion() {
-    if (!mascota) return;
+    if (!mascota || (!alimentForm.marca && !alimentForm.tipo)) {
+      alert("Completá al menos la marca o el tipo de alimento");
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const entry = {
@@ -65,7 +68,7 @@ export default function Historial() {
   }
 
   async function addEntry() {
-    if (!form.title || !mascota) return;
+    if (!form.title.trim() || !mascota) return;
     const { data } = await supabase.from("historial").insert({ ...form, mascota_id: mascota.id }).select();
     if (data) setHistorial(prev => [data[0], ...prev]);
     setForm({ date: "", vet: "", title: "", summary: "" });

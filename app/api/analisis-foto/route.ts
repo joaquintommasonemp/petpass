@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ reply: "⚠️ API key de Anthropic no configurada." });
+  }
   const { imageBase64, mediaType, mascotaNombre, mascotaEspecie } = await req.json();
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -43,6 +46,10 @@ Respondé siempre en español, estructurando tu respuesta en tres partes:
   });
 
   const data = await res.json();
+  if (!res.ok || data.error) {
+    const msg = data.error?.message || `Error HTTP ${res.status}`;
+    return NextResponse.json({ reply: `⚠️ No pude analizar la imagen (${msg}).` });
+  }
   const reply = data.content?.[0]?.text || "No pude analizar la imagen.";
   return NextResponse.json({ reply });
 }
