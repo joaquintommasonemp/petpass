@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [showPeso, setShowPeso] = useState(false);
   const [nuevoPeso, setNuevoPeso] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -52,8 +53,17 @@ export default function Dashboard() {
     setLoading(false);
   }
 
+  async function togglePublic() {
+    if (!selected) return;
+    const newVal = !isPublic;
+    setIsPublic(newVal);
+    await supabase.from("mascotas").update({ is_public: newVal }).eq("id", selected.id);
+    setSelected((prev: any) => ({ ...prev, is_public: newVal }));
+  }
+
   async function selectMascota(m: any) {
     setSelected(m);
+    setIsPublic(m.is_public || false);
     const { data: vacs } = await supabase.from("vacunas").select("*").eq("mascota_id", m.id);
     setVacunas(vacs || []);
     const { data: hist } = await supabase.from("historial").select("*")
@@ -197,57 +207,92 @@ export default function Dashboard() {
             {selected?.location && <Badge color="#60a5fa">{selected.location}</Badge>}
             {selected?.weight && <Badge color="#fb923c">{selected.weight}</Badge>}
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
               fontSize: 11, color: "#4ade80", textDecoration: "none", fontWeight: 700,
               background: "#4ade8012", border: "1px solid #4ade8030", borderRadius: 8,
               padding: "4px 10px", display: "inline-block",
-            }}>🌐 Ver perfil público</a>
+            }}>🌐 Ver perfil</a>
+            {/* Toggle público/privado */}
+            <button onClick={togglePublic} style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: isPublic ? "#4ade8018" : "#252a3a",
+              border: `1px solid ${isPublic ? "#4ade8044" : "#353a4a"}`,
+              borderRadius: 20, padding: "4px 10px", cursor: "pointer",
+              fontSize: 11, fontWeight: 700,
+              color: isPublic ? "#4ade80" : "#7a8299",
+            }}>
+              <span style={{
+                width: 14, height: 14, borderRadius: "50%",
+                background: isPublic ? "#4ade80" : "#7a8299",
+                display: "inline-block", transition: "background 0.2s",
+              }} />
+              {isPublic ? "Visible en Explorar" : "Perfil privado"}
+            </button>
           </div>
         </div>
       </Card>
 
-      {/* QR */}
-      <Card style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 56, marginBottom: 6 }}>⬛</div>
-        <div style={{ color: "#7a8299", fontSize: 12 }}>
-          QR de identificación de {selected?.name}.<br />
-          Colocalo en el collar — cualquiera puede contactarte si lo encuentra.
+      {/* QR compacto */}
+      <Card style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" }}>
+        <span style={{ fontSize: 28, flexShrink: 0 }}>⬛</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>QR de identificación</div>
+          <div style={{ color: "#7a8299", fontSize: 11 }}>Colocalo en el collar — si lo encuentran, ven todos sus datos</div>
         </div>
-        {selected?.chip && <div style={{ marginTop: 8 }}><Badge color="#4ade80">Chip #{selected.chip}</Badge></div>}
+        <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
+          background: "#252a3a", color: "#f0f4ff", borderRadius: 8, padding: "6px 12px",
+          fontSize: 11, fontWeight: 700, textDecoration: "none", flexShrink: 0,
+        }}>Ver →</a>
       </Card>
 
       {/* Resumen de salud */}
-      {(vacunas.length > 0 || diagnosticos.length > 0) && (() => {
-        const sorted = [...vacunas].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
-        const lastVac = sorted[0];
+      {(() => {
+        const lastVac = [...vacunas].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())[0];
         const nextVac = [...vacunas].filter(v => v.next_date).sort((a, b) => new Date(a.next_date).getTime() - new Date(b.next_date).getTime())[0];
+        const lastVisita = diagnosticos.filter(d => d.title !== "📄 Documento")[0];
+        const hasData = lastVac || nextVac || lastVisita;
+        if (!hasData) return null;
         return (
-          <Card style={{ border: "1px solid #4ade8022" }}>
-            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 12, color: "#4ade80" }}>💊 Resumen de salud</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <Card style={{ border: "1px solid #4ade8022", padding: 0, overflow: "hidden" }}>
+            <div style={{ background: "#0f2a1a", padding: "10px 16px", borderBottom: "1px solid #4ade8022" }}>
+              <span style={{ fontWeight: 800, fontSize: 13, color: "#4ade80" }}>🏥 Estado de salud</span>
+            </div>
+            <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 0 }}>
+              {lastVisita && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1a2030" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Última visita</div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{lastVisita.title}</div>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#7a8299" }}>{lastVisita.date}</span>
+                </div>
+              )}
               {lastVac && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: "#7a8299" }}>Última vacuna</span>
-                  <span style={{ fontSize: 12, fontWeight: 700 }}>{lastVac.name} · {lastVac.date}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1a2030" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Última vacuna</div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{lastVac.name}</div>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#7a8299" }}>{lastVac.date}</span>
                 </div>
               )}
               {nextVac && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: "#7a8299" }}>Próxima vacuna</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>{nextVac.name} · {nextVac.next_date}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Próxima vacuna</div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{nextVac.name}</div>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>{nextVac.next_date}</span>
                 </div>
               )}
-              {diagnosticos.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 11, color: "#7a8299", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginTop: 4, marginBottom: 6 }}>Historial reciente</div>
-                  {diagnosticos.slice(0, 3).map((d: any, i: number) => (
-                    <div key={i} style={{ background: "#0f1117", borderRadius: 8, padding: "8px 10px", marginBottom: 6 }}>
-                      <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 2 }}>{d.title}</div>
-                      <div style={{ fontSize: 11, color: "#7a8299", lineHeight: 1.4 }}>{d.summary}</div>
-                      {d.date && <div style={{ fontSize: 10, color: "#4a5568", marginTop: 2 }}>{d.date}</div>}
-                    </div>
-                  ))}
+              {!nextVac && lastVac && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Próxima visita recomendada</div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>Control de rutina</div>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#fb923c" }}>Consultar con vet</span>
                 </div>
               )}
             </div>

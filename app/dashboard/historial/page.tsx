@@ -10,13 +10,19 @@ function Badge({ children, color = "#60a5fa" }: any) {
   return <span style={{ background: color + "22", color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border: `1px solid ${color}44` }}>{children}</span>;
 }
 
+type HistTab = "consultas" | "alimentacion" | "documentos";
+
 export default function Historial() {
   const [mascotas, setMascotas] = useState<any[]>([]);
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
+  const [alimentacion, setAlimentacion] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
+  const [alimentForm, setAlimentForm] = useState({ marca: "", tipo: "", cantidad: "", frecuencia: "", notas: "" });
   const [adding, setAdding] = useState(false);
+  const [addingAliment, setAddingAliment] = useState(false);
+  const [histTab, setHistTab] = useState<HistTab>("consultas");
   const supabase = createClient();
 
   useEffect(() => {
@@ -35,8 +41,27 @@ export default function Historial() {
   async function selectMascota(m: any) {
     setMascota(m);
     setHistorial([]);
+    setAlimentacion([]);
     const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false });
     setHistorial(hist || []);
+    const { data: alim } = await supabase.from("alimentacion").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false });
+    setAlimentacion(alim || []);
+  }
+
+  async function addAlimentacion() {
+    if (!mascota) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const entry = {
+      ...alimentForm,
+      mascota_id: mascota.id,
+      user_id: user.id,
+      fecha: new Date().toLocaleDateString("es-AR"),
+    };
+    const { data } = await supabase.from("alimentacion").insert(entry).select();
+    if (data) setAlimentacion(prev => [data[0], ...prev]);
+    setAlimentForm({ marca: "", tipo: "", cantidad: "", frecuencia: "", notas: "" });
+    setAddingAliment(false);
   }
 
   async function addEntry() {
@@ -172,15 +197,27 @@ export default function Historial() {
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      {/* Sub-tabs */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "#0f1117", borderRadius: 12, padding: 4 }}>
+        {([["consultas", "🏥 Consultas"], ["alimentacion", "🍖 Alimentación"], ["documentos", "📄 Docs"]] as const).map(([key, label]) => (
+          <button key={key} onClick={() => setHistTab(key)} style={{
+            flex: 1, border: "none", borderRadius: 10, padding: "7px 4px",
+            background: histTab === key ? "#252a3a" : "transparent",
+            color: histTab === key ? "#f0f4ff" : "#7a8299",
+            fontWeight: 700, fontSize: 11, cursor: "pointer",
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {histTab === "consultas" && <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 800 }}>Consultas</h2>
         <button onClick={() => setAdding(!adding)} style={{
           background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
-          borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700,
+          borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
         }}>+ Agregar</button>
-      </div>
+      </div>}
 
-      {adding && (
+      {histTab === "consultas" && adding && (
         <Card style={{ border: "1px solid #4ade8044" }}>
           <div style={{ fontWeight: 700, color: "#4ade80", marginBottom: 12 }}>Nueva consulta</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -197,14 +234,14 @@ export default function Historial() {
         </Card>
       )}
 
-      {historial.length === 0 && !adding && (
+      {histTab === "consultas" && historial.filter(h => h.title !== "📄 Documento").length === 0 && !adding && (
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>🏥</div>
           <p style={{ color: "#7a8299", fontSize: 13 }}>Todavía no hay consultas registradas.<br />Agregá la primera.</p>
         </Card>
       )}
 
-      {historial.filter((h: any) => h.title !== "📄 Documento").map((h: any, i: number) => (
+      {histTab === "consultas" && historial.filter((h: any) => h.title !== "📄 Documento").map((h: any, i: number) => (
         <Card key={i}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontWeight: 700, fontSize: 14 }}>{h.title}</span>
@@ -215,10 +252,73 @@ export default function Historial() {
         </Card>
       ))}
 
-      <div style={{ color: "#7a8299", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10, marginTop: 4 }}>
+      {/* ── ALIMENTACIÓN ─────────────────────────────────────────────── */}
+      {histTab === "alimentacion" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800 }}>Alimentación</h2>
+            <button onClick={() => setAddingAliment(!addingAliment)} style={{
+              background: "#fb923c22", color: "#fb923c", border: "1px solid #fb923c44",
+              borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>+ Registrar</button>
+          </div>
+
+          {addingAliment && (
+            <Card style={{ border: "1px solid #fb923c44" }}>
+              <div style={{ fontWeight: 700, color: "#fb923c", marginBottom: 12 }}>🍖 Nuevo registro de alimentación</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input placeholder="Marca del alimento (ej: Royal Canin)" value={alimentForm.marca} onChange={e => setAlimentForm(f => ({ ...f, marca: e.target.value }))} />
+                <input placeholder="Tipo (ej: Croquetas, Húmedo, BARF, Casero)" value={alimentForm.tipo} onChange={e => setAlimentForm(f => ({ ...f, tipo: e.target.value }))} />
+                <input placeholder="Cantidad diaria (ej: 200g mañana y noche)" value={alimentForm.cantidad} onChange={e => setAlimentForm(f => ({ ...f, cantidad: e.target.value }))} />
+                <input placeholder="Frecuencia (ej: 2 veces por día)" value={alimentForm.frecuencia} onChange={e => setAlimentForm(f => ({ ...f, frecuencia: e.target.value }))} />
+                <textarea placeholder="Notas (ej: le cayó bien, heces normales, rechazó el nuevo sabor...)" rows={2} value={alimentForm.notas}
+                  onChange={e => setAlimentForm(f => ({ ...f, notas: e.target.value }))}
+                  style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff", resize: "none" }} />
+                <button onClick={addAlimentacion} style={{
+                  background: "#fb923c", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                }}>Guardar</button>
+              </div>
+            </Card>
+          )}
+
+          {alimentacion.length === 0 && !addingAliment && (
+            <Card style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🍖</div>
+              <p style={{ color: "#7a8299", fontSize: 13 }}>Sin registros de alimentación.<br />Registrá qué come {mascota?.name}.</p>
+            </Card>
+          )}
+
+          {alimentacion.map((a: any, i: number) => (
+            <Card key={i} style={{ border: "1px solid #fb923c22" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 15 }}>{a.marca || "Sin marca"}</div>
+                  <div style={{ color: "#fb923c", fontSize: 12, fontWeight: 700, marginTop: 2 }}>{a.tipo}</div>
+                </div>
+                <span style={{ fontSize: 11, color: "#7a8299" }}>{a.fecha}</span>
+              </div>
+              {a.cantidad && (
+                <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                  <span style={{ background: "#fb923c22", color: "#fb923c", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+                    ⚖️ {a.cantidad}
+                  </span>
+                  {a.frecuencia && (
+                    <span style={{ background: "#60a5fa22", color: "#60a5fa", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+                      🕐 {a.frecuencia}
+                    </span>
+                  )}
+                </div>
+              )}
+              {a.notas && <div style={{ fontSize: 12, color: "#7a8299", lineHeight: 1.5, fontStyle: "italic" }}>"{a.notas}"</div>}
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {histTab === "documentos" && <div style={{ color: "#7a8299", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10, marginTop: 4 }}>
         Documentos
-      </div>
-      <Card style={{ textAlign: "center", border: "2px dashed #252a3a" }}>
+      </div>}
+      {histTab === "documentos" && <Card style={{ textAlign: "center", border: "2px dashed #252a3a" }}>
         <label style={{ cursor: "pointer" }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>📎</div>
           <div style={{ color: "#7a8299", fontSize: 13, marginBottom: 10 }}>Subí análisis, radiografías, recetas</div>
@@ -228,9 +328,9 @@ export default function Historial() {
           }}>{uploading ? "Subiendo..." : "Seleccionar archivo"}</div>
           <input type="file" style={{ display: "none" }} onChange={handleFile} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
         </label>
-      </Card>
+      </Card>}
 
-      {historial.filter((h: any) => h.title === "📄 Documento").map((h: any, i: number) => {
+      {histTab === "documentos" && historial.filter((h: any) => h.title === "📄 Documento").map((h: any, i: number) => {
         const [name, pathOrUrl] = h.summary?.split("::") || [];
         const isPrivate = pathOrUrl && !pathOrUrl.startsWith("http");
         return (

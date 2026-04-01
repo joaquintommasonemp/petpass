@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 
-type Tab = "adopciones" | "perdidas" | "descuentos";
+type Tab = "explorar" | "adopciones" | "perdidas" | "descuentos";
 
 const DESCUENTOS = [
   { nombre: "Puppis", descripcion: "En todos los productos de la tienda online", icon: "🛍️" },
@@ -24,6 +24,7 @@ function Card({ children, style = {} }: any) {
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { key: Tab; label: string; icon: string }[] = [
+    { key: "explorar", label: "Explorar", icon: "🐾" },
     { key: "adopciones", label: "Adopciones", icon: "❤️" },
     { key: "perdidas", label: "Perdidas", icon: "📍" },
     { key: "descuentos", label: "Descuentos", icon: "🎁" },
@@ -42,6 +43,135 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
           {t.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+// ─── Tab: Explorar (Tinder de mascotas) ──────────────────────────────────────
+function TabExplorar() {
+  const [mascotas, setMascotas] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [raza, setRaza] = useState("");
+  const [razas, setRazas] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    let result = mascotas;
+    if (raza) result = result.filter(m => m.breed === raza);
+    if (search) result = result.filter(m =>
+      m.name?.toLowerCase().includes(search.toLowerCase()) ||
+      m.breed?.toLowerCase().includes(search.toLowerCase()) ||
+      m.location?.toLowerCase().includes(search.toLowerCase())
+    );
+    setFiltered(result);
+  }, [mascotas, raza, search]);
+
+  async function load() {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.from("mascotas")
+      .select("*, profiles(full_name, phone)")
+      .eq("is_public", true).eq("active", true)
+      .neq("user_id", user?.id || "");
+    const ms = data || [];
+    setMascotas(ms);
+    setFiltered(ms);
+    const uniqueRazas = Array.from(new Set(ms.map((m: any) => m.breed).filter(Boolean))) as string[];
+    setRazas(uniqueRazas);
+    setLoading(false);
+  }
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
+
+  return (
+    <div>
+      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 14 }}>
+        Mascotas públicas — coordiná paseos, viajes o simplemente conectá con tutores de la misma raza 🐾
+      </p>
+
+      {/* Buscador y filtro */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <input
+          placeholder="🔍 Buscar por nombre, raza o zona..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, fontSize: 13 }}
+        />
+      </div>
+      {razas.length > 0 && (
+        <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+          <button onClick={() => setRaza("")} style={{
+            background: !raza ? "#4ade8022" : "#181c27",
+            border: `1px solid ${!raza ? "#4ade80" : "#252a3a"}`,
+            color: !raza ? "#4ade80" : "#7a8299",
+            borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
+            cursor: "pointer", whiteSpace: "nowrap",
+          }}>Todas</button>
+          {razas.map(r => (
+            <button key={r} onClick={() => setRaza(r === raza ? "" : r)} style={{
+              background: raza === r ? "#4ade8022" : "#181c27",
+              border: `1px solid ${raza === r ? "#4ade80" : "#252a3a"}`,
+              color: raza === r ? "#4ade80" : "#7a8299",
+              borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
+              cursor: "pointer", whiteSpace: "nowrap",
+            }}>{r}</button>
+          ))}
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <Card style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 10 }}>🐾</div>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Sin mascotas públicas todavía</div>
+          <p style={{ color: "#7a8299", fontSize: 13 }}>
+            Activá el perfil público de tu mascota desde la pestaña Perfil para aparecer acá.
+          </p>
+        </Card>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {filtered.map((m: any, i: number) => {
+          const isGato = m.breed?.toLowerCase().includes("gato");
+          const owner = m.profiles;
+          return (
+            <div key={i} style={{
+              background: "#181c27", border: "1px solid #252a3a",
+              borderRadius: 16, overflow: "hidden",
+            }}>
+              {/* Foto */}
+              <div style={{
+                height: 120, background: "#252a3a",
+                display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+              }}>
+                {m.photo_url
+                  ? <img src={m.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: 52 }}>{isGato ? "🐱" : "🐕"}</span>
+                }
+              </div>
+              <div style={{ padding: "10px 12px" }}>
+                <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 2 }}>{m.name}</div>
+                <div style={{ color: "#7a8299", fontSize: 11, marginBottom: 6 }}>
+                  {m.breed}{m.age ? ` · ${m.age}` : ""}{m.sex ? ` · ${m.sex}` : ""}
+                </div>
+                {m.location && (
+                  <div style={{ fontSize: 11, color: "#60a5fa", marginBottom: 8 }}>📍 {m.location}</div>
+                )}
+                {owner?.phone && (
+                  <a href={"https://wa.me/" + owner.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer"
+                    style={{
+                      display: "block", background: "#4ade8022", color: "#4ade80",
+                      border: "1px solid #4ade8044", borderRadius: 8, padding: "6px 0",
+                      fontSize: 11, fontWeight: 700, textDecoration: "none", textAlign: "center",
+                    }}>💬 Contactar</a>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -413,10 +543,11 @@ export default function Comunidad() {
   return (
     <div>
       <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
-      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Adopciones, mascotas perdidas y descuentos</p>
+      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Explorá mascotas, adopciones, perdidas y descuentos</p>
 
       <TabBar active={tab} onChange={setTab} />
 
+      {tab === "explorar" && <TabExplorar />}
       {tab === "adopciones" && <Adopciones />}
       {tab === "perdidas" && <TabPerdidas />}
       {tab === "descuentos" && <TabDescuentos />}

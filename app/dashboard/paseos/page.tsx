@@ -28,6 +28,7 @@ export default function Paseos() {
   const [form, setForm] = useState({ mascota_id: "", notes: "" });
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [newSessionId, setNewSessionId] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => { load(); }, []);
@@ -66,6 +67,7 @@ export default function Paseos() {
     if (data?.[0]) {
       setSessions(prev => [data[0], ...prev]);
       setUpdates(prev => ({ ...prev, [data[0].id]: [] }));
+      setNewSessionId(data[0].id);
     }
     setForm(f => ({ ...f, notes: "" }));
     setCreating(false);
@@ -96,6 +98,29 @@ export default function Paseos() {
           Compartí un link con el cuidador para que registre novedades durante el paseo o la estadía.
         </p>
       </div>
+
+      {/* Link recién creado */}
+      {newSessionId && (
+        <div style={{ background: "#0f2a1a", border: "1px solid #4ade8066", borderRadius: 14, padding: 16, marginBottom: 16 }}>
+          <div style={{ fontWeight: 800, fontSize: 14, color: "#4ade80", marginBottom: 8 }}>✅ ¡Sesión creada! Compartí este link:</div>
+          <div style={{ background: "#0f1117", borderRadius: 10, padding: "10px 12px", marginBottom: 10, wordBreak: "break-all", fontSize: 12, color: "#94a3b8" }}>
+            {typeof window !== "undefined" ? `${window.location.origin}/paseo/${newSessionId}` : `/paseo/${newSessionId}`}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => { copyLink(newSessionId); }} style={{
+              flex: 1, background: copiedId === newSessionId ? "#4ade8033" : "#4ade8022",
+              color: "#4ade80", border: "1px solid #4ade8044",
+              borderRadius: 10, padding: 12, fontWeight: 800, fontSize: 14, cursor: "pointer",
+            }}>
+              {copiedId === newSessionId ? "✅ Link copiado!" : "📋 Copiar link"}
+            </button>
+            <button onClick={() => setNewSessionId(null)} style={{
+              background: "#252a3a", color: "#7a8299", border: "none",
+              borderRadius: 10, padding: "12px 14px", cursor: "pointer", fontSize: 13,
+            }}>×</button>
+          </div>
+        </div>
+      )}
 
       <button onClick={() => setCreating(!creating)} style={{
         width: "100%", background: "linear-gradient(135deg, #4ade80, #22c55e)",
