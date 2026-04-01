@@ -73,7 +73,7 @@ export default function Dashboard() {
     setHistorialPeso([...(hist || []), ...(inicial || [])]);
     const { data: diags } = await supabase.from("historial").select("*")
       .eq("mascota_id", m.id)
-      .not("title", "in", '("Actualización de peso","Peso inicial")')
+      .not("title", "in", '("Actualización de peso","Peso inicial","📄 Documento")')
       .order("created_at", { ascending: false }).limit(5);
     setDiagnosticos(diags || []);
   }
