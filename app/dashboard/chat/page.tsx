@@ -95,31 +95,63 @@ export default function Chat() {
     const citas = historial.filter((h: any) => h.title === "📅 Cita");
     const alim = historial.filter((h: any) => h.marca !== undefined || (h.tipo && !h.title));
 
-    const systemPrompt = mascota
-      ? `Sos un veterinario IA especializado. Tenés acceso al perfil COMPLETO de ${mascota.name}:
+    const vacsText = vacunas.length > 0
+      ? vacunas.map((v: any) => {
+          const next = v.next_date ? ", proxima " + v.next_date : "";
+          return "- " + v.name + ": aplicada " + v.date + next + ", estado: " + (v.status || "ok");
+        }).join("\n")
+      : "- Sin vacunas registradas";
+    const consultasText = consultas.length > 0
+      ? consultas.slice(0, 8).map((h: any) => {
+          const sum = h.summary ? " - " + h.summary : "";
+          const vet = h.vet ? " (Vet: " + h.vet + ")" : "";
+          return "- " + (h.date || "sin fecha") + ": " + h.title + sum + vet;
+        }).join("\n")
+      : "- Sin consultas registradas";
+    const alimentText = alim.length > 0
+      ? alim.map((a: any) => {
+          const notas = a.notas ? " (" + a.notas + ")" : "";
+          return "- " + (a.marca || a.tipo || "alimento") + ": " + (a.frecuencia || "") + notas;
+        }).join("\n")
+      : "- No registrada";
+    const docsText = docs.length > 0
+      ? docs.map((d: any) => "- " + (d.summary?.split("::")?.[0] || "documento") + " (" + (d.date || "sin fecha") + ")").join("\n")
+      : "- Sin documentos";
+    const citasText = citas.length > 0
+      ? citas.map((c: any) => {
+          const vet = c.vet ? " con " + c.vet : "";
+          return "- " + c.date + ": " + c.summary + vet;
+        }).join("\n")
+      : "- Sin citas agendadas";
 
-DATOS BÁSICOS:
-- Raza: ${mascota.breed || "—"} | Edad: ${mascota.age || "—"} | Peso actual: ${mascota.weight || "—"} | Sexo: ${mascota.sex || "—"}
-- Color/señas: ${mascota.color || "—"} | Chip: ${mascota.chip || "—"} | Zona: ${mascota.location || "—"}
-
-VACUNAS:
-${vacunas.length > 0 ? vacunas.map((v: any) => `- ${v.name}: aplicada ${v.date}${v.next_date ? `, próxima ${v.next_date}` : ""}, estado: ${v.status || "ok"}`).join("\n") : "- Sin vacunas registradas"}
-
-HISTORIAL CLÍNICO (últimas consultas):
-${consultas.length > 0 ? consultas.slice(0, 8).map((h: any) => `- ${h.date || "sin fecha"}: ${h.title}${h.summary ? ` — ${h.summary}` : ""}${h.vet ? ` (Vet: ${h.vet})` : ""}`).join("\n") : "- Sin consultas registradas"}
-
-ALIMENTACIÓN:
-${alim.length > 0 ? alim.map((a: any) => `- ${a.marca || a.tipo || "alimento"}: ${a.frecuencia || ""}${a.notas ? ` (${a.notas})` : ""}`).join("\n") : "- No registrada"}
-
-DOCUMENTOS SUBIDOS:
-${docs.length > 0 ? docs.map((d: any) => `- ${d.summary?.split("::")?.[0] || "documento"} (${d.date || "sin fecha"})`).join("\n") : "- Sin documentos"}
-
-PRÓXIMAS CITAS:
-${citas.length > 0 ? citas.map((c: any) => `- ${c.date}: ${c.summary}${c.vet ? ` con ${c.vet}` : ""}`).join("\n") : "- Sin citas agendadas"}
-
-Si te mandan una foto, analizala en detalle: describí lo que ves, identificá posibles síntomas, erupciones, heridas o comportamientos anormales.
-Respondé siempre en español rioplatense, sé empático y claro. Usá toda la info del historial para dar respuestas personalizadas. Recordá que tu orientación no reemplaza una consulta veterinaria presencial.`
-      : "Sos un veterinario IA. Respondé en español rioplatense. Si te mandan fotos, analizalas.";
+    const systemPromptLines = mascota ? [
+      "Sos un veterinario IA especializado. Tenes acceso al perfil COMPLETO de " + mascota.name + ":",
+      "",
+      "DATOS BASICOS:",
+      "- Raza: " + (mascota.breed || "N/A") + " | Edad: " + (mascota.age || "N/A") + " | Peso actual: " + (mascota.weight || "N/A") + " | Sexo: " + (mascota.sex || "N/A"),
+      "- Color/senas: " + (mascota.color || "N/A") + " | Chip: " + (mascota.chip || "N/A") + " | Zona: " + (mascota.location || "N/A"),
+      "",
+      "VACUNAS:",
+      vacsText,
+      "",
+      "HISTORIAL CLINICO (ultimas consultas):",
+      consultasText,
+      "",
+      "ALIMENTACION:",
+      alimentText,
+      "",
+      "DOCUMENTOS SUBIDOS:",
+      docsText,
+      "",
+      "PROXIMAS CITAS:",
+      citasText,
+      "",
+      "Si te mandan una foto, analizala en detalle: describi lo que ves, identifica posibles sintomas, erupciones, heridas o comportamientos anormales.",
+      "Responde siempre en espanol rioplatense, se empatico y claro. Usa toda la info del historial para dar respuestas personalizadas. Recorda que tu orientacion no reemplaza una consulta veterinaria presencial.",
+    ] : null;
+    const systemPrompt = systemPromptLines
+      ? systemPromptLines.join("\n")
+      : "Sos un veterinario IA. Responde en espanol rioplatense. Si te mandan fotos, analizalas.";
 
     try {
       const userContent: any[] = [];
