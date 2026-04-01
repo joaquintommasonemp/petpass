@@ -10,6 +10,23 @@ function Badge({ children, color = "#60a5fa" }: any) {
   return <span style={{ background: color + "22", color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border: `1px solid ${color}44` }}>{children}</span>;
 }
 
+// Identifica entradas que son documentos/estudios (tienen URL en summary)
+function isDoc(h: any) {
+  return typeof h.summary === "string" && h.summary.includes("::");
+}
+
+function detectStudyType(fileName: string): string {
+  const name = fileName.toLowerCase();
+  if (/radiograf|placa|rx\b|rayos[\s_-]?x|xray/.test(name)) return "🩻 Radiografía";
+  if (/ecograf|ultraso|ecosonogr/.test(name)) return "🔊 Ecografía";
+  if (/hemograma|laboratorio|lab\b|sangre|blood|bioquim|analisis|análisis|orina|urin/.test(name)) return "🔬 Laboratorio";
+  if (/tomograf|tac\b|\bct\b/.test(name)) return "🏥 Tomografía";
+  if (/biopsia/.test(name)) return "🔬 Biopsia";
+  if (/electrocardiog|ecg\b|\bekg\b/.test(name)) return "❤️ Electrocardiograma";
+  if (/resonancia|mri\b|rmn\b/.test(name)) return "🏥 Resonancia";
+  return "📄 Documento";
+}
+
 type HistTab = "consultas" | "alimentacion" | "documentos";
 
 export default function Historial() {
@@ -28,6 +45,8 @@ export default function Historial() {
   const [creatingLink, setCreatingLink] = useState(false);
   const [newLink, setNewLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [recetas, setRecetas] = useState<string | null>(null);
+  const [loadingRecetas, setLoadingRecetas] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -115,6 +134,47 @@ export default function Historial() {
     setAddingAliment(false);
   }
 
+  async function pedirRecetas() {
+    if (!mascota) return;
+    setLoadingRecetas(true);
+    setRecetas(null);
+    const { data: { session } } = await supabase.auth.getSession();
+    const dietaActual = alimentacion.slice(0, 3).map((a: any) =>
+      `${a.marca || ""}${a.tipo ? ` (${a.tipo})` : ""}${a.cantidad ? ` · ${a.cantidad}` : ""}`
+    ).join("; ") || "sin registros previos";
+
+    const prompt = `Sugerí 3 recetas o planes de alimentación casera saludable para ${mascota.name}.
+
+Datos de la mascota:
+- Especie/Raza: ${mascota.breed}
+- Edad: ${mascota.age || "desconocida"}
+- Peso: ${mascota.weight || "desconocido"}
+- Sexo: ${mascota.sex || "—"}
+- Dieta actual: ${dietaActual}
+
+Para cada receta incluí:
+1. Nombre de la receta
+2. Ingredientes con cantidades aproximadas
+3. Preparación en pasos simples
+4. Frecuencia recomendada y tamaño de porción
+5. Beneficios nutricionales
+
+Finalizá con una nota sobre alimentos tóxicos a evitar para ${mascota.breed?.toLowerCase().includes("gato") ? "gatos" : "perros"}.
+Respondé en español, con formato claro.`;
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session?.access_token}` },
+      body: JSON.stringify({
+        system: "Sos un veterinario nutricionista especialista en mascotas. Dás recetas caseras equilibradas y seguras.",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    setRecetas(data.reply || "No se pudo generar recetas.");
+    setLoadingRecetas(false);
+  }
+
   async function addEntry() {
     if (!form.title.trim() || !mascota) return;
     const { data } = await supabase.from("historial").insert({ ...form, mascota_id: mascota.id }).select();
@@ -137,7 +197,7 @@ export default function Historial() {
       // Guardar el PATH (no la URL pública) — se generan URLs firmadas al ver
       const entry = {
         mascota_id: mascota.id,
-        title: "📄 Documento",
+        title: detectStudyType(file.name),
         summary: `${file.name}::${path}`,
         date: new Date().toLocaleDateString("es-AR"),
         vet: "",
@@ -271,14 +331,14 @@ export default function Historial() {
         </Card>
       )}
 
-      {histTab === "consultas" && historial.filter((h: any) => h.title !== "📄 Documento" && h.title !== "📅 Cita").length === 0 && !adding && (
+      {histTab === "consultas" && historial.filter((h: any) => !isDoc(h) && h.title !== "📅 Cita").length === 0 && !adding && (
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>🏥</div>
           <p style={{ color: "#7a8299", fontSize: 13 }}>Todavía no hay consultas registradas.<br />Agregá la primera.</p>
         </Card>
       )}
 
-      {histTab === "consultas" && historial.filter((h: any) => h.title !== "📄 Documento" && h.title !== "📅 Cita").map((h: any, i: number) => (
+      {histTab === "consultas" && historial.filter((h: any) => !isDoc(h) && h.title !== "📅 Cita").map((h: any, i: number) => (
         <Card key={i}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontWeight: 700, fontSize: 14 }}>{h.title}</span>
@@ -349,6 +409,37 @@ export default function Historial() {
               {a.notas && <div style={{ fontSize: 12, color: "#7a8299", lineHeight: 1.5, fontStyle: "italic" }}>"{a.notas}"</div>}
             </Card>
           ))}
+
+          {/* ── Recetas recomendadas IA ── */}
+          <div style={{ marginTop: 8 }}>
+            <button onClick={pedirRecetas} disabled={loadingRecetas} style={{
+              width: "100%", background: loadingRecetas ? "#252a3a" : "linear-gradient(135deg, #fb923c, #f97316)",
+              color: loadingRecetas ? "#7a8299" : "#000", border: "none", borderRadius: 12, padding: 14,
+              fontWeight: 900, fontSize: 14, cursor: "pointer", opacity: loadingRecetas ? 0.7 : 1,
+              boxShadow: loadingRecetas ? "none" : "0 4px 20px #fb923c30",
+            }}>
+              {loadingRecetas ? "⏳ Generando recetas..." : "🍽️ Recetas caseras recomendadas por IA"}
+            </button>
+          </div>
+
+          {recetas && (
+            <Card style={{ border: "1px solid #fb923c33", marginTop: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: "#fb923c" }}>🍽️ Recetas para {mascota?.name}</div>
+                <button onClick={() => setRecetas(null)} style={{
+                  background: "transparent", border: "none", color: "#7a8299",
+                  fontSize: 18, cursor: "pointer", lineHeight: 1,
+                }}>×</button>
+              </div>
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: "#f0f4ff", whiteSpace: "pre-wrap" }}>
+                {recetas.split(/(\*\*[^*]+\*\*)/g).map((part: string, i: number) =>
+                  part.startsWith("**") && part.endsWith("**")
+                    ? <strong key={i} style={{ color: "#fb923c" }}>{part.slice(2, -2)}</strong>
+                    : <span key={i}>{part}</span>
+                )}
+              </div>
+            </Card>
+          )}
         </div>
       )}
 
@@ -439,12 +530,12 @@ export default function Historial() {
           )}
 
           {/* Documentos subidos */}
-          {historial.filter((h: any) => h.title === "📄 Documento").length > 0 && (
+          {historial.filter((h: any) => isDoc(h)).length > 0 && (
             <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10, marginTop: 8 }}>
               Documentos guardados
             </div>
           )}
-          {historial.filter((h: any) => h.title === "📄 Documento").map((h: any, i: number) => {
+          {historial.filter((h: any) => isDoc(h)).map((h: any, i: number) => {
             const parts: string[] = h.summary?.split("||") || [];
             const [name, pathOrUrl] = (parts[0] || "").split("::");
             const vetNote = parts.find((p: string) => p.startsWith("nota::"))?.replace("nota::", "");
@@ -452,10 +543,10 @@ export default function Historial() {
             return (
               <Card key={i} style={{ padding: "12px 16px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <span style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>📄</span>
+                  <span style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{h.title?.split(" ")[0] || "📄"}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {name || "Documento"}
+                      {h.title && h.title !== "📄 Documento" ? h.title : (name || "Documento")}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 11, color: "#7a8299" }}>{h.date}</span>

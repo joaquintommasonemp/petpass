@@ -48,3 +48,87 @@ button:active { transform: scale(0.97); }
 
 /* Leaflet fix */
 .leaflet-container { z-index: 1; }
+
+/* Mobile content padding (includes bottom nav clearance) */
+.dashboard-content-pad {
+  padding: 16px 16px 90px;
+}
+
+/* ── Mobile layout (default) ── */
+.dashboard-wrapper {
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+.dashboard-header {
+  display: flex;
+}
+
+.dashboard-sidebar {
+  display: none;
+}
+
+.dashboard-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 440px;
+  background: #181c27;
+  border-top: 1px solid #252a3a;
+  display: flex;
+  z-index: 100;
+}
+
+/* ── Desktop layout (≥768px) ── */
+@media (min-width: 768px) {
+  .dashboard-wrapper {
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .dashboard-header {
+    display: none;
+  }
+
+  .dashboard-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    min-height: 100vh;
+    background: #181c27;
+    border-right: 1px solid #252a3a;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .dashboard-nav {
+    display: none;
+  }
+
+  .dashboard-content {
+    margin-left: 240px;
+    flex: 1;
+    min-height: 100vh;
+    max-width: none;
+  }
+
+  .dashboard-content-pad {
+    padding: 36px 48px 48px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content-pad {
+    padding: 40px 72px 48px;
+  }
+}

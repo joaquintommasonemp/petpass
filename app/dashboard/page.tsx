@@ -43,6 +43,9 @@ export default function Dashboard() {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [familiaMembers, setFamiliaMembers] = useState<any[]>([]);
+  const [showInvitar, setShowInvitar] = useState(false);
+  const [copiedFamilia, setCopiedFamilia] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -57,13 +60,34 @@ export default function Dashboard() {
     const { data: prof } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
     if (prof?.is_admin) setIsAdmin(true);
     const { data } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
-    if (data && data.length > 0) {
-      setMascotas(data);
-      await selectMascota(data[0]);
+    // Mascotas compartidas con este usuario por familia
+    const { data: familiaRows } = await supabase.from("mascota_familia").select("mascota_id").eq("user_id", user.id);
+    const familiaIds = (familiaRows || []).map((r: any) => r.mascota_id);
+    let shared: any[] = [];
+    if (familiaIds.length > 0) {
+      const { data: sharedMs } = await supabase.from("mascotas").select("*").in("id", familiaIds).eq("active", true);
+      shared = sharedMs || [];
+    }
+    const allMascotas = [...(data || []), ...shared];
+    if (allMascotas.length > 0) {
+      setMascotas(allMascotas);
+      await selectMascota(allMascotas[0]);
     }
     const { data: urgs } = await supabase.from("urgencias_contactos").select("*").eq("user_id", user.id).order("created_at");
     setUrgencias(urgs || []);
     setLoading(false);
+  }
+
+  async function loadFamilia(mascotaId: string) {
+    const { data } = await supabase.from("mascota_familia").select("user_id, profiles(full_name)").eq("mascota_id", mascotaId);
+    setFamiliaMembers(data || []);
+  }
+
+  function copyFamiliaLink(mascotaId: string) {
+    const url = `${window.location.origin}/acceso/${mascotaId}`;
+    navigator.clipboard.writeText(url);
+    setCopiedFamilia(true);
+    setTimeout(() => setCopiedFamilia(false), 2500);
   }
 
   async function togglePublic() {
@@ -77,6 +101,8 @@ export default function Dashboard() {
   async function selectMascota(m: any) {
     setSelected(m);
     setIsPublic(m.is_public || false);
+    setFamiliaMembers([]);
+    loadFamilia(m.id);
     const { data: vacs } = await supabase.from("vacunas").select("*").eq("mascota_id", m.id);
     setVacunas(vacs || []);
     const { data: diags } = await supabase.from("historial").select("*")
@@ -203,6 +229,35 @@ Sé concreto y profesional. Respondé en español.`;
     setLoadingReporte(false);
   }
 
+  function addToGoogleCalendar(c: any) {
+    const dateStr = c.date.replace(/-/g, "");
+    const title = encodeURIComponent(`[${selected?.name}] ${c.summary}`);
+    const details = encodeURIComponent(c.vet ? `Veterinario/a: ${c.vet}` : "Cita veterinaria");
+    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&details=${details}`, "_blank");
+  }
+
+  function downloadIcal(c: any) {
+    const dateStr = c.date.replace(/-/g, "");
+    const uid = c.id + "@petpass";
+    const now = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15) + "Z";
+    const ical = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PetPass//ES",
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${now}`,
+      `DTSTART;VALUE=DATE:${dateStr}`,
+      `DTEND;VALUE=DATE:${dateStr}`,
+      `SUMMARY:[${selected?.name}] ${c.summary}`,
+      c.vet ? `DESCRIPTION:Veterinario/a: ${c.vet}` : "",
+      "END:VEVENT", "END:VCALENDAR",
+    ].filter(Boolean).join("\r\n");
+    const blob = new Blob([ical], { type: "text/calendar" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `cita_${selected?.name}_${c.date}.ics`;
+    a.click();
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/");
@@ -288,6 +343,11 @@ Sé concreto y profesional. Respondé en español.`;
             )}
             {selected?.location && <Badge color="#60a5fa">{selected.location}</Badge>}
             {selected?.weight && <Badge color="#fb923c">{selected.weight}</Badge>}
+            {selected?.castrado && selected.castrado !== "No sé" && (
+              <Badge color={selected.castrado === "Sí" ? "#a78bfa" : "#7a8299"}>
+                {selected.castrado === "Sí" ? "✂️ Castrado/a" : "⚪ No castrado/a"}
+              </Badge>
+            )}
           </div>
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
@@ -311,7 +371,38 @@ Sé concreto y profesional. Respondé en español.`;
               }} />
               {isPublic ? "Visible en Explorar" : "Perfil privado"}
             </button>
+            <button onClick={() => setShowInvitar(!showInvitar)} style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: "#60a5fa18", border: "1px solid #60a5fa33",
+              borderRadius: 20, padding: "4px 10px", cursor: "pointer",
+              fontSize: 11, fontWeight: 700, color: "#60a5fa",
+            }}>👨‍👩‍👧 Familia</button>
           </div>
+          {showInvitar && (
+            <div style={{ marginTop: 12, background: "#0f1117", borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 12, color: "#7a8299", marginBottom: 8 }}>
+                Compartí este link con tu familia. Cuando lo abran (con su cuenta), podrán ver y gestionar a {selected?.name}.
+              </div>
+              <button onClick={() => copyFamiliaLink(selected?.id)} style={{
+                width: "100%", background: copiedFamilia ? "#60a5fa22" : "#252a3a",
+                color: copiedFamilia ? "#60a5fa" : "#f0f4ff",
+                border: `1px solid ${copiedFamilia ? "#60a5fa44" : "#353a4a"}`,
+                borderRadius: 10, padding: "9px 12px", fontWeight: 800, fontSize: 13, cursor: "pointer",
+              }}>
+                {copiedFamilia ? "✅ Link copiado!" : "📋 Copiar link de acceso familiar"}
+              </button>
+              {familiaMembers.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Con acceso</div>
+                  {familiaMembers.map((f: any, i: number) => (
+                    <div key={i} style={{ fontSize: 12, color: "#f0f4ff", padding: "4px 0", borderBottom: "1px solid #1a2030" }}>
+                      👤 {f.profiles?.full_name || "Usuario"}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 
@@ -387,8 +478,16 @@ Sé concreto y profesional. Respondé en español.`;
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{c.summary}</div>
                         {c.vet && <div style={{ fontSize: 11, color: "#7a8299" }}>{c.vet}</div>}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <span style={{ fontSize: 12, fontWeight: 700, color: "#a78bfa" }}>{c.date}</span>
+                        <button onClick={() => addToGoogleCalendar(c)} title="Agregar a Google Calendar" style={{
+                          background: "transparent", border: "none", color: "#60a5fa",
+                          fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                        }}>📅</button>
+                        <button onClick={() => downloadIcal(c)} title="Descargar .ics" style={{
+                          background: "transparent", border: "none", color: "#a78bfa",
+                          fontSize: 13, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                        }}>⬇️</button>
                         <button onClick={() => eliminarCita(c.id)} style={{
                           background: "transparent", border: "none", color: "#f87171",
                           fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1,

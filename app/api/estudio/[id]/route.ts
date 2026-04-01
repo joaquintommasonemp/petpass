@@ -7,6 +7,18 @@ const admin = () => createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
+function detectStudyType(fileName: string, aiSummary: string): string {
+  const text = (fileName + " " + aiSummary).toLowerCase();
+  if (/radiograf|placa|rx\b|rayos[\s_-]?x|xray/.test(text)) return "🩻 Radiografía";
+  if (/ecograf|ecogra|ultraso|ecosonogr/.test(text)) return "🔊 Ecografía";
+  if (/hemograma|laboratorio|lab\b|sangre|blood|bioquim|analisis|análisis|orina|urin/.test(text)) return "🔬 Laboratorio";
+  if (/tomograf|tac\b|\bct\b/.test(text)) return "🏥 Tomografía";
+  if (/biopsia/.test(text)) return "🔬 Biopsia";
+  if (/electrocardiog|ecg\b|\bekg\b/.test(text)) return "❤️ Electrocardiograma";
+  if (/resonancia|mri\b|rmn\b/.test(text)) return "🏥 Resonancia";
+  return "📄 Documento";
+}
+
 // GET — cargar info del link (público, para la página del veterinario)
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const db = admin();
@@ -71,6 +83,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     } catch {}
   }
 
+  // Detectar tipo de estudio
+  const studyType = detectStudyType(fileName, aiSummary);
+
   // Guardar en historial (service role bypasa RLS)
   const summaryParts = [`${fileName}::${publicUrl}`];
   if (note) summaryParts.push(`nota::${note}`);
@@ -78,7 +93,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   await db.from("historial").insert({
     mascota_id: link.mascota_id,
-    title: "📄 Documento",
+    title: studyType,
     summary: summaryParts.join("||"),
     date: new Date().toLocaleDateString("es-AR"),
     vet: vetName || "Veterinaria",

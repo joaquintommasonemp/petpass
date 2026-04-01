@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+// useRef already imported above
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 
@@ -47,7 +48,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
   );
 }
 
-// ─── Tab: Explorar (Tinder de mascotas) ──────────────────────────────────────
+// ─── Tab: Explorar (Tinder de mascotas + Mural) ───────────────────────────────
 function TabExplorar() {
   const [mascotas, setMascotas] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
@@ -55,6 +56,13 @@ function TabExplorar() {
   const [raza, setRaza] = useState("");
   const [razas, setRazas] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mensajes, setMensajes] = useState<any[]>([]);
+  const [msgText, setMsgText] = useState("");
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const [miMascota, setMiMascota] = useState<any>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => { load(); }, []);
@@ -72,16 +80,69 @@ function TabExplorar() {
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
-    const { data } = await supabase.from("mascotas")
-      .select("*, profiles(full_name, phone)")
-      .eq("is_public", true).eq("active", true)
-      .neq("user_id", user?.id || "");
+    const [{ data }, { data: msgs }, { data: miMs }] = await Promise.all([
+      supabase.from("mascotas").select("*, profiles(full_name, phone)").eq("is_public", true).eq("active", true).neq("user_id", user?.id || ""),
+      supabase.from("comunidad_mensajes").select("*").order("created_at", { ascending: false }).limit(30),
+      supabase.from("mascotas").select("name, breed").eq("user_id", user?.id || "").eq("active", true).limit(1),
+    ]);
     const ms = data || [];
     setMascotas(ms);
     setFiltered(ms);
+    setMensajes(msgs || []);
+    if (miMs?.[0]) setMiMascota(miMs[0]);
     const uniqueRazas = Array.from(new Set(ms.map((m: any) => m.breed).filter(Boolean))) as string[];
     setRazas(uniqueRazas);
     setLoading(false);
+  }
+
+  async function sendMsg() {
+    if (!msgText.trim()) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setSendingMsg(true);
+
+    let photo_url: string | null = null;
+    if (photoFile) {
+      const path = `mural/${Date.now()}_${photoFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error } = await supabase.storage.from("comunidad").upload(path, photoFile);
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("comunidad").getPublicUrl(path);
+        photo_url = urlData.publicUrl;
+      }
+    }
+
+    const entry = {
+      user_id: user.id,
+      author_name: miMascota?.name ? `Tutor de ${miMascota.name}` : "Tutor",
+      mascota_name: miMascota?.name || null,
+      message: msgText.trim(),
+      photo_url,
+    };
+    const { data: saved } = await supabase.from("comunidad_mensajes").insert(entry).select();
+    if (saved?.[0]) setMensajes(prev => [saved[0], ...prev]);
+    setMsgText("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setSendingMsg(false);
+  }
+
+  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPhotoFile(f);
+    const reader = new FileReader();
+    reader.onload = ev => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(f);
+  }
+
+  function timeAgo(d: string) {
+    const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+    if (mins < 1) return "ahora";
+    if (mins < 60) return `hace ${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `hace ${hrs}h`;
+    return `hace ${Math.floor(hrs / 24)}d`;
   }
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
@@ -171,6 +232,84 @@ function TabExplorar() {
             </div>
           );
         })}
+      </div>
+
+      {/* ── Mural de la comunidad ── */}
+      <div style={{ marginTop: 28, marginBottom: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
+          Mural de la comunidad
+        </div>
+
+        {/* Formulario de publicación */}
+        <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 14, marginBottom: 16 }}>
+          <textarea
+            placeholder={miMascota ? `Compartí algo sobre ${miMascota.name}...` : "Compartí algo con la comunidad..."}
+            value={msgText}
+            onChange={e => setMsgText(e.target.value)}
+            rows={3}
+            style={{
+              background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10,
+              padding: "10px 14px", color: "#f0f4ff", resize: "none", width: "100%",
+              fontSize: 13, marginBottom: 10,
+            }}
+          />
+          {photoPreview && (
+            <div style={{ position: "relative", display: "inline-block", marginBottom: 10 }}>
+              <img src={photoPreview} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", border: "1px solid #4ade8044" }} />
+              <button onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{
+                position: "absolute", top: -6, right: -6, background: "#f87171", color: "#fff",
+                border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              }}>×</button>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => fileRef.current?.click()} style={{
+              background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+              borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>📷</button>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
+            <button onClick={sendMsg} disabled={sendingMsg || !msgText.trim()} style={{
+              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #4ade80, #22c55e)" : "#252a3a",
+              color: msgText.trim() ? "#000" : "#7a8299", border: "none",
+              borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer",
+              opacity: sendingMsg ? 0.6 : 1,
+            }}>{sendingMsg ? "Publicando..." : "Publicar"}</button>
+          </div>
+        </div>
+
+        {/* Feed de mensajes */}
+        {mensajes.length === 0 && (
+          <div style={{ textAlign: "center", padding: "24px 0", color: "#7a8299", fontSize: 13 }}>
+            Sé el primero en publicar algo 🐾
+          </div>
+        )}
+        {mensajes.map((msg: any, i: number) => (
+          <div key={i} style={{
+            background: "#181c27", border: "1px solid #252a3a",
+            borderRadius: 14, padding: 14, marginBottom: 10,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: "50%", background: "#4ade8022",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                }}>🐾</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{msg.author_name || "Tutor"}</div>
+                  {msg.mascota_name && (
+                    <div style={{ fontSize: 11, color: "#4ade80" }}>🐕 {msg.mascota_name}</div>
+                  )}
+                </div>
+              </div>
+              <span style={{ fontSize: 11, color: "#7a8299" }}>{timeAgo(msg.created_at)}</span>
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.5, marginBottom: msg.photo_url ? 10 : 0 }}>{msg.message}</p>
+            {msg.photo_url && (
+              <img src={msg.photo_url} style={{ width: "100%", borderRadius: 10, maxHeight: 280, objectFit: "cover" }} />
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

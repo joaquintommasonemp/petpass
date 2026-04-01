@@ -67,7 +67,7 @@ export default function NuevaMascota() {
   const [form, setForm] = useState({
     name: "", type: "", breed: "", birth_month: "", birth_year: "",
     weight: "", sex: "Macho", color: "", chip: "",
-    zona_tipo: "", zona_valor: "", cp: "",
+    zona_tipo: "", zona_valor: "", cp: "", castrado: "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -124,6 +124,7 @@ export default function NuevaMascota() {
     const { data: mascotaData, error: err } = await supabase.from("mascotas").insert({
       name: form.name, breed: form.breed, age, weight: form.weight ? `${form.weight} kg` : "",
       sex: form.sex, color: form.color, chip: form.chip, location,
+      castrado: form.castrado || null,
       photo_url: "", user_id: user.id,
     }).select();
 
@@ -269,6 +270,22 @@ export default function NuevaMascota() {
                 borderColor: form.sex === s ? "#4ade80" : "#252a3a",
                 color: form.sex === s ? "#4ade80" : "#7a8299",
               }}>{s}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Castrado */}
+        <div>
+          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>¿Está castrad{form.sex === "Hembra" ? "a" : "o"}?</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {["Sí", "No", "No sé"].map(op => (
+              <button key={op} onClick={() => update("castrado", op)} style={{
+                flex: 1, padding: 10, borderRadius: 10, fontWeight: 700, fontSize: 13,
+                border: "1px solid", cursor: "pointer",
+                background: form.castrado === op ? "#4ade8022" : "#181c27",
+                borderColor: form.castrado === op ? "#4ade80" : "#252a3a",
+                color: form.castrado === op ? "#4ade80" : "#7a8299",
+              }}>{op}</button>
             ))}
           </div>
         </div>
