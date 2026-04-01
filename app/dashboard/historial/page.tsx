@@ -35,7 +35,6 @@ export default function Historial() {
   async function selectMascota(m: any) {
     setMascota(m);
     setHistorial([]);
-    setUploaded([]);
     const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false });
     setHistorial(hist || []);
   }
