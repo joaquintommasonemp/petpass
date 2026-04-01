@@ -112,35 +112,21 @@ export default function Historial() {
     setUploading(false);
   }
 
-  async function openDoc(pathOrUrl: string) {
-    if (pathOrUrl.startsWith("http")) {
-      // Entradas antiguas con URL pública directa
-      window.open(pathOrUrl, "_blank");
-    } else {
-      // URL firmada válida 1 hora
-      const { data, error } = await supabase.storage.from("documentos").createSignedUrl(pathOrUrl, 3600);
-      if (data?.signedUrl) {
-        window.open(data.signedUrl, "_blank");
-      } else {
-        alert("No se pudo abrir el archivo: " + error?.message);
-      }
-    }
+  function getPublicUrl(pathOrUrl: string): string {
+    if (pathOrUrl.startsWith("http")) return pathOrUrl;
+    const { data } = supabase.storage.from("documentos").getPublicUrl(pathOrUrl);
+    return data.publicUrl;
   }
 
-  async function shareDoc(pathOrUrl: string, fileName: string) {
-    if (pathOrUrl.startsWith("http")) {
-      navigator.clipboard.writeText(pathOrUrl);
-      alert("Link copiado al portapapeles");
-      return;
-    }
-    // URL firmada válida 7 días para compartir
-    const { data, error } = await supabase.storage.from("documentos").createSignedUrl(pathOrUrl, 604800);
-    if (data?.signedUrl) {
-      navigator.clipboard.writeText(data.signedUrl);
-      alert(`Link de "${fileName}" copiado. Válido por 7 días.`);
-    } else {
-      alert("No se pudo generar el link: " + error?.message);
-    }
+  function openDoc(pathOrUrl: string) {
+    const url = getPublicUrl(pathOrUrl);
+    window.open(url, "_blank");
+  }
+
+  function shareDoc(pathOrUrl: string, fileName: string) {
+    const url = getPublicUrl(pathOrUrl);
+    navigator.clipboard.writeText(url);
+    alert(`Link de "${fileName}" copiado al portapapeles.`);
   }
 
   return (
