@@ -197,24 +197,34 @@ export default function Dashboard() {
     if (!selected || !authToken) return;
     setLoadingReporte(true);
     setReporte(null);
-    const vacs = vacunas.map(v => `${v.name} (${v.date}${v.next_date ? ` → próxima: ${v.next_date}` : ""})`).join(", ") || "Sin registros";
-    const diags = diagnosticos.map(d => `${d.date}: ${d.title}${d.summary ? ` — ${d.summary}` : ""}`).join("\n") || "Sin consultas";
-    const citasProx = citas.filter(c => c.date >= new Date().toISOString().slice(0, 10)).map(c => `${c.date}: ${c.summary}`).join(", ") || "Sin citas";
-    const prompt = `Generá un reporte de salud completo y estructurado para ${selected.name}.
-
-DATOS: Raza: ${selected.breed || "—"} | Edad: ${selected.age || "—"} | Peso: ${selected.weight || "—"} | Sexo: ${selected.sex || "—"}
-VACUNAS: ${vacs}
-HISTORIAL RECIENTE:\n${diags}
-CITAS PRÓXIMAS: ${citasProx}
-
-El reporte debe tener estas secciones:
-1. **Resumen general** (estado de salud en 2-3 frases)
-2. **Vacunación** (estado y recomendaciones)
-3. **Historial clínico reciente** (análisis breve)
-4. **Alertas o puntos de atención** (si hay algo que revisar)
-5. **Recomendaciones para los próximos 30 días**
-
-Sé concreto y profesional. Respondé en español.`;
+    const vacs = vacunas.map(v => {
+      const next = v.next_date ? " -> proxima: " + v.next_date : "";
+      return v.name + " (" + v.date + next + ")";
+    }).join(", ") || "Sin registros";
+    const diags = diagnosticos.map(d => {
+      const sum = d.summary ? " - " + d.summary : "";
+      return d.date + ": " + d.title + sum;
+    }).join("\n") || "Sin consultas";
+    const citasProx = citas.filter(c => c.date >= new Date().toISOString().slice(0, 10)).map(c => c.date + ": " + c.summary).join(", ") || "Sin citas";
+    const promptLines = [
+      "Genera un reporte de salud completo y estructurado para " + selected.name + ".",
+      "",
+      "DATOS: Raza: " + (selected.breed || "N/A") + " | Edad: " + (selected.age || "N/A") + " | Peso: " + (selected.weight || "N/A") + " | Sexo: " + (selected.sex || "N/A"),
+      "VACUNAS: " + vacs,
+      "HISTORIAL RECIENTE:",
+      diags,
+      "CITAS PROXIMAS: " + citasProx,
+      "",
+      "El reporte debe tener estas secciones:",
+      "1. **Resumen general** (estado de salud en 2-3 frases)",
+      "2. **Vacunacion** (estado y recomendaciones)",
+      "3. **Historial clinico reciente** (analisis breve)",
+      "4. **Alertas o puntos de atencion** (si hay algo que revisar)",
+      "5. **Recomendaciones para los proximos 30 dias**",
+      "",
+      "Se concreto y profesional. Responde en espanol.",
+    ];
+    const prompt = promptLines.join("\n");
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -376,7 +386,7 @@ Sé concreto y profesional. Respondé en español.`;
               background: "#60a5fa18", border: "1px solid #60a5fa33",
               borderRadius: 20, padding: "4px 10px", cursor: "pointer",
               fontSize: 11, fontWeight: 700, color: "#60a5fa",
-            }}>👨‍👩‍👧 Familia</button>
+            }}>{"👪"} Familia</button>
           </div>
           {showInvitar && (
             <div style={{ marginTop: 12, background: "#0f1117", borderRadius: 12, padding: 12 }}>

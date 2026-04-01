@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="dashboard-wrapper">
 
-      {/* ── Mobile Header ── */}
+      {/* Mobile Header */}
       <div className="dashboard-header" style={{
         background: "#181c27cc", backdropFilter: "blur(12px)",
         borderBottom: "1px solid #252a3a",
@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }}>+ Mascota</Link>
       </div>
 
-      {/* ── Desktop Sidebar ── */}
+      {/* Desktop Sidebar */}
       <aside className="dashboard-sidebar">
         {/* Logo */}
         <div style={{ padding: "28px 24px 20px" }}>
@@ -126,17 +126,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             color: "#7a8299", borderRadius: 12, padding: "8px 16px",
             fontWeight: 600, fontSize: 12, cursor: "pointer",
           }}>
-            <span style={{ fontSize: 14 }}>↩</span> Cerrar sesión
+            <span style={{ fontSize: 14 }}>{"<-"}</span> Cerrar sesion
           </button>
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
+      {/* Main Content */}
       <div className="dashboard-content dashboard-content-pad">
         {children}
       </div>
 
-      {/* ── Mobile Bottom Nav ── */}
+      {/* Mobile Bottom Nav */}
       <div className="dashboard-nav">
         {TABS.map(tab => {
           const active = pathname === tab.href;
