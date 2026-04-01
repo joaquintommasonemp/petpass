@@ -12,7 +12,12 @@ export async function GET(req: NextRequest) {
     { global: { headers: { Authorization: `Bearer ${token}` } } }
   );
   const { data: { user } } = await supabaseAuth.auth.getUser();
-  if (!user || user.email !== process.env.ADMIN_EMAIL) {
+  if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+
+  // Verificar is_admin en la tabla profiles
+  const adminCheck = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data: profile } = await adminCheck.from("profiles").select("is_admin").eq("id", user.id).single();
+  if (!profile?.is_admin) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 

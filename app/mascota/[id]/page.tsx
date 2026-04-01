@@ -19,7 +19,6 @@ export default function PerfilPublicoMascota() {
   const [mascota, setMascota] = useState<any>(null);
   const [owner, setOwner] = useState<any>(null);
   const [vacunas, setVacunas] = useState<any[]>([]);
-  const [diagnosticos, setDiagnosticos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const supabase = createClient();
@@ -30,19 +29,15 @@ export default function PerfilPublicoMascota() {
 
   async function load() {
     const { data: m } = await supabase.from("mascotas").select("*").eq("id", id).single();
-    if (!m) { setNotFound(true); setLoading(false); return; }
+    if (!m || !m.is_public) { setNotFound(true); setLoading(false); return; }
     setMascota(m);
 
-    const [{ data: vacs }, { data: diags }, { data: profile }] = await Promise.all([
+    const [{ data: vacs }, { data: profile }] = await Promise.all([
       supabase.from("vacunas").select("*").eq("mascota_id", id),
-      supabase.from("historial").select("*").eq("mascota_id", id)
-        .not("title", "in", '("Actualización de peso","Peso inicial")')
-        .order("created_at", { ascending: false }).limit(5),
       supabase.from("profiles").select("full_name, phone").eq("id", m.user_id).single(),
     ]);
 
     setVacunas(vacs || []);
-    setDiagnosticos(diags || []);
     setOwner(profile);
     setLoading(false);
   }
@@ -234,22 +229,6 @@ export default function PerfilPublicoMascota() {
           </div>
         )}
 
-        {/* Historial clínico */}
-        {diagnosticos.length > 0 && (
-          <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Historial clínico</div>
-            {diagnosticos.map((d: any, i: number) => (
-              <div key={i} style={{ background: "#0f1117", borderRadius: 10, padding: "10px 14px", marginBottom: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>{d.title}</div>
-                  {d.date && <div style={{ fontSize: 11, color: "#7a8299", flexShrink: 0, marginLeft: 8 }}>{d.date}</div>}
-                </div>
-                {d.summary && <div style={{ fontSize: 12, color: "#7a8299", lineHeight: 1.5 }}>{d.summary}</div>}
-                {d.vet && <div style={{ fontSize: 11, color: "#4a5568", marginTop: 4 }}>Vet: {d.vet}</div>}
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Footer PetPass */}
         <div style={{ textAlign: "center", paddingTop: 8 }}>

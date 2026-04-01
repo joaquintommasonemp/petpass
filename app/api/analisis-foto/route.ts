@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ reply: "⚠️ API key de Anthropic no configurada." });
   }
+
+  // Verificar que el usuario esté autenticado
+  const token = req.headers.get("authorization")?.replace("Bearer ", "");
+  if (!token || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ reply: "⚠️ No autorizado." }, { status: 401 });
+  }
+  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data: { user } } = await admin.auth.getUser(token);
+  if (!user) {
+    return NextResponse.json({ reply: "⚠️ Sesión inválida." }, { status: 401 });
+  }
+
   const { imageBase64, mediaType, mascotaNombre, mascotaEspecie } = await req.json();
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {

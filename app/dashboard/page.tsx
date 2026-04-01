@@ -44,7 +44,8 @@ export default function Dashboard() {
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
-    if (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL || user.email === "joaquintommasone@gmail.com") setIsAdmin(true);
+    const { data: prof } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
+    if (prof?.is_admin) setIsAdmin(true);
     const { data } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
     if (data && data.length > 0) {
       setMascotas(data);

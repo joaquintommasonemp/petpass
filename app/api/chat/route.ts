@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const FREE_LIMIT = 5;
-const ADMIN_EMAIL = "joaquintommasone@gmail.com";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,15 +22,15 @@ export async function POST(req: NextRequest) {
       );
       const { data: { user } } = await admin.auth.getUser(token);
 
-      if (user && user.email !== ADMIN_EMAIL) {
+      if (user) {
         const currentMonth = new Date().toISOString().slice(0, 7);
         const { data: profile } = await admin
           .from("profiles")
-          .select("ia_uses_count, ia_uses_month, is_premium")
+          .select("ia_uses_count, ia_uses_month, is_premium, is_admin")
           .eq("id", user.id)
           .single();
 
-        const isPremium = profile?.is_premium === true;
+        const isPremium = profile?.is_premium === true || profile?.is_admin === true;
 
         if (!isPremium) {
           const sameMonth = profile?.ia_uses_month === currentMonth;
