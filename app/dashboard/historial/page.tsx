@@ -52,18 +52,17 @@ export default function Historial() {
     if (!file || !mascota) return;
     setUploading(true);
 
-    // Sanitizar nombre de archivo
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${mascota.id}/${Date.now()}_${safeName}`;
 
     const { error } = await supabase.storage.from("documentos").upload(path, file, { upsert: true });
 
     if (!error) {
-      const { data: urlData } = supabase.storage.from("documentos").getPublicUrl(path);
+      // Guardar el PATH (no la URL pública) — se generan URLs firmadas al ver
       const entry = {
         mascota_id: mascota.id,
         title: "📄 Documento",
-        summary: `${file.name}::${urlData.publicUrl}`,
+        summary: `${file.name}::${path}`,
         date: new Date().toLocaleDateString("es-AR"),
         vet: "",
       };
@@ -77,15 +76,46 @@ export default function Historial() {
     } else {
       console.error("Upload error:", error.message);
       if (error.message.includes("Bucket not found")) {
-        alert("El bucket 'documentos' no existe. Ejecutá el SQL de configuración en Supabase.");
+        alert("El bucket 'documentos' no existe. Crealo en Supabase → Storage.");
       } else if (error.message.includes("row-level security") || error.message.includes("policy")) {
-        alert("Sin permisos para subir archivos. Ejecutá el SQL de políticas en Supabase.");
+        alert("Sin permisos. Revisá las políticas del bucket 'documentos' en Supabase → Storage → Policies.");
       } else {
         alert("Error al subir: " + error.message);
       }
     }
     if (e.target) e.target.value = "";
     setUploading(false);
+  }
+
+  async function openDoc(pathOrUrl: string) {
+    if (pathOrUrl.startsWith("http")) {
+      // Entradas antiguas con URL pública directa
+      window.open(pathOrUrl, "_blank");
+    } else {
+      // URL firmada válida 1 hora
+      const { data, error } = await supabase.storage.from("documentos").createSignedUrl(pathOrUrl, 3600);
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, "_blank");
+      } else {
+        alert("No se pudo abrir el archivo: " + error?.message);
+      }
+    }
+  }
+
+  async function shareDoc(pathOrUrl: string, fileName: string) {
+    if (pathOrUrl.startsWith("http")) {
+      navigator.clipboard.writeText(pathOrUrl);
+      alert("Link copiado al portapapeles");
+      return;
+    }
+    // URL firmada válida 7 días para compartir
+    const { data, error } = await supabase.storage.from("documentos").createSignedUrl(pathOrUrl, 604800);
+    if (data?.signedUrl) {
+      navigator.clipboard.writeText(data.signedUrl);
+      alert(`Link de "${fileName}" copiado. Válido por 7 días.`);
+    } else {
+      alert("No se pudo generar el link: " + error?.message);
+    }
   }
 
   return (
@@ -201,15 +231,39 @@ export default function Historial() {
       </Card>
 
       {historial.filter((h: any) => h.title === "📄 Documento").map((h: any, i: number) => {
-        const [name, url] = h.summary?.split("::") || [];
+        const [name, pathOrUrl] = h.summary?.split("::") || [];
+        const isPrivate = pathOrUrl && !pathOrUrl.startsWith("http");
         return (
-          <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
-            <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#f0f4ff", textDecoration: "none", flex: 1, marginRight: 8 }}>
-              📄 {name || "Documento"}
-            </a>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              <span style={{ fontSize: 11, color: "#7a8299" }}>{h.date}</span>
-              <Badge color="#4ade80">Ver</Badge>
+          <Card key={i} style={{ padding: "12px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 24, flexShrink: 0 }}>📄</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {name || "Documento"}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                  <span style={{ fontSize: 11, color: "#7a8299" }}>{h.date}</span>
+                  {isPrivate && (
+                    <span style={{ background: "#60a5fa22", color: "#60a5fa", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 700, border: "1px solid #60a5fa33" }}>
+                      🔒 Privado
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <button
+                  onClick={() => openDoc(pathOrUrl)}
+                  style={{
+                    background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                    borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  }}>Ver</button>
+                <button
+                  onClick={() => shareDoc(pathOrUrl, name)}
+                  style={{
+                    background: "#60a5fa22", color: "#60a5fa", border: "1px solid #60a5fa44",
+                    borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  }}>Compartir</button>
+              </div>
             </div>
           </Card>
         );
