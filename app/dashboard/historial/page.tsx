@@ -51,8 +51,13 @@ export default function Historial() {
     const file = e.target.files?.[0];
     if (!file || !mascota) return;
     setUploading(true);
-    const path = `${mascota.id}/${Date.now()}_${file.name}`;
-    const { error } = await supabase.storage.from("documentos").upload(path, file);
+
+    // Sanitizar nombre de archivo
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${mascota.id}/${Date.now()}_${safeName}`;
+
+    const { error } = await supabase.storage.from("documentos").upload(path, file, { upsert: true });
+
     if (!error) {
       const { data: urlData } = supabase.storage.from("documentos").getPublicUrl(path);
       const entry = {
@@ -62,11 +67,22 @@ export default function Historial() {
         date: new Date().toLocaleDateString("es-AR"),
         vet: "",
       };
-      const { data: saved } = await supabase.from("historial").insert(entry).select();
-      if (saved) setHistorial(prev => [saved[0], ...prev]);
+      const { data: saved, error: insertError } = await supabase.from("historial").insert(entry).select();
+      if (saved) {
+        setHistorial(prev => [saved[0], ...prev]);
+      } else {
+        console.error("Insert error:", insertError?.message);
+        alert("Archivo subido pero no se pudo registrar en el historial.");
+      }
     } else {
       console.error("Upload error:", error.message);
-      alert("Error al subir el archivo: " + error.message);
+      if (error.message.includes("Bucket not found")) {
+        alert("El bucket 'documentos' no existe. Ejecutá el SQL de configuración en Supabase.");
+      } else if (error.message.includes("row-level security") || error.message.includes("policy")) {
+        alert("Sin permisos para subir archivos. Ejecutá el SQL de políticas en Supabase.");
+      } else {
+        alert("Error al subir: " + error.message);
+      }
     }
     if (e.target) e.target.value = "";
     setUploading(false);

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase";
 
 type Message = { role: string; text: string; image?: string };
 
+const FREE_LIMIT = 5;
+
 export default function Chat() {
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
@@ -12,16 +14,23 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [usedCount, setUsedCount] = useState(0);
+  const [isPremium, setIsPremium] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      setAuthToken(session.access_token);
+
+      const user = session.user;
       const { data: mascotas } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true).limit(1);
-      if (mascotas && mascotas[0]) {
+      if (mascotas?.[0]) {
         setMascota(mascotas[0]);
         const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", mascotas[0].id);
         const { data: vacs } = await supabase.from("vacunas").select("*").eq("mascota_id", mascotas[0].id);
@@ -31,6 +40,14 @@ export default function Chat() {
           text: `Hola! Soy el veterinario IA de ${mascotas[0].name}. Conozco su historial completo. Podés escribirme o mandarme una foto para que analice. ¿En qué te ayudo?`,
         }]);
       }
+
+      // Cargar uso actual
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const { data: profile } = await supabase
+        .from("profiles").select("ia_uses_count, ia_uses_month, is_premium").eq("id", user.id).single();
+      setIsPremium(profile?.is_premium === true || user.email === "joaquintommasone@gmail.com");
+      const sameMonth = profile?.ia_uses_month === currentMonth;
+      setUsedCount(sameMonth ? (profile?.ia_uses_count || 0) : 0);
     }
     load();
   }, []);
@@ -57,6 +74,12 @@ export default function Chat() {
 
   async function sendMessage() {
     if ((!input.trim() && !imageData) || loading) return;
+
+    if (!isPremium && usedCount >= FREE_LIMIT) {
+      setShowUpgrade(true);
+      return;
+    }
+
     const userMsg = input.trim();
     setInput("");
     const newMsg: Message = { role: "user", text: userMsg || "Analizá esta foto de mi mascota", image: imagePreview || undefined };
@@ -86,10 +109,22 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
 
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {}),
+        },
         body: JSON.stringify({ system: systemPrompt, messages: apiMessages }),
       });
       const data = await res.json();
+
+      if (data.limitReached) {
+        setShowUpgrade(true);
+        setLoading(false);
+        clearImage();
+        return;
+      }
+
+      if (data.used) setUsedCount(data.used);
       setMessages(prev => [...prev, { role: "assistant", text: data.reply }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", text: "Error de conexión. Intentá de nuevo." }]);
@@ -98,17 +133,38 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
     setLoading(false);
   }
 
+  const remaining = Math.max(0, FREE_LIMIT - usedCount);
   const SUGGESTIONS = mascota
     ? [`Cuándo vacunar a ${mascota.name}?`, "Se rasca mucho", "Cuánto debería pesar?"]
     : ["Cómo sé si mi perro está enfermo?"];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 160px)" }}>
-      <div style={{ background: "#4ade8022", border: "1px solid #4ade8033", borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12, color: "#4ade80" }}>
-        🤖 IA con historial de {mascota?.name || "tu mascota"} · No reemplaza al veterinario
-      </div>
 
-      {/* Acceso rápido análisis de foto */}
+      {/* Banner info / uso */}
+      {isPremium ? (
+        <div style={{ background: "#f472b622", border: "1px solid #f472b633", borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12, color: "#f472b6", display: "flex", alignItems: "center", gap: 6 }}>
+          ✨ <strong>Premium</strong> · Consultas ilimitadas activas
+        </div>
+      ) : (
+        <div style={{
+          background: usedCount >= FREE_LIMIT ? "#f8717122" : "#4ade8022",
+          border: `1px solid ${usedCount >= FREE_LIMIT ? "#f8717133" : "#4ade8033"}`,
+          borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12,
+          color: usedCount >= FREE_LIMIT ? "#f87171" : "#4ade80",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          <span>🤖 {usedCount >= FREE_LIMIT ? "Límite mensual alcanzado" : `${remaining} consulta${remaining !== 1 ? "s" : ""} gratis restante${remaining !== 1 ? "s" : ""} este mes`}</span>
+          {usedCount >= FREE_LIMIT && (
+            <button onClick={() => setShowUpgrade(true)} style={{
+              background: "#f87171", color: "#fff", border: "none",
+              borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer",
+            }}>Ver Premium</button>
+          )}
+        </div>
+      )}
+
+      {/* Botón análisis foto */}
       <button
         onClick={() => fileRef.current?.click()}
         style={{
@@ -125,6 +181,7 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
         <span style={{ marginLeft: "auto", color: "#60a5fa", fontSize: 18 }}>›</span>
       </button>
 
+      {/* Mensajes */}
       <div style={{ flex: 1, overflowY: "auto", paddingRight: 4 }}>
         {messages.map((m, i) => (
           <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
@@ -136,9 +193,7 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
               padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
               border: m.role === "assistant" ? "1px solid #252a3a" : "none",
             }}>
-              {m.image && (
-                <img src={m.image} style={{ width: "100%", borderRadius: 8, marginBottom: 6, maxHeight: 200, objectFit: "cover" }} />
-              )}
+              {m.image && <img src={m.image} style={{ width: "100%", borderRadius: 8, marginBottom: 6, maxHeight: 200, objectFit: "cover" }} />}
               {m.text}
             </div>
           </div>
@@ -146,7 +201,7 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
             <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: "16px 16px 16px 4px", padding: "10px 18px", color: "#7a8299", fontSize: 13 }}>
-              Analizando{imageData ? " la foto" : " historial"}...
+              Analizando{imageData ? " la foto" : ""}...
             </div>
           </div>
         )}
@@ -165,6 +220,7 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
         </div>
       )}
 
+      {/* Input */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <button onClick={() => fileRef.current?.click()} style={{
           background: "#181c27", border: "1px solid #252a3a", borderRadius: 12,
@@ -173,7 +229,8 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
         <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageFile} />
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder="Preguntá o mandá una foto..."
+          placeholder={usedCount >= FREE_LIMIT && !isPremium ? "Límite alcanzado — activá Premium" : "Preguntá o mandá una foto..."}
+          disabled={usedCount >= FREE_LIMIT && !isPremium}
           style={{ flex: 1 }} />
         <button onClick={sendMessage} disabled={loading || (!input.trim() && !imageData)} style={{
           background: "#4ade80", color: "#000", border: "none", borderRadius: 12,
@@ -190,6 +247,51 @@ Respondé en español rioplatense, sé empático y claro. Siempre recordá que t
           }}>{q}</button>
         ))}
       </div>
+
+      {/* Modal upgrade */}
+      {showUpgrade && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#00000090", zIndex: 300,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        }}>
+          <div style={{
+            background: "#181c27", border: "1px solid #f472b644",
+            borderRadius: 20, padding: 28, maxWidth: 360, width: "100%", textAlign: "center",
+          }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>🤖</div>
+            <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 8 }}>Límite del plan gratuito</h3>
+            <p style={{ color: "#7a8299", fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
+              Usaste tus <strong style={{ color: "#f0f4ff" }}>{FREE_LIMIT} consultas gratuitas</strong> de este mes.<br />
+              Activá Premium para tener consultas ilimitadas con la IA veterinaria.
+            </p>
+
+            <div style={{ background: "#0f1117", borderRadius: 14, padding: 16, marginBottom: 20, textAlign: "left" }}>
+              <div style={{ fontWeight: 800, color: "#f472b6", marginBottom: 10, textAlign: "center" }}>✨ Premium · $X/mes</div>
+              {["Consultas IA ilimitadas", "Análisis de fotos ilimitado", "Historial clínico completo", "Soporte prioritario"].map(f => (
+                <div key={f} style={{ fontSize: 13, color: "#f0f4ff", padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> {f}
+                </div>
+              ))}
+            </div>
+
+            <a
+              href="https://wa.me/5491100000000?text=Hola!%20Quiero%20activar%20PetPass%20Premium"
+              target="_blank" rel="noreferrer"
+              style={{
+                display: "block", background: "linear-gradient(135deg, #f472b6, #ec4899)",
+                color: "#fff", borderRadius: 12, padding: "13px 20px",
+                fontWeight: 900, fontSize: 15, textDecoration: "none", marginBottom: 10,
+              }}
+            >Activar Premium →</a>
+
+            <button onClick={() => setShowUpgrade(false)} style={{
+              background: "transparent", border: "1px solid #252a3a",
+              color: "#7a8299", borderRadius: 12, padding: "10px 20px",
+              fontSize: 13, cursor: "pointer", width: "100%",
+            }}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
