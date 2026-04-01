@@ -32,12 +32,15 @@ export default function Chat() {
       const { data: mascotas } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true).limit(1);
       if (mascotas?.[0]) {
         setMascota(mascotas[0]);
-        const { data: hist } = await supabase.from("historial").select("*").eq("mascota_id", mascotas[0].id);
-        const { data: vacs } = await supabase.from("vacunas").select("*").eq("mascota_id", mascotas[0].id);
-        setHistorial([...(hist || []), ...(vacs || [])]);
+        const [{ data: hist }, { data: vacs }, { data: alim }] = await Promise.all([
+          supabase.from("historial").select("*").eq("mascota_id", mascotas[0].id).order("created_at", { ascending: false }),
+          supabase.from("vacunas").select("*").eq("mascota_id", mascotas[0].id),
+          supabase.from("alimentacion").select("*").eq("mascota_id", mascotas[0].id),
+        ]);
+        setHistorial([...(hist || []), ...(vacs || []), ...(alim || [])]);
         setMessages([{
           role: "assistant",
-          text: `Hola! Soy el veterinario IA de ${mascotas[0].name}. Conozco su historial completo. Podés escribirme o mandarme una foto para que analice. ¿En qué te ayudo?`,
+          text: `Hola! Soy el veterinario IA de ${mascotas[0].name}. Tengo acceso a su historial, vacunas, alimentación y documentos. ¿En qué te ayudo?`,
         }]);
       }
 
@@ -86,14 +89,37 @@ export default function Chat() {
     setMessages(prev => [...prev, newMsg]);
     setLoading(true);
 
+    const vacunas = historial.filter((h: any) => h.name && h.date && !h.title);
+    const consultas = historial.filter((h: any) => h.title && !["Actualización de peso","Peso inicial","📄 Documento","📅 Cita"].includes(h.title));
+    const docs = historial.filter((h: any) => h.title === "📄 Documento");
+    const citas = historial.filter((h: any) => h.title === "📅 Cita");
+    const alim = historial.filter((h: any) => h.marca !== undefined || (h.tipo && !h.title));
+
     const systemPrompt = mascota
-      ? `Sos un veterinario IA. Tenés acceso al perfil completo de ${mascota.name}:
-- Raza: ${mascota.breed}, Edad: ${mascota.age}, Peso: ${mascota.weight}, Sexo: ${mascota.sex}, Color: ${mascota.color}
-- Zona: ${mascota.location}
-- Historial clínico: ${JSON.stringify(historial.slice(0, 10))}
-Si te mandan una foto, analizala en detalle: describí lo que ves, identificá posibles síntomas, erupciones, heridas, o comportamientos anormales.
-Respondé en español rioplatense, sé empático y claro. Siempre recordá que tu orientación no reemplaza una consulta veterinaria presencial.`
-      : "Sos un veterinario IA. Respondé en español. Si te mandan fotos, analizalas.";
+      ? `Sos un veterinario IA especializado. Tenés acceso al perfil COMPLETO de ${mascota.name}:
+
+DATOS BÁSICOS:
+- Raza: ${mascota.breed || "—"} | Edad: ${mascota.age || "—"} | Peso actual: ${mascota.weight || "—"} | Sexo: ${mascota.sex || "—"}
+- Color/señas: ${mascota.color || "—"} | Chip: ${mascota.chip || "—"} | Zona: ${mascota.location || "—"}
+
+VACUNAS:
+${vacunas.length > 0 ? vacunas.map((v: any) => `- ${v.name}: aplicada ${v.date}${v.next_date ? `, próxima ${v.next_date}` : ""}, estado: ${v.status || "ok"}`).join("\n") : "- Sin vacunas registradas"}
+
+HISTORIAL CLÍNICO (últimas consultas):
+${consultas.length > 0 ? consultas.slice(0, 8).map((h: any) => `- ${h.date || "sin fecha"}: ${h.title}${h.summary ? ` — ${h.summary}` : ""}${h.vet ? ` (Vet: ${h.vet})` : ""}`).join("\n") : "- Sin consultas registradas"}
+
+ALIMENTACIÓN:
+${alim.length > 0 ? alim.map((a: any) => `- ${a.marca || a.tipo || "alimento"}: ${a.frecuencia || ""}${a.notas ? ` (${a.notas})` : ""}`).join("\n") : "- No registrada"}
+
+DOCUMENTOS SUBIDOS:
+${docs.length > 0 ? docs.map((d: any) => `- ${d.summary?.split("::")?.[0] || "documento"} (${d.date || "sin fecha"})`).join("\n") : "- Sin documentos"}
+
+PRÓXIMAS CITAS:
+${citas.length > 0 ? citas.map((c: any) => `- ${c.date}: ${c.summary}${c.vet ? ` con ${c.vet}` : ""}`).join("\n") : "- Sin citas agendadas"}
+
+Si te mandan una foto, analizala en detalle: describí lo que ves, identificá posibles síntomas, erupciones, heridas o comportamientos anormales.
+Respondé siempre en español rioplatense, sé empático y claro. Usá toda la info del historial para dar respuestas personalizadas. Recordá que tu orientación no reemplaza una consulta veterinaria presencial.`
+      : "Sos un veterinario IA. Respondé en español rioplatense. Si te mandan fotos, analizalas.";
 
     try {
       const userContent: any[] = [];

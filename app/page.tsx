@@ -1,37 +1,48 @@
 "use client";
 import Link from "next/link";
 
+const FEATURES = [
+  { icon: "🤖", title: "Vet IA 24/7", desc: "Consultá síntomas, mandá fotos y recibí orientación instantánea con el historial de tu mascota como contexto.", color: "#4ade80" },
+  { icon: "🏥", title: "Historia clínica digital", desc: "Vacunas, consultas, peso, documentos y citas — todo organizado y accesible desde tu celular.", color: "#60a5fa" },
+  { icon: "⬛", title: "QR de identificación", desc: "Generá un QR para el collar. Si tu mascota se pierde, cualquiera puede ver sus datos y contactarte.", color: "#a78bfa" },
+  { icon: "🐕", title: "Paseos y guarderías", desc: "Compartí un link con el cuidador para que te mande fotos y novedades en tiempo real.", color: "#fb923c" },
+  { icon: "📍", title: "Mascotas perdidas", desc: "Publicá alertas con foto, ubicación y contacto directo por WhatsApp en segundos.", color: "#f87171" },
+  { icon: "❤️", title: "Adopciones y comunidad", desc: "Encontrá o publicá mascotas en adopción, descuentos veterinarios y conectate con otros dueños.", color: "#f472b6" },
+];
+
+const TESTIMONIALS = [
+  { texto: "Nunca más me olvidé de una vacuna. La IA me avisa antes que el vet.", nombre: "Valentina M.", mascota: "Luna · Beagle 2 años" },
+  { texto: "Gracias a PetPass encontré a mi perro en 3 horas. Lo vieron en el barrio con el QR.", nombre: "Matías R.", mascota: "Thor · Husky 4 años" },
+  { texto: "La uso cuando me da cosa llamar al vet de noche. Siempre responde bien.", nombre: "Carolina G.", mascota: "Michi · Gato 5 años" },
+];
+
 export default function Home() {
   return (
     <main style={{ maxWidth: 440, margin: "0 auto", background: "#0f1117", minHeight: "100vh" }}>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <div style={{
-        background: "linear-gradient(160deg, #0f2a1a 0%, #0f1117 60%)",
+        background: "linear-gradient(160deg, #0f2a1a 0%, #0f1117 65%)",
         padding: "52px 24px 40px",
+        textAlign: "center",
         position: "relative", overflow: "hidden",
       }}>
-        {/* Glow circles */}
         <div style={{ position: "absolute", top: -80, right: -80, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, #4ade8025, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -40, left: -60, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, #22c55e15, transparent 70%)", pointerEvents: "none" }} />
 
-        {/* Badge */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#4ade8020", border: "1px solid #4ade8040", borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 700, color: "#4ade80", marginBottom: 20 }}>
-          🇦🇷 Hecho en Argentina
-        </div>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>🐾</div>
 
-        {/* Headline */}
-        <h1 style={{ fontSize: 38, fontWeight: 900, lineHeight: 1.1, marginBottom: 16 }}>
-          <span style={{ color: "#f0f4ff" }}>Tu mascota,</span>
+        <h1 style={{ fontSize: 36, fontWeight: 900, lineHeight: 1.15, marginBottom: 16 }}>
+          <span style={{ color: "#f0f4ff" }}>Todo lo que tu mascota</span>
           <br />
           <span style={{
             background: "linear-gradient(90deg, #4ade80, #22d3ee)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>siempre protegida.</span>
+          }}>necesita, en un solo lugar.</span>
         </h1>
 
-        <p style={{ color: "#94a3b8", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>
-          Historia clínica digital, IA veterinaria 24/7, alertas de mascotas perdidas y comunidad — todo gratis.
+        <p style={{ color: "#94a3b8", fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 340, margin: "0 auto 28px" }}>
+          Historia clínica digital, IA veterinaria 24/7, QR de identificación, alertas de pérdida y comunidad — todo gratis.
         </p>
 
         <Link href="/registro" style={{
@@ -54,16 +65,11 @@ export default function Home() {
 
       {/* ── MOCKUP ───────────────────────────────────────────────────── */}
       <div style={{ padding: "32px 24px 0" }}>
-        <div style={{
-          background: "#181c27", border: "1px solid #252a3a",
-          borderRadius: 20, overflow: "hidden",
-        }}>
-          {/* Mock header */}
+        <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 20, overflow: "hidden" }}>
           <div style={{ background: "#181c27", borderBottom: "1px solid #252a3a", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontWeight: 800, fontSize: 14, color: "#4ade80" }}>PetPass 🐾</span>
             <span style={{ background: "#4ade8022", color: "#4ade80", borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>+ Mascota</span>
           </div>
-          {/* Mock perfil */}
           <div style={{ padding: 16 }}>
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #4ade8033, #22c55e22)", border: "2px solid #4ade8044", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🐶</div>
@@ -76,20 +82,17 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Mock chat */}
             <div style={{ background: "#0f1117", borderRadius: 12, padding: 12, marginBottom: 8 }}>
               <div style={{ fontSize: 10, color: "#4ade80", fontWeight: 700, marginBottom: 6 }}>🤖 Vet IA · Respuesta instantánea</div>
               <div style={{ background: "#181c27", borderRadius: "10px 10px 10px 2px", padding: "8px 12px", fontSize: 12, color: "#f0f4ff", lineHeight: 1.5, border: "1px solid #252a3a" }}>
                 Rocky está al día con sus vacunas 💉 La próxima dosis es en <strong style={{ color: "#4ade80" }}>Marzo 2026</strong>. ¿Hay algo que te preocupe?
               </div>
             </div>
-            {/* Mock nav */}
             <div style={{ display: "flex", justifyContent: "space-around", paddingTop: 8, borderTop: "1px solid #252a3a" }}>
-              {[["🐾","Perfil"],["🏥","Historial"],["🤖","Vet IA"],["👥","Comunidad"]].map(([icon, label]) => (
+              {[["🐾","Perfil"],["🏥","Historial"],["🤖","Vet IA"],["🐕","Paseos"],["👥","Comunidad"]].map(([icon, label]) => (
                 <div key={label} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 16 }}>{icon}</div>
+                  <div style={{ fontSize: 14 }}>{icon}</div>
                   <div style={{ fontSize: 9, color: label === "Perfil" ? "#4ade80" : "#7a8299", fontWeight: 700 }}>{label}</div>
-                  {label === "Perfil" && <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#4ade80", margin: "2px auto 0" }} />}
                 </div>
               ))}
             </div>
@@ -98,9 +101,13 @@ export default function Home() {
       </div>
 
       {/* ── STATS ────────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", margin: "24px 24px 0", gap: 10 }}>
-        {[["🐾", "+5.000", "mascotas"], ["🤖", "24/7", "IA vet"], ["💚", "100%", "gratis"]].map(([icon, val, label]) => (
-          <div key={label} style={{ flex: 1, background: "#181c27", border: "1px solid #252a3a", borderRadius: 14, padding: "14px 8px", textAlign: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "24px 24px 0" }}>
+        {[
+          ["🐾", "+5.000", "mascotas"],
+          ["🤖", "24/7", "Vet IA"],
+          ["💚", "100%", "gratis"],
+        ].map(([icon, val, label]) => (
+          <div key={label} style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 14, padding: "14px 8px", textAlign: "center" }}>
             <div style={{ fontSize: 20, marginBottom: 2 }}>{icon}</div>
             <div style={{ fontSize: 18, fontWeight: 900, color: "#4ade80" }}>{val}</div>
             <div style={{ fontSize: 10, color: "#7a8299", fontWeight: 600 }}>{label}</div>
@@ -110,14 +117,12 @@ export default function Home() {
 
       {/* ── FEATURES ─────────────────────────────────────────────────── */}
       <div style={{ padding: "28px 24px 0" }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>Todo incluido</div>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>Todo incluido, todo gratis</div>
+          <div style={{ fontSize: 14, color: "#94a3b8" }}>Una app pensada para el día a día de tu mascota</div>
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            { icon: "🤖", title: "IA Veterinaria 24/7", desc: "Consultá síntomas, mandá fotos y recibí orientación al instante — con el historial de tu mascota", color: "#4ade80" },
-            { icon: "🏥", title: "Historia clínica digital", desc: "Vacunas, consultas, peso y documentos siempre disponibles desde tu celular", color: "#60a5fa" },
-            { icon: "📍", title: "Mascotas perdidas", desc: "Publicá alertas con foto, ubicación y contacto directo por WhatsApp", color: "#f87171" },
-            { icon: "❤️", title: "Adopciones", desc: "Encontrá o publicá mascotas en adopción en tu zona", color: "#f472b6" },
-          ].map((f, i) => (
+          {FEATURES.map((f, i) => (
             <div key={i} style={{
               background: "#181c27", border: `1px solid ${f.color}20`,
               borderRadius: 16, padding: "16px",
@@ -137,14 +142,13 @@ export default function Home() {
 
       {/* ── TESTIMONIOS ──────────────────────────────────────────────── */}
       <div style={{ padding: "28px 24px 0" }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>Lo que dicen los dueños</div>
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>Lo que dicen los dueños</div>
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            { texto: "Nunca más me olvidé de una vacuna. La IA me avisó antes que el veterinario 😅", nombre: "Valentina M.", mascota: "Luna, Beagle 2 años" },
-            { texto: "Gracias a PetPass encontré a mi perro en 3 horas. Lo habían visto en el barrio.", nombre: "Matías R.", mascota: "Thor, Husky 4 años" },
-            { texto: "Uso la IA cuando me da cosa llamar al veterinario de noche. Siempre responde.", nombre: "Carolina G.", mascota: "Michi, Gato 5 años" },
-          ].map((t, i) => (
+          {TESTIMONIALS.map((t, i) => (
             <div key={i} style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16 }}>
+              <div style={{ fontSize: 20, marginBottom: 8, color: "#4ade80" }}>★★★★★</div>
               <div style={{ fontSize: 13, color: "#f0f4ff", lineHeight: 1.6, marginBottom: 10 }}>"{t.texto}"</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #4ade8033, #60a5fa33)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🙂</div>

@@ -38,6 +38,13 @@ export default function PaseoPublico() {
     const { data: sess } = await supabase.from("paseo_sessions").select("*").eq("id", id).single();
     if (!sess) { setNotFound(true); setLoading(false); return; }
     setSession(sess);
+    // Guardar sesión en historial local del cuidador
+    if (typeof window !== "undefined") {
+      const prev = JSON.parse(localStorage.getItem("petpass_sesiones_cuidador") || "[]");
+      if (!prev.includes(id)) {
+        localStorage.setItem("petpass_sesiones_cuidador", JSON.stringify([id, ...prev].slice(0, 20)));
+      }
+    }
     const { data: m } = await supabase.from("mascotas").select("*").eq("id", sess.mascota_id).single();
     setMascota(m);
     const { data: upds } = await supabase.from("paseo_updates")
@@ -229,6 +236,17 @@ export default function PaseoPublico() {
             Aún no hay novedades. ¡Enviá la primera!
           </div>
         )}
+
+        {/* Link a panel multi-sesión */}
+        <div style={{ marginTop: 24, textAlign: "center" }}>
+          <Link href="/paseo" style={{
+            fontSize: 12, color: "#7a8299", textDecoration: "none",
+            background: "#181c27", border: "1px solid #252a3a",
+            borderRadius: 10, padding: "8px 16px", display: "inline-block",
+          }}>
+            📋 Ver todas mis sesiones activas →
+          </Link>
+        </div>
       </div>
     </main>
   );
