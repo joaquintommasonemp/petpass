@@ -35,6 +35,12 @@ export default function Dashboard() {
   const [nuevoPeso, setNuevoPeso] = useState("");
   const [showAgendarCita, setShowAgendarCita] = useState(false);
   const [citaForm, setCitaForm] = useState({ date: "", summary: "", vet: "" });
+  const [urgencias, setUrgencias] = useState<any[]>([]);
+  const [showAddUrgencia, setShowAddUrgencia] = useState(false);
+  const [urgenciaForm, setUrgenciaForm] = useState({ name: "", phone: "", specialty: "", notes: "" });
+  const [reporte, setReporte] = useState<string | null>(null);
+  const [loadingReporte, setLoadingReporte] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -44,8 +50,10 @@ export default function Dashboard() {
   useEffect(() => { loadData(); }, []);
 
   async function loadData() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/login"); return; }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { router.push("/login"); return; }
+    setAuthToken(session.access_token);
+    const user = session.user;
     const { data: prof } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
     if (prof?.is_admin) setIsAdmin(true);
     const { data } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
@@ -53,6 +61,8 @@ export default function Dashboard() {
       setMascotas(data);
       await selectMascota(data[0]);
     }
+    const { data: urgs } = await supabase.from("urgencias_contactos").select("*").eq("user_id", user.id).order("created_at");
+    setUrgencias(urgs || []);
     setLoading(false);
   }
 
@@ -140,6 +150,57 @@ export default function Dashboard() {
   async function eliminarCita(id: string) {
     await supabase.from("historial").delete().eq("id", id);
     setCitas(prev => prev.filter(c => c.id !== id));
+  }
+
+  async function handleAddUrgencia() {
+    if (!urgenciaForm.name) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from("urgencias_contactos").insert({ ...urgenciaForm, user_id: user.id }).select();
+    if (data?.[0]) setUrgencias(prev => [...prev, data[0]]);
+    setUrgenciaForm({ name: "", phone: "", specialty: "", notes: "" });
+    setShowAddUrgencia(false);
+  }
+
+  async function eliminarUrgencia(id: string) {
+    await supabase.from("urgencias_contactos").delete().eq("id", id);
+    setUrgencias(prev => prev.filter(u => u.id !== id));
+  }
+
+  async function generarReporte() {
+    if (!selected || !authToken) return;
+    setLoadingReporte(true);
+    setReporte(null);
+    const vacs = vacunas.map(v => `${v.name} (${v.date}${v.next_date ? ` → próxima: ${v.next_date}` : ""})`).join(", ") || "Sin registros";
+    const diags = diagnosticos.map(d => `${d.date}: ${d.title}${d.summary ? ` — ${d.summary}` : ""}`).join("\n") || "Sin consultas";
+    const citasProx = citas.filter(c => c.date >= new Date().toISOString().slice(0, 10)).map(c => `${c.date}: ${c.summary}`).join(", ") || "Sin citas";
+    const prompt = `Generá un reporte de salud completo y estructurado para ${selected.name}.
+
+DATOS: Raza: ${selected.breed || "—"} | Edad: ${selected.age || "—"} | Peso: ${selected.weight || "—"} | Sexo: ${selected.sex || "—"}
+VACUNAS: ${vacs}
+HISTORIAL RECIENTE:\n${diags}
+CITAS PRÓXIMAS: ${citasProx}
+
+El reporte debe tener estas secciones:
+1. **Resumen general** (estado de salud en 2-3 frases)
+2. **Vacunación** (estado y recomendaciones)
+3. **Historial clínico reciente** (análisis breve)
+4. **Alertas o puntos de atención** (si hay algo que revisar)
+5. **Recomendaciones para los próximos 30 días**
+
+Sé concreto y profesional. Respondé en español.`;
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+      body: JSON.stringify({
+        system: "Sos un veterinario experto redactando reportes de salud animal. Usá markdown con **negritas** para los títulos de sección.",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    setReporte(data.reply || "No se pudo generar el reporte.");
+    setLoadingReporte(false);
   }
 
   async function handleLogout() {
@@ -380,6 +441,87 @@ export default function Dashboard() {
           ))}
         </>
       )}
+
+      {/* Reporte de salud */}
+      <Card style={{ border: "1px solid #60a5fa22", padding: 0, overflow: "hidden" }}>
+        <div style={{ background: "#0f1a2a", padding: "10px 16px", borderBottom: "1px solid #60a5fa22", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 800, fontSize: 13, color: "#60a5fa" }}>📋 Reporte de salud</span>
+          <button onClick={generarReporte} disabled={loadingReporte} style={{
+            background: "#60a5fa22", color: "#60a5fa", border: "1px solid #60a5fa44",
+            borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+            opacity: loadingReporte ? 0.6 : 1,
+          }}>{loadingReporte ? "Generando..." : reporte ? "Regenerar" : "Generar con IA"}</button>
+        </div>
+        {!reporte && !loadingReporte && (
+          <div style={{ padding: "14px 16px", color: "#7a8299", fontSize: 13 }}>
+            Generá un resumen completo del estado de salud de {selected?.name} con análisis, alertas y recomendaciones.
+          </div>
+        )}
+        {loadingReporte && (
+          <div style={{ padding: "14px 16px", color: "#7a8299", fontSize: 13 }}>Analizando historial...</div>
+        )}
+        {reporte && (
+          <div style={{ padding: 16, fontSize: 13, color: "#f0f4ff", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+            {reporte.replace(/\*\*(.*?)\*\*/g, "$1")}
+          </div>
+        )}
+      </Card>
+
+      {/* URGENCIAS */}
+      <Card style={{ border: "1px solid #f8717133", padding: 0, overflow: "hidden" }}>
+        <div style={{ background: "#1a0f0f", padding: "10px 16px", borderBottom: "1px solid #f8717122", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 800, fontSize: 13, color: "#f87171" }}>🚨 Urgencias y contactos clave</span>
+          <button onClick={() => setShowAddUrgencia(!showAddUrgencia)} style={{
+            background: "#f8717122", color: "#f87171", border: "1px solid #f8717144",
+            borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+          }}>+ Agregar</button>
+        </div>
+
+        {showAddUrgencia && (
+          <div style={{ padding: 16, borderBottom: "1px solid #252a3a" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <input placeholder="Nombre (ej: Dr. García, Clínica VetCentro)" value={urgenciaForm.name} onChange={e => setUrgenciaForm(f => ({ ...f, name: e.target.value }))} />
+              <input placeholder="Teléfono" value={urgenciaForm.phone} onChange={e => setUrgenciaForm(f => ({ ...f, phone: e.target.value }))} />
+              <input placeholder="Especialidad (ej: Clínica general, Guardia 24hs)" value={urgenciaForm.specialty} onChange={e => setUrgenciaForm(f => ({ ...f, specialty: e.target.value }))} />
+              <input placeholder="Notas (ej: atiende los sábados)" value={urgenciaForm.notes} onChange={e => setUrgenciaForm(f => ({ ...f, notes: e.target.value }))} />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => setShowAddUrgencia(false)} style={{ flex: 1, background: "#252a3a", color: "#7a8299", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 700 }}>Cancelar</button>
+                <button onClick={handleAddUrgencia} style={{ flex: 1, background: "#f87171", color: "#fff", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 800 }}>Guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ padding: urgencias.length > 0 ? "8px 16px 12px" : "14px 16px" }}>
+          {urgencias.length === 0 && !showAddUrgencia && (
+            <p style={{ color: "#7a8299", fontSize: 13, margin: 0 }}>Guardá los datos del veterinario de confianza para tenerlos a mano en emergencias.</p>
+          )}
+          {urgencias.map((u: any) => (
+            <div key={u.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "10px 0", borderBottom: "1px solid #1a2030" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.name}</div>
+                {u.specialty && <div style={{ fontSize: 11, color: "#f87171", fontWeight: 600, marginBottom: 2 }}>{u.specialty}</div>}
+                {u.phone && (
+                  <a href={`tel:${u.phone}`} style={{ fontSize: 13, color: "#7a8299", textDecoration: "none", display: "block" }}>📞 {u.phone}</a>
+                )}
+                {u.notes && <div style={{ fontSize: 11, color: "#7a8299", marginTop: 2 }}>{u.notes}</div>}
+              </div>
+              <div style={{ display: "flex", gap: 6, marginLeft: 8, flexShrink: 0 }}>
+                {u.phone && (
+                  <a href={`https://wa.me/${u.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
+                    background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                    borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, textDecoration: "none",
+                  }}>WA</a>
+                )}
+                <button onClick={() => eliminarUrgencia(u.id)} style={{
+                  background: "transparent", border: "none", color: "#f87171",
+                  fontSize: 18, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                }}>×</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Acciones */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>

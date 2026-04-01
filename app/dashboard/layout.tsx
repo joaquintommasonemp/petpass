@@ -6,6 +6,7 @@ const TABS = [
   { href: "/dashboard", label: "Perfil", icon: "🐾" },
   { href: "/dashboard/historial", label: "Historial", icon: "🏥" },
   { href: "/dashboard/chat", label: "Vet IA", icon: "🤖" },
+  { href: "/dashboard/educacion", label: "Edu", icon: "📚" },
   { href: "/dashboard/paseos", label: "Paseos", icon: "🐕" },
   { href: "/dashboard/comunidad", label: "Comunidad", icon: "👥" },
 ];
@@ -57,11 +58,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           return (
             <Link key={tab.href} href={tab.href} style={{
               flex: 1, textDecoration: "none", display: "flex", flexDirection: "column",
-              alignItems: "center", padding: "10px 4px 8px", gap: 2,
+              alignItems: "center", padding: "8px 2px 6px", gap: 1,
             }}>
-              <span style={{ fontSize: 18 }}>{tab.icon}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: active ? "#4ade80" : "#7a8299" }}>{tab.label}</span>
-              {active && <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#4ade80" }} />}
+              <span style={{ fontSize: 16 }}>{tab.icon}</span>
+              <span style={{ fontSize: 8, fontWeight: 700, color: active ? "#4ade80" : "#7a8299" }}>{tab.label}</span>
+              {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#4ade80" }} />}
             </Link>
           );
         })}
