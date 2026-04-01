@@ -17,14 +17,14 @@ function isDoc(h: any) {
 
 function detectStudyType(fileName: string): string {
   const name = fileName.toLowerCase();
-  if (/radiograf|placa|rx\b|rayos[\s_-]?x|xray/.test(name)) return "🩻 Radiografía";
-  if (/ecograf|ultraso|ecosonogr/.test(name)) return "🔊 Ecografía";
-  if (/hemograma|laboratorio|lab\b|sangre|blood|bioquim|analisis|análisis|orina|urin/.test(name)) return "🔬 Laboratorio";
-  if (/tomograf|tac\b|\bct\b/.test(name)) return "🏥 Tomografía";
-  if (/biopsia/.test(name)) return "🔬 Biopsia";
-  if (/electrocardiog|ecg\b|\bekg\b/.test(name)) return "❤️ Electrocardiograma";
-  if (/resonancia|mri\b|rmn\b/.test(name)) return "🏥 Resonancia";
-  return "📄 Documento";
+  if (name.includes("radiograf") || name.includes("placa") || name.includes("xray") || name.includes("rayosx")) return "Radiografia";
+  if (name.includes("ecograf") || name.includes("ultraso")) return "Ecografia";
+  if (name.includes("hemograma") || name.includes("laboratorio") || name.includes("sangre") || name.includes("analisis") || name.includes("orina")) return "Laboratorio";
+  if (name.includes("tomograf") || name.includes("tac")) return "Tomografia";
+  if (name.includes("biopsia")) return "Biopsia";
+  if (name.includes("electrocardiog") || name.includes("ecg")) return "Electrocardiograma";
+  if (name.includes("resonancia") || name.includes("mri")) return "Resonancia";
+  return "Documento";
 }
 
 type HistTab = "consultas" | "alimentacion" | "documentos";
@@ -139,34 +139,38 @@ export default function Historial() {
     setLoadingRecetas(true);
     setRecetas(null);
     const { data: { session } } = await supabase.auth.getSession();
-    const dietaActual = alimentacion.slice(0, 3).map((a: any) =>
-      `${a.marca || ""}${a.tipo ? ` (${a.tipo})` : ""}${a.cantidad ? ` · ${a.cantidad}` : ""}`
-    ).join("; ") || "sin registros previos";
 
-    const prompt = `Sugerí 3 recetas o planes de alimentación casera saludable para ${mascota.name}.
+    const dietaActual = alimentacion.slice(0, 3).map((a: any) => {
+      const parts: string[] = [];
+      if (a.marca) parts.push(a.marca);
+      if (a.tipo) parts.push("(" + a.tipo + ")");
+      if (a.cantidad) parts.push(a.cantidad);
+      return parts.join(" ");
+    }).join("; ") || "sin registros previos";
 
-Datos de la mascota:
-- Especie/Raza: ${mascota.breed}
-- Edad: ${mascota.age || "desconocida"}
-- Peso: ${mascota.weight || "desconocido"}
-- Sexo: ${mascota.sex || "—"}
-- Dieta actual: ${dietaActual}
-
-Para cada receta incluí:
-1. Nombre de la receta
-2. Ingredientes con cantidades aproximadas
-3. Preparación en pasos simples
-4. Frecuencia recomendada y tamaño de porción
-5. Beneficios nutricionales
-
-Finalizá con una nota sobre alimentos tóxicos a evitar para ${mascota.breed?.toLowerCase().includes("gato") ? "gatos" : "perros"}.
-Respondé en español, con formato claro.`;
+    const esGato = mascota.breed?.toLowerCase().includes("gato") ? "gatos" : "perros";
+    const lines = [
+      "Sugeri 3 recetas o planes de alimentacion casera saludable para " + mascota.name + ".",
+      "",
+      "Datos de la mascota:",
+      "- Raza: " + (mascota.breed || "desconocida"),
+      "- Edad: " + (mascota.age || "desconocida"),
+      "- Peso: " + (mascota.weight || "desconocido"),
+      "- Sexo: " + (mascota.sex || "desconocido"),
+      "- Dieta actual: " + dietaActual,
+      "",
+      "Para cada receta inclui: nombre, ingredientes con cantidades, preparacion paso a paso, frecuencia y porcion recomendada, beneficios nutricionales.",
+      "",
+      "Finali con una nota sobre alimentos toxicos a evitar para " + esGato + ".",
+      "Responde en espanol, con formato claro.",
+    ];
+    const prompt = lines.join("\n");
 
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session?.access_token}` },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") },
       body: JSON.stringify({
-        system: "Sos un veterinario nutricionista especialista en mascotas. Dás recetas caseras equilibradas y seguras.",
+        system: "Sos un veterinario nutricionista especialista en mascotas. Das recetas caseras equilibradas y seguras.",
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -432,11 +436,7 @@ Respondé en español, con formato claro.`;
                 }}>×</button>
               </div>
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "#f0f4ff", whiteSpace: "pre-wrap" }}>
-                {recetas.split(/(\*\*[^*]+\*\*)/g).map((part: string, i: number) =>
-                  part.startsWith("**") && part.endsWith("**")
-                    ? <strong key={i} style={{ color: "#fb923c" }}>{part.slice(2, -2)}</strong>
-                    : <span key={i}>{part}</span>
-                )}
+                {recetas.replace(/\*\*/g, "")}
               </div>
             </Card>
           )}
