@@ -7,7 +7,8 @@ function Card({ children, style = {} }: any) {
 }
 
 function Badge({ children, color = "#60a5fa" }: any) {
-  return <span style={{ background: color + "22", color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border: `1px solid ${color}44` }}>{children}</span>;
+  const border = "1px solid " + color + "44";
+  return <span style={{ background: color + "22", color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border }}>{children}</span>;
 }
 
 // Identifica entradas que son documentos/estudios (tienen URL en summary)
@@ -27,9 +28,8 @@ function detectStudyType(fileName: string): string {
   return "Documento";
 }
 
-type HistTab = "consultas" | "alimentacion" | "documentos";
-const HIST_TABS: HistTab[] = ["consultas", "alimentacion", "documentos"];
-const HIST_TAB_LABELS: Record<HistTab, string> = { consultas: "Consultas", alimentacion: "Alimentacion", documentos: "Docs" };
+const HIST_TABS = ["consultas", "alimentacion", "documentos"];
+const HIST_TAB_LABELS: {[k: string]: string} = { consultas: "Consultas", alimentacion: "Alimentacion", documentos: "Docs" };
 
 export default function Historial() {
   const [mascotas, setMascotas] = useState<any[]>([]);
@@ -42,7 +42,7 @@ export default function Historial() {
   const [alimentForm, setAlimentForm] = useState({ marca: "", tipo: "", cantidad: "", frecuencia: "", notas: "" });
   const [adding, setAdding] = useState(false);
   const [addingAliment, setAddingAliment] = useState(false);
-  const [histTab, setHistTab] = useState<HistTab>("consultas");
+  const [histTab, setHistTab] = useState("consultas");
   const [linkNotes, setLinkNotes] = useState("");
   const [creatingLink, setCreatingLink] = useState(false);
   const [newLink, setNewLink] = useState<string | null>(null);
@@ -284,7 +284,7 @@ export default function Historial() {
           {mascotas.map(m => (
             <button key={m.id} onClick={() => selectMascota(m)} style={{
               background: mascota?.id === m.id ? "#4ade8022" : "#181c27",
-              border: `1px solid ${mascota?.id === m.id ? "#4ade80" : "#252a3a"}`,
+              border: "1px solid " + (mascota?.id === m.id ? "#4ade80" : "#252a3a"),
               borderRadius: 20, padding: "6px 14px",
               color: mascota?.id === m.id ? "#4ade80" : "#7a8299",
               fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", cursor: "pointer",
@@ -438,7 +438,7 @@ export default function Historial() {
                 }}>x</button>
               </div>
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "#f0f4ff", whiteSpace: "pre-wrap" }}>
-                {recetas.replace(/\*\*/g, "")}
+                {recetas.split("**").join("")}
               </div>
             </Card>
           )}
@@ -481,7 +481,7 @@ export default function Historial() {
                   flex: 1, background: "#60a5fa22", color: "#60a5fa", border: "1px solid #60a5fa44",
                   borderRadius: 10, padding: 10, fontWeight: 800, fontSize: 13, cursor: "pointer",
                 }}>📋 Copiar</button>
-                <a href={`https://wa.me/?text=Te%20comparto%20el%20link%20para%20subir%20los%20estudios%20de%20${mascota?.name}%20a%20PetPass%3A%20${encodeURIComponent(newLink)}`}
+                <a href={"https://wa.me/?text=Te%20comparto%20el%20link%20para%20subir%20los%20estudios%20de%20" + (mascota?.name || "") + "%20a%20PetPass%3A%20" + encodeURIComponent(newLink)}
                   target="_blank" rel="noreferrer" style={{
                     flex: 1, background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
                     borderRadius: 10, padding: 10, fontWeight: 800, fontSize: 13, cursor: "pointer",
