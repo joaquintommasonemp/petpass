@@ -27,27 +27,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile Header */}
       <div className="dashboard-header" style={{
-        background: "#181c27cc", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #252a3a",
+        background: "#FFFFFFee", backdropFilter: "blur(12px)",
+        borderBottom: "1px solid #E2E8F0",
         padding: "12px 20px", alignItems: "center",
         justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 22 }}>🐾</span>
+          <span style={{ fontSize: 22, color: "#0CCE6B" }}>🐾</span>
           <div>
             <div style={{
               fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 18,
-              background: "linear-gradient(135deg, #f0f4ff, #4ade80)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              color: "#0F1E3D",
             }}>PetPass</div>
-            <div style={{ color: "#7a8299", fontSize: 10, marginTop: -1 }}>Tu mascota, siempre protegida</div>
+            <div style={{ color: "#64748B", fontSize: 10, marginTop: -1 }}>Tu mascota, siempre protegida</div>
           </div>
         </div>
         <Link href="/mascota/nueva" style={{
-          background: "linear-gradient(135deg, #4ade80, #22c55e)",
-          color: "#000", border: "none",
+          background: "linear-gradient(135deg, #0CCE6B, #09A855)",
+          color: "#fff", border: "none",
           borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 800, textDecoration: "none",
-          boxShadow: "0 2px 12px #4ade8030",
+          boxShadow: "0 2px 12px rgba(12,206,107,0.25)",
         }}>+ Mascota</Link>
       </div>
 
@@ -58,23 +57,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-              background: "linear-gradient(135deg, #4ade8033, #22c55e22)",
-              border: "1px solid #4ade8044",
+              background: "#E8FFF2",
+              border: "1px solid #C6F6E0",
               display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
             }}>🐾</div>
             <div>
               <div style={{
                 fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 20,
-                background: "linear-gradient(135deg, #f0f4ff, #4ade80)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                color: "#0F1E3D",
               }}>PetPass</div>
             </div>
           </div>
-          <div style={{ color: "#7a8299", fontSize: 11, paddingLeft: 2 }}>Tu mascota, siempre protegida</div>
+          <div style={{ color: "#64748B", fontSize: 11, paddingLeft: 2 }}>Tu mascota, siempre protegida</div>
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: "#252a3a", margin: "0 16px 12px" }} />
+        <div style={{ height: 1, background: "#E2E8F0", margin: "0 16px 12px" }} />
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: "4px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
@@ -85,22 +83,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "10px 12px", borderRadius: 12,
                 textDecoration: "none",
-                background: active ? "#4ade8015" : "transparent",
-                borderLeft: active ? "3px solid #4ade80" : "3px solid transparent",
+                background: active ? "#E8FFF2" : "transparent",
+                borderLeft: active ? "3px solid #0CCE6B" : "3px solid transparent",
                 transition: "all 0.15s",
               }}>
                 <span style={{ fontSize: 18, flexShrink: 0, width: 24, textAlign: "center" }}>{tab.icon}</span>
                 <div>
                   <div style={{
                     fontSize: 13, fontWeight: 700,
-                    color: active ? "#4ade80" : "#f0f4ff",
+                    color: active ? "#0CCE6B" : "#0F1E3D",
                   }}>{tab.label}</div>
-                  <div style={{ fontSize: 11, color: "#7a8299", marginTop: 1 }}>{tab.desc}</div>
+                  <div style={{ fontSize: 11, color: "#64748B", marginTop: 1 }}>{tab.desc}</div>
                 </div>
                 {active && (
                   <div style={{
                     marginLeft: "auto", width: 6, height: 6, borderRadius: "50%",
-                    background: "#4ade80", boxShadow: "0 0 8px #4ade80",
+                    background: "#0CCE6B",
                   }} />
                 )}
               </Link>
@@ -110,20 +108,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Bottom actions */}
         <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ height: 1, background: "#252a3a", marginBottom: 4 }} />
+          <div style={{ height: 1, background: "#E2E8F0", marginBottom: 4 }} />
           <Link href="/mascota/nueva" style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "linear-gradient(135deg, #4ade80, #22c55e)",
-            color: "#000", borderRadius: 12, padding: "10px 16px",
+            background: "linear-gradient(135deg, #0CCE6B, #09A855)",
+            color: "#fff", borderRadius: 12, padding: "10px 16px",
             fontWeight: 800, fontSize: 13, textDecoration: "none",
-            boxShadow: "0 4px 16px #4ade8030",
+            boxShadow: "0 4px 16px rgba(12,206,107,0.25)",
           }}>
             <span style={{ fontSize: 16 }}>+</span> Nueva mascota
           </Link>
           <button onClick={handleLogout} style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "transparent", border: "1px solid #252a3a",
-            color: "#7a8299", borderRadius: 12, padding: "8px 16px",
+            background: "transparent", border: "1px solid #E2E8F0",
+            color: "#64748B", borderRadius: 12, padding: "8px 16px",
             fontWeight: 600, fontSize: 12, cursor: "pointer",
           }}>
             <span style={{ fontSize: 14 }}>{"<-"}</span> Cerrar sesion
@@ -146,8 +144,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alignItems: "center", padding: "8px 2px 6px", gap: 1,
             }}>
               <span style={{ fontSize: 16 }}>{tab.icon}</span>
-              <span style={{ fontSize: 8, fontWeight: 700, color: active ? "#4ade80" : "#7a8299" }}>{tab.label}</span>
-              {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#4ade80" }} />}
+              <span style={{ fontSize: 8, fontWeight: 700, color: active ? "#0CCE6B" : "#64748B" }}>{tab.label}</span>
+              {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#0CCE6B" }} />}
             </Link>
           );
         })}

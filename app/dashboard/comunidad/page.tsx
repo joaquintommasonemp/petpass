@@ -17,7 +17,7 @@ const DESCUENTOS = [
 
 function Card({ children, style = {} }: any) {
   return (
-    <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
+    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
       {children}
     </div>
   );
@@ -32,12 +32,12 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
     { key: "descuentos", label: "Descuentos", icon: "🎁" },
   ];
   return (
-    <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "#0f1117", borderRadius: 12, padding: 4 }}>
+    <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
       {tabs.map(t => (
         <button key={t.key} onClick={() => onChange(t.key)} style={{
           flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
-          background: active === t.key ? "#252a3a" : "transparent",
-          color: active === t.key ? "#f0f4ff" : "#7a8299",
+          background: active === t.key ? "#E2E8F0" : "transparent",
+          color: active === t.key ? "#0F1E3D" : "#64748B",
           fontWeight: 700, fontSize: 11, cursor: "pointer",
           display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
         }}>
@@ -83,7 +83,7 @@ function TabExplorar() {
     const { data: { user } } = await supabase.auth.getUser();
     const [{ data }, { data: msgs }, { data: miMs }] = await Promise.all([
       supabase.from("mascotas").select("*, profiles(full_name, phone)").eq("is_public", true).eq("active", true).neq("user_id", user?.id || ""),
-      supabase.from("comunidad_mensajes").select("*").order("created_at", { ascending: false }).limit(30),
+      supabase.from("comunidad_mensajes").select("*").not("author_name", "ilike", "SOLICITUD:%").order("created_at", { ascending: false }).limit(30),
       supabase.from("mascotas").select("name, breed").eq("user_id", user?.id || "").eq("active", true).limit(1),
     ]);
     const ms = data || [];
@@ -138,11 +138,11 @@ function TabExplorar() {
   }
 
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>;
 
   return (
     <div>
-      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 14 }}>
+      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
         Mascotas públicas — coordiná paseos, viajes o simplemente conectá con tutores de la misma raza 🐾
       </p>
 
@@ -158,17 +158,17 @@ function TabExplorar() {
       {razas.length > 0 && (
         <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
           <button onClick={() => setRaza("")} style={{
-            background: !raza ? "#4ade8022" : "#181c27",
-            border: `1px solid ${!raza ? "#4ade80" : "#252a3a"}`,
-            color: !raza ? "#4ade80" : "#7a8299",
+            background: !raza ? "#E8FFF2" : "#FFFFFF",
+            border: `1px solid ${!raza ? "#0CCE6B" : "#E2E8F0"}`,
+            color: !raza ? "#0CCE6B" : "#64748B",
             borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
             cursor: "pointer", whiteSpace: "nowrap",
           }}>Todas</button>
           {razas.map(r => (
             <button key={r} onClick={() => setRaza(r === raza ? "" : r)} style={{
-              background: raza === r ? "#4ade8022" : "#181c27",
-              border: `1px solid ${raza === r ? "#4ade80" : "#252a3a"}`,
-              color: raza === r ? "#4ade80" : "#7a8299",
+              background: raza === r ? "#E8FFF2" : "#FFFFFF",
+              border: `1px solid ${raza === r ? "#0CCE6B" : "#E2E8F0"}`,
+              color: raza === r ? "#0CCE6B" : "#64748B",
               borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
               cursor: "pointer", whiteSpace: "nowrap",
             }}>{r}</button>
@@ -180,7 +180,7 @@ function TabExplorar() {
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 10 }}>🐾</div>
           <div style={{ fontWeight: 700, marginBottom: 6 }}>Sin mascotas públicas todavía</div>
-          <p style={{ color: "#7a8299", fontSize: 13 }}>
+          <p style={{ color: "#64748B", fontSize: 13 }}>
             Activá el perfil público de tu mascota desde la pestaña Perfil para aparecer acá.
           </p>
         </Card>
@@ -192,12 +192,12 @@ function TabExplorar() {
           const owner = m.profiles;
           return (
             <div key={i} style={{
-              background: "#181c27", border: "1px solid #252a3a",
+              background: "#FFFFFF", border: "1px solid #E2E8F0",
               borderRadius: 16, overflow: "hidden",
             }}>
               {/* Foto */}
               <div style={{
-                height: 120, background: "#252a3a",
+                height: 120, background: "#E2E8F0",
                 display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
               }}>
                 {m.photo_url
@@ -207,17 +207,17 @@ function TabExplorar() {
               </div>
               <div style={{ padding: "10px 12px" }}>
                 <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 2 }}>{m.name}</div>
-                <div style={{ color: "#7a8299", fontSize: 11, marginBottom: 6 }}>
+                <div style={{ color: "#64748B", fontSize: 11, marginBottom: 6 }}>
                   {m.breed}{m.age ? ` · ${m.age}` : ""}{m.sex ? ` · ${m.sex}` : ""}
                 </div>
                 {m.location && (
-                  <div style={{ fontSize: 11, color: "#60a5fa", marginBottom: 8 }}>📍 {m.location}</div>
+                  <div style={{ fontSize: 11, color: "#3B82F6", marginBottom: 8 }}>📍 {m.location}</div>
                 )}
                 {owner?.phone && (
                   <a href={"https://wa.me/" + owner.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer"
                     style={{
-                      display: "block", background: "#4ade8022", color: "#4ade80",
-                      border: "1px solid #4ade8044", borderRadius: 8, padding: "6px 0",
+                      display: "block", background: "#E8FFF2", color: "#0CCE6B",
+                      border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 0",
                       fontSize: 11, fontWeight: 700, textDecoration: "none", textAlign: "center",
                     }}>💬 Contactar</a>
                 )}
@@ -229,28 +229,28 @@ function TabExplorar() {
 
       {/* ── Mural de la comunidad ── */}
       <div style={{ marginTop: 28, marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
           Mural de la comunidad
         </div>
 
         {/* Formulario de publicación */}
-        <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 14, marginBottom: 16 }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 14, marginBottom: 16 }}>
           <textarea
             placeholder={miMascota ? `Compartí algo sobre ${miMascota.name}...` : "Compartí algo con la comunidad..."}
             value={msgText}
             onChange={e => setMsgText(e.target.value)}
             rows={3}
             style={{
-              background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10,
-              padding: "10px 14px", color: "#f0f4ff", resize: "none", width: "100%",
+              background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
+              padding: "10px 14px", color: "#0F1E3D", resize: "none", width: "100%",
               fontSize: 13, marginBottom: 10,
             }}
           />
           {photoPreview && (
             <div style={{ position: "relative", display: "inline-block", marginBottom: 10 }}>
-              <img src={photoPreview} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", border: "1px solid #4ade8044" }} />
+              <img src={photoPreview} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", border: "1px solid #C6F6E0" }} />
               <button onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{
-                position: "absolute", top: -6, right: -6, background: "#f87171", color: "#fff",
+                position: "absolute", top: -6, right: -6, background: "#EF4444", color: "#fff",
                 border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
               }}>×</button>
@@ -258,13 +258,13 @@ function TabExplorar() {
           )}
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => fileRef.current?.click()} style={{
-              background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+              background: "#E2E8F0", color: "#64748B", border: "1px solid #CBD5E1",
               borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
             }}>📷</button>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
             <button onClick={sendMsg} disabled={sendingMsg || !msgText.trim()} style={{
-              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #4ade80, #22c55e)" : "#252a3a",
-              color: msgText.trim() ? "#000" : "#7a8299", border: "none",
+              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #0CCE6B, #09A855)" : "#E2E8F0",
+              color: msgText.trim() ? "#000" : "#64748B", border: "none",
               borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer",
               opacity: sendingMsg ? 0.6 : 1,
             }}>{sendingMsg ? "Publicando..." : "Publicar"}</button>
@@ -273,29 +273,29 @@ function TabExplorar() {
 
         {/* Feed de mensajes */}
         {mensajes.length === 0 && (
-          <div style={{ textAlign: "center", padding: "24px 0", color: "#7a8299", fontSize: 13 }}>
+          <div style={{ textAlign: "center", padding: "24px 0", color: "#64748B", fontSize: 13 }}>
             Sé el primero en publicar algo 🐾
           </div>
         )}
         {mensajes.map((msg: any, i: number) => (
           <div key={i} style={{
-            background: "#181c27", border: "1px solid #252a3a",
+            background: "#FFFFFF", border: "1px solid #E2E8F0",
             borderRadius: 14, padding: 14, marginBottom: 10,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{
-                  width: 32, height: 32, borderRadius: "50%", background: "#4ade8022",
+                  width: 32, height: 32, borderRadius: "50%", background: "#E8FFF2",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
                 }}>🐾</div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 13 }}>{msg.author_name || "Tutor"}</div>
                   {msg.mascota_name && (
-                    <div style={{ fontSize: 11, color: "#4ade80" }}>🐕 {msg.mascota_name}</div>
+                    <div style={{ fontSize: 11, color: "#0CCE6B" }}>🐕 {msg.mascota_name}</div>
                   )}
                 </div>
               </div>
-              <span style={{ fontSize: 11, color: "#7a8299" }}>{timeAgo(msg.created_at)}</span>
+              <span style={{ fontSize: 11, color: "#64748B" }}>{timeAgo(msg.created_at)}</span>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.5, marginBottom: msg.photo_url ? 10 : 0 }}>{msg.message}</p>
             {msg.photo_url && (
@@ -317,31 +317,36 @@ function TabDescuentos() {
 
   async function handleSendBiz() {
     if (!bizForm.nombre || !bizForm.email) return;
-    await supabase.from("descuento_requests").insert(bizForm).select();
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("comunidad_mensajes").insert({
+      author_name: "SOLICITUD:descuento",
+      mascota_name: "pendiente",
+      message: JSON.stringify({ ...bizForm, user_id: user?.id }),
+    });
     setSent(true);
     setShowForm(false);
   }
 
   return (
     <div>
-      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 16 }}>
         Beneficios exclusivos para miembros PetPass 🐾
       </p>
       {DESCUENTOS.map((d, i) => (
         <Card key={i} style={{ display: "flex", gap: 14, alignItems: "center", opacity: 0.6 }}>
           <div style={{
-            fontSize: 28, width: 48, height: 48, borderRadius: 12, background: "#252a3a",
+            fontSize: 28, width: 48, height: 48, borderRadius: 12, background: "#E2E8F0",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>{d.icon}</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
               <span style={{ fontWeight: 700, fontSize: 14 }}>{d.nombre}</span>
               <span style={{
-                background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+                background: "#E2E8F0", color: "#64748B", border: "1px solid #CBD5E1",
                 borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800,
               }}>Próximamente</span>
             </div>
-            <div style={{ color: "#7a8299", fontSize: 12 }}>{d.descripcion}</div>
+            <div style={{ color: "#64748B", fontSize: 12 }}>{d.descripcion}</div>
           </div>
         </Card>
       ))}
@@ -349,24 +354,24 @@ function TabDescuentos() {
       {/* CTA para negocios */}
       <div style={{ marginTop: 8 }}>
         {sent ? (
-          <Card style={{ textAlign: "center", border: "1px solid #4ade8044" }}>
+          <Card style={{ textAlign: "center", border: "1px solid #C6F6E0" }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
             <div style={{ fontWeight: 800, marginBottom: 4 }}>¡Recibimos tu consulta!</div>
-            <div style={{ color: "#7a8299", fontSize: 13 }}>Te contactamos pronto para sumar tu negocio.</div>
+            <div style={{ color: "#64748B", fontSize: 13 }}>Te contactamos pronto para sumar tu negocio.</div>
           </Card>
         ) : (
-          <Card style={{ border: "1px solid #f472b633", background: "linear-gradient(135deg, #1a0f2a, #181c27)" }}>
+          <Card style={{ border: "1px solid #FBCFE8", background: "#FFFFFF" }}>
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showForm ? 14 : 0 }}>
               <div style={{
-                width: 44, height: 44, borderRadius: 12, background: "#f472b622",
+                width: 44, height: 44, borderRadius: 12, background: "#FDF2F8",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
               }}>🏪</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>¿Tenés un negocio pet-friendly?</div>
-                <div style={{ color: "#7a8299", fontSize: 12 }}>Sumá tu descuento y llegá a miles de tutores</div>
+                <div style={{ color: "#64748B", fontSize: 12 }}>Sumá tu descuento y llegá a miles de tutores</div>
               </div>
               <button onClick={() => setShowForm(!showForm)} style={{
-                background: "linear-gradient(135deg, #f472b6, #ec4899)",
+                background: "linear-gradient(135deg, #EC4899, #DB2777)",
                 color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px",
                 fontSize: 12, fontWeight: 800, cursor: "pointer", flexShrink: 0,
               }}>Quiero aparecer</button>
@@ -378,7 +383,7 @@ function TabDescuentos() {
                 <input placeholder="Email de contacto *" type="email" value={bizForm.email} onChange={e => setBizForm(f => ({ ...f, email: e.target.value }))} />
                 <input placeholder="Descuento que ofrecés (ej: 15% en consultas)" value={bizForm.descuento} onChange={e => setBizForm(f => ({ ...f, descuento: e.target.value }))} />
                 <button onClick={handleSendBiz} style={{
-                  background: "linear-gradient(135deg, #f472b6, #ec4899)",
+                  background: "linear-gradient(135deg, #EC4899, #DB2777)",
                   color: "#fff", border: "none", borderRadius: 10, padding: 12,
                   fontWeight: 800, fontSize: 14, cursor: "pointer",
                 }}>Enviar consulta →</button>
@@ -498,12 +503,12 @@ function TabPerdidas() {
   return (
     <div>
       {/* Sub-tabs Perdidas / Encontradas */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#0f1117", borderRadius: 12, padding: 4 }}>
-        {([["perdidas", "📍 Perdidas", "#f87171"], ["encontradas", "✅ Encontradas", "#4ade80"]] as const).map(([key, label, color]) => (
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
+        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#0CCE6B"]] as const).map(([key, label, color]) => (
           <button key={key} onClick={() => setSubTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
-            background: subTab === key ? "#252a3a" : "transparent",
-            color: subTab === key ? color : "#7a8299",
+            background: subTab === key ? "#E2E8F0" : "transparent",
+            color: subTab === key ? color : "#64748B",
             fontWeight: 700, fontSize: 12, cursor: "pointer",
           }}>{label}</button>
         ))}
@@ -512,15 +517,15 @@ function TabPerdidas() {
       {/* Botones de reporte */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <button onClick={() => { setReportingType("perdida"); setReporting(!reporting || reportingType !== "perdida"); }} style={{
-          flex: 1, background: "#f8717122", color: "#f87171",
-          border: "1px solid #f8717144", borderRadius: 12, padding: 12,
+          flex: 1, background: "#FFF0F0", color: "#EF4444",
+          border: "1px solid #FECACA", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
           📍 Reportar perdida
         </button>
         <button onClick={() => { setReportingType("encontrada"); setReporting(!reporting || reportingType !== "encontrada"); }} style={{
-          flex: 1, background: "#4ade8022", color: "#4ade80",
-          border: "1px solid #4ade8044", borderRadius: 12, padding: 12,
+          flex: 1, background: "#E8FFF2", color: "#0CCE6B",
+          border: "1px solid #C6F6E0", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
           ✅ Encontré una
@@ -528,8 +533,8 @@ function TabPerdidas() {
       </div>
 
       {reporting && (
-        <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#f8717144" : "#4ade8044"}` }}>
-          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#f87171" : "#4ade80", marginBottom: 12 }}>
+        <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#FECACA" : "#C6F6E0"}` }}>
+          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#0CCE6B", marginBottom: 12 }}>
             {reportingType === "perdida" ? "📍 Nueva alerta de mascota perdida" : "✅ Reportar mascota encontrada"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -539,17 +544,17 @@ function TabPerdidas() {
             ))}
             <textarea placeholder="Descripción adicional..." rows={2} value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff", resize: "none" }} />
+              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", resize: "none" }} />
             {/* Fotos */}
             <div>
-              <div style={{ fontSize: 12, color: "#7a8299", marginBottom: 8 }}>Fotos de la mascota</div>
+              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 8 }}>Fotos de la mascota</div>
               {fotoPreviews.length > 0 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
                   {fotoPreviews.map((src, i) => (
                     <div key={i} style={{ position: "relative" }}>
-                      <img src={src} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: "1px solid #f8717133" }} />
+                      <img src={src} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: "1px solid #FECACA" }} />
                       <button onClick={() => { setFotosForm(p => p.filter((_, idx) => idx !== i)); setFotoPreviews(p => p.filter((_, idx) => idx !== i)); }} style={{
-                        position: "absolute", top: -6, right: -6, background: "#f87171", color: "#fff",
+                        position: "absolute", top: -6, right: -6, background: "#EF4444", color: "#fff",
                         border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
                         cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                       }}>×</button>
@@ -558,14 +563,14 @@ function TabPerdidas() {
                 </div>
               )}
               <button onClick={() => fileRef.current?.click()} style={{
-                background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+                background: "#E2E8F0", color: "#64748B", border: "1px solid #CBD5E1",
                 borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer",
               }}>📷 Agregar fotos</button>
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFotos} />
             </div>
 
             <button onClick={handleReport} disabled={loading} style={{
-              background: reportingType === "perdida" ? "#f87171" : "#4ade80",
+              background: reportingType === "perdida" ? "#EF4444" : "#0CCE6B",
               color: reportingType === "perdida" ? "#fff" : "#000", border: "none",
               borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1, cursor: "pointer",
             }}>{loading ? "Publicando..." : "Publicar"}</button>
@@ -576,7 +581,7 @@ function TabPerdidas() {
       {perdidasFiltradas.length === 0 && !reporting && (
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>{subTab === "perdidas" ? "📍" : "✅"}</div>
-          <p style={{ color: "#7a8299", fontSize: 13 }}>
+          <p style={{ color: "#64748B", fontSize: 13 }}>
             {subTab === "perdidas" ? "No hay mascotas perdidas reportadas." : "No hay mascotas encontradas reportadas."}
           </p>
         </Card>
@@ -592,12 +597,12 @@ function TabPerdidas() {
 
         const isEncontrada = p.tipo === "encontrada";
         return (
-          <Card key={i} style={{ border: `1px solid ${isEncontrada ? "#4ade8033" : "#f8717122"}` }}>
+          <Card key={i} style={{ border: `1px solid ${isEncontrada ? "#C6F6E0" : "#FFF0F0"}` }}>
             {/* Fotos subidas por el usuario */}
             {uploadedPhotos.length > 0 && (
               <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto" }}>
                 {uploadedPhotos.map((url, pi) => (
-                  <img key={pi} src={url} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", flexShrink: 0, border: "1px solid #f8717133" }} />
+                  <img key={pi} src={url} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", flexShrink: 0, border: "1px solid #FECACA" }} />
                 ))}
               </div>
             )}
@@ -606,7 +611,7 @@ function TabPerdidas() {
               {uploadedPhotos.length === 0 && (
                 <div style={{
                   width: 64, height: 64, borderRadius: 12, flexShrink: 0,
-                  background: "#252a3a", border: "2px solid #f8717133",
+                  background: "#E2E8F0", border: "2px solid #FECACA",
                   display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
                 }}>
                   {foto
@@ -621,41 +626,41 @@ function TabPerdidas() {
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
                     {isEncontrada && (
-                      <span style={{ background: "#4ade8022", color: "#4ade80", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
+                      <span style={{ background: "#E8FFF2", color: "#0CCE6B", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
                     )}
                   </div>
                   <span style={{
-                    background: days <= 2 ? "#f8717122" : "#fb923c22",
-                    color: days <= 2 ? "#f87171" : "#fb923c",
+                    background: days <= 2 ? "#FFF0F0" : "#FFF7ED",
+                    color: days <= 2 ? "#EF4444" : "#F97316",
                     borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700, flexShrink: 0,
                   }}>hace {days}d</span>
                 </div>
 
-                <div style={{ color: "#7a8299", fontSize: 12, marginBottom: 2 }}>
+                <div style={{ color: "#64748B", fontSize: 12, marginBottom: 2 }}>
                   {p.breed}{p.color ? ` · ${p.color}` : ""}
                 </div>
                 {p.zone && (
-                  <div style={{ color: "#7a8299", fontSize: 12, marginBottom: 4 }}>📍 {p.zone}</div>
+                  <div style={{ color: "#64748B", fontSize: 12, marginBottom: 4 }}>📍 {p.zone}</div>
                 )}
                 {p.description && (
-                  <div style={{ fontSize: 12, color: "#f0f4ff", marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
+                  <div style={{ fontSize: 12, color: "#0F1E3D", marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
                 )}
 
                 {/* Datos del dueño */}
-                <div style={{ background: "#0f1117", borderRadius: 10, padding: "8px 12px", marginBottom: 8 }}>
-                  <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Contacto</div>
+                <div style={{ background: "#F4F6FB", borderRadius: 10, padding: "8px 12px", marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "#64748B", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Contacto</div>
                   {owner?.full_name && (
-                    <div style={{ fontSize: 13, color: "#f0f4ff", marginBottom: 2 }}>👤 {owner.full_name}</div>
+                    <div style={{ fontSize: 13, color: "#0F1E3D", marginBottom: 2 }}>👤 {owner.full_name}</div>
                   )}
                   {(p.phone || owner?.phone) && (
-                    <div style={{ fontSize: 12, color: "#7a8299" }}>📞 {p.phone || owner.phone}</div>
+                    <div style={{ fontSize: 12, color: "#64748B" }}>📞 {p.phone || owner.phone}</div>
                   )}
                 </div>
 
                 {p.phone && (
                   <a href={"https://wa.me/" + p.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                    display: "inline-block", background: "#4ade8022", color: "#4ade80",
-                    border: "1px solid #4ade8044", borderRadius: 8, padding: "6px 14px",
+                    display: "inline-block", background: "#E8FFF2", color: "#0CCE6B",
+                    border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 14px",
                     fontSize: 12, fontWeight: 700, textDecoration: "none",
                   }}>💬 Contactar por WhatsApp</a>
                 )}
@@ -675,6 +680,10 @@ function TabProfesionales() {
   const [profesionales, setProfesionales] = useState<any[]>([]);
   const [filtro, setFiltro] = useState("Todos");
   const [loading, setLoading] = useState(true);
+  const [showSolicitud, setShowSolicitud] = useState(false);
+  const [solicitudForm, setSolicitudForm] = useState({ nombre: "", especialidad: "Veterinario", descripcion: "", zona: "", telefono: "", instagram: "", email: "" });
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
   const supabase = createClient();
 
   useEffect(function() {
@@ -688,6 +697,20 @@ function TabProfesionales() {
       .catch(function() { setLoading(false); });
   }, []);
 
+  async function handleSolicitudPro() {
+    if (!solicitudForm.nombre) return;
+    setEnviando(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("comunidad_mensajes").insert({
+      author_name: "SOLICITUD:profesional",
+      mascota_name: "pendiente",
+      message: JSON.stringify({ ...solicitudForm, user_id: user?.id }),
+    });
+    setEnviado(true);
+    setEnviando(false);
+    setShowSolicitud(false);
+  }
+
   const lista = filtro === "Todos" ? profesionales : profesionales.filter(function(p) { return p.especialidad === filtro; });
 
   const iconEsp: Record<string, string> = {
@@ -695,11 +718,11 @@ function TabProfesionales() {
     Guarderia: "🏠", Nutricionista: "🥗", Otro: "🐾",
   };
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>;
 
   return (
     <div>
-      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 14 }}>
+      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
         Veterinarios, peluqueros y especialistas recomendados por la comunidad.
       </p>
 
@@ -707,9 +730,9 @@ function TabProfesionales() {
         {ESPECIALIDADES.map(function(e) {
           return (
             <button key={e} onClick={function() { setFiltro(e); }} style={{
-              background: filtro === e ? "#60a5fa22" : "#181c27",
-              border: "1px solid " + (filtro === e ? "#60a5fa" : "#252a3a"),
-              color: filtro === e ? "#60a5fa" : "#7a8299",
+              background: filtro === e ? "#EFF6FF" : "#FFFFFF",
+              border: "1px solid " + (filtro === e ? "#3B82F6" : "#E2E8F0"),
+              color: filtro === e ? "#3B82F6" : "#64748B",
               borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
               cursor: "pointer", whiteSpace: "nowrap",
             }}>{e}</button>
@@ -721,7 +744,7 @@ function TabProfesionales() {
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🏥</div>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Sin profesionales todavia</div>
-          <p style={{ color: "#7a8299", fontSize: 13, lineHeight: 1.6 }}>
+          <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6 }}>
             Pronto vamos a listar veterinarios, peluqueros y especialistas de tu zona.
           </p>
         </Card>
@@ -729,11 +752,11 @@ function TabProfesionales() {
 
       {lista.map(function(p: any, i: number) {
         return (
-          <Card key={i} style={{ border: "1px solid #60a5fa22" }}>
+          <Card key={i} style={{ border: "1px solid #EFF6FF" }}>
             <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
               <div style={{
                 width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-                background: "#60a5fa18", border: "1px solid #60a5fa33",
+                background: "#EFF6FF", border: "1px solid #BFDBFE",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 26, overflow: "hidden",
               }}>
@@ -744,28 +767,28 @@ function TabProfesionales() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div style={{ fontWeight: 800, fontSize: 15 }}>{p.nombre}</div>
-                  <span style={{ background: "#60a5fa18", color: "#60a5fa", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800, flexShrink: 0, marginLeft: 8 }}>
+                  <span style={{ background: "#EFF6FF", color: "#3B82F6", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800, flexShrink: 0, marginLeft: 8 }}>
                     {p.especialidad}
                   </span>
                 </div>
-                {p.descripcion && <div style={{ color: "#7a8299", fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{p.descripcion}</div>}
-                {p.zona && <div style={{ color: "#60a5fa", fontSize: 12, marginTop: 4 }}>📍 {p.zona}</div>}
+                {p.descripcion && <div style={{ color: "#64748B", fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{p.descripcion}</div>}
+                {p.zona && <div style={{ color: "#3B82F6", fontSize: 12, marginTop: 4 }}>📍 {p.zona}</div>}
                 <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                   {p.telefono && (
                     <a href={"https://wa.me/" + p.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                      background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                      background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
                       borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
                     }}>WhatsApp</a>
                   )}
                   {p.instagram && (
                     <a href={"https://instagram.com/" + p.instagram.replace("@", "")} target="_blank" rel="noreferrer" style={{
-                      background: "#f472b622", color: "#f472b6", border: "1px solid #f472b644",
+                      background: "#FDF2F8", color: "#EC4899", border: "1px solid #FBCFE8",
                       borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
                     }}>Instagram</a>
                   )}
                   {p.email && (
                     <a href={"mailto:" + p.email} style={{
-                      background: "#a78bfa22", color: "#a78bfa", border: "1px solid #a78bfa44",
+                      background: "#F5F3FF", color: "#8B5CF6", border: "1px solid #DDD6FE",
                       borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
                     }}>Email</a>
                   )}
@@ -775,6 +798,53 @@ function TabProfesionales() {
           </Card>
         );
       })}
+
+      {/* CTA para profesionales */}
+      <div style={{ marginTop: 8 }}>
+        {enviado ? (
+          <Card style={{ textAlign: "center", border: "1px solid #BFDBFE" }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+            <div style={{ fontWeight: 800, marginBottom: 4 }}>Solicitud enviada</div>
+            <div style={{ color: "#64748B", fontSize: 13 }}>Revisamos tu perfil y te confirmamos por email.</div>
+          </Card>
+        ) : (
+          <Card style={{ border: "1px solid #BFDBFE", background: "linear-gradient(135deg, #EFF6FF, #FFFFFF)" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showSolicitud ? 14 : 0 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, background: "#EFF6FF",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
+              }}>🏥</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>Sos profesional del mundo animal?</div>
+                <div style={{ color: "#64748B", fontSize: 12 }}>Postulate para aparecer en el directorio</div>
+              </div>
+              <button onClick={function() { setShowSolicitud(!showSolicitud); }} style={{
+                background: "linear-gradient(135deg, #3B82F6, #3b82f6)",
+                color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px",
+                fontSize: 12, fontWeight: 800, cursor: "pointer", flexShrink: 0,
+              }}>Solicitar</button>
+            </div>
+            {showSolicitud && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input placeholder="Nombre / Nombre del negocio *" value={solicitudForm.nombre} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, nombre: e.target.value }; }); }} />
+                <select value={solicitudForm.especialidad} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, especialidad: e.target.value }; }); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", fontSize: 13 }}>
+                  {["Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"].map(function(esp) { return <option key={esp} value={esp}>{esp}</option>; })}
+                </select>
+                <input placeholder="Descripcion breve" value={solicitudForm.descripcion} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, descripcion: e.target.value }; }); }} />
+                <input placeholder="Zona / Barrio" value={solicitudForm.zona} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, zona: e.target.value }; }); }} />
+                <input placeholder="WhatsApp (con codigo de area)" value={solicitudForm.telefono} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, telefono: e.target.value }; }); }} />
+                <input placeholder="Instagram (@usuario)" value={solicitudForm.instagram} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, instagram: e.target.value }; }); }} />
+                <input placeholder="Email de contacto" type="email" value={solicitudForm.email} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, email: e.target.value }; }); }} />
+                <button onClick={handleSolicitudPro} disabled={enviando} style={{
+                  background: "linear-gradient(135deg, #3B82F6, #3b82f6)",
+                  color: "#fff", border: "none", borderRadius: 10, padding: 12,
+                  fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: enviando ? 0.6 : 1,
+                }}>{enviando ? "Enviando..." : "Enviar solicitud"}</button>
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
@@ -786,7 +856,7 @@ export default function Comunidad() {
   return (
     <div>
       <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
-      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Explora mascotas, adopciones, profesionales y descuentos</p>
+      <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Explora mascotas, adopciones, profesionales y descuentos</p>
 
       <TabBar active={tab} onChange={setTab} />
 

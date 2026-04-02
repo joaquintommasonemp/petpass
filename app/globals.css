@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0f1117;
-  --card: #181c27;
-  --border: #252a3a;
-  --accent: #4ade80;
-  --text: #f0f4ff;
-  --muted: #7a8299;
+  --bg: #F4F6FB;
+  --card: #FFFFFF;
+  --border: #E2E8F0;
+  --accent: #0CCE6B;
+  --text: #0F1E3D;
+  --muted: #64748B;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,7 +43,7 @@ button:active { transform: scale(0.97); }
 
 /* Landing page */
 .landing-wrapper {
-  background: #0f1117;
+  background: #F4F6FB;
   min-height: 100vh;
 }
 
@@ -127,7 +127,7 @@ button:active { transform: scale(0.97); }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #252a3a; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
 
 /* Leaflet fix */
 .leaflet-container { z-index: 1; }
@@ -160,8 +160,8 @@ button:active { transform: scale(0.97); }
   transform: translateX(-50%);
   width: 100%;
   max-width: 440px;
-  background: #181c27;
-  border-top: 1px solid #252a3a;
+  background: #FFFFFF;
+  border-top: 1px solid #E2E8F0;
   display: flex;
   z-index: 100;
 }
@@ -185,8 +185,8 @@ button:active { transform: scale(0.97); }
     flex-direction: column;
     width: 240px;
     min-height: 100vh;
-    background: #181c27;
-    border-right: 1px solid #252a3a;
+    background: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
     position: fixed;
     top: 0;
     left: 0;

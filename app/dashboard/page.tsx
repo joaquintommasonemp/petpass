@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-function Badge({ children, color = "#4ade80" }: { children: React.ReactNode; color?: string }) {
+function Badge({ children, color = "#0CCE6B" }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{
       background: color + "22", color, borderRadius: 20, padding: "2px 10px",
@@ -16,8 +16,9 @@ function Badge({ children, color = "#4ade80" }: { children: React.ReactNode; col
 function Card({ children, style = {} }: { children: React.ReactNode; style?: any }) {
   return (
     <div style={{
-      background: "#181c27", border: "1px solid #252a3a", borderRadius: 16,
-      padding: 16, marginBottom: 12, ...style,
+      background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16,
+      padding: 16, marginBottom: 12,
+      boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)", ...style,
     }}>{children}</div>
   );
 }
@@ -273,15 +274,15 @@ export default function Dashboard() {
     router.push("/");
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>;
 
   if (mascotas.length === 0) return (
     <div style={{ textAlign: "center", padding: 40 }}>
       <div style={{ fontSize: 64 }}>🐾</div>
       <h2 style={{ marginTop: 16, marginBottom: 8 }}>Registrá tu primera mascota</h2>
-      <p style={{ color: "#7a8299", marginBottom: 24 }}>Todavía no tenés ninguna mascota en PetPass.</p>
+      <p style={{ color: "#64748B", marginBottom: 24 }}>Todavía no tenés ninguna mascota en PetPass.</p>
       <Link href="/mascota/nueva" style={{
-        background: "#4ade80", color: "#000", borderRadius: 12, padding: "12px 24px",
+        background: "linear-gradient(135deg, #0CCE6B, #09A855)", color: "#fff", borderRadius: 12, padding: "12px 24px",
         fontWeight: 800, textDecoration: "none", fontSize: 14,
       }}>+ Agregar mascota</Link>
     </div>
@@ -294,10 +295,10 @@ export default function Dashboard() {
         <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
           {mascotas.map(m => (
             <button key={m.id} onClick={() => selectMascota(m)} style={{
-              background: selected?.id === m.id ? "#4ade8022" : "#181c27",
-              border: `1px solid ${selected?.id === m.id ? "#4ade80" : "#252a3a"}`,
+              background: selected?.id === m.id ? "#E8FFF2" : "#FFFFFF",
+              border: `1px solid ${selected?.id === m.id ? "#0CCE6B" : "#E2E8F0"}`,
               borderRadius: 20, padding: "6px 14px",
-              color: selected?.id === m.id ? "#4ade80" : "#7a8299",
+              color: selected?.id === m.id ? "#0CCE6B" : "#64748B",
               fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", cursor: "pointer",
               display: "flex", alignItems: "center", gap: 6,
             }}>
@@ -322,13 +323,13 @@ export default function Dashboard() {
             onClick={() => fileRef.current?.click()}
             style={{
               width: 80, height: 80, borderRadius: "50%", cursor: "pointer",
-              background: "#252a3a", border: "2px solid #4ade8044",
+              background: "#F4F6FB", border: "2px solid #C6F6E0",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden", position: "relative",
             }}
           >
             {uploadingPhoto ? (
-              <span style={{ color: "#7a8299", fontSize: 11 }}>Subiendo...</span>
+              <span style={{ color: "#64748B", fontSize: 11 }}>Subiendo...</span>
             ) : selected?.photo_url ? (
               <img src={selected.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
@@ -345,70 +346,70 @@ export default function Dashboard() {
 
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 24, fontWeight: 800, fontFamily: "Georgia, serif" }}>{selected?.name}</div>
-          <div style={{ color: "#7a8299", fontSize: 13, marginBottom: 8 }}>
+          <div style={{ color: "#64748B", fontSize: 13, marginBottom: 8 }}>
             {selected?.breed} · {selected?.age} · {selected?.sex}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {selected?.chip && (
               <a href={`/mascota/${selected.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                <Badge color="#4ade80">🔗 Chip: ...{selected.chip.slice(-6)}</Badge>
+                <Badge color="#0CCE6B">🔗 Chip: ...{selected.chip.slice(-6)}</Badge>
               </a>
             )}
-            {selected?.location && <Badge color="#60a5fa">{selected.location}</Badge>}
-            {selected?.weight && <Badge color="#fb923c">{selected.weight}</Badge>}
+            {selected?.location && <Badge color="#3B82F6">{selected.location}</Badge>}
+            {selected?.weight && <Badge color="#F97316">{selected.weight}</Badge>}
             {selected?.castrado && selected.castrado !== "No sé" && (
-              <Badge color={selected.castrado === "Sí" ? "#a78bfa" : "#7a8299"}>
+              <Badge color={selected.castrado === "Sí" ? "#8B5CF6" : "#64748B"}>
                 {selected.castrado === "Sí" ? "✂️ Castrado/a" : "⚪ No castrado/a"}
               </Badge>
             )}
           </div>
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
-              fontSize: 11, color: "#4ade80", textDecoration: "none", fontWeight: 700,
-              background: "#4ade8012", border: "1px solid #4ade8030", borderRadius: 8,
+              fontSize: 11, color: "#0CCE6B", textDecoration: "none", fontWeight: 700,
+              background: "#E8FFF2", border: "1px solid rgba(12,206,107,0.2)", borderRadius: 8,
               padding: "4px 10px", display: "inline-block",
             }}>🌐 Ver perfil</a>
             {/* Toggle público/privado */}
             <button onClick={togglePublic} style={{
               display: "flex", alignItems: "center", gap: 5,
-              background: isPublic ? "#4ade8018" : "#252a3a",
-              border: `1px solid ${isPublic ? "#4ade8044" : "#353a4a"}`,
+              background: isPublic ? "#E8FFF2" : "#E2E8F0",
+              border: `1px solid ${isPublic ? "#C6F6E0" : "#CBD5E1"}`,
               borderRadius: 20, padding: "4px 10px", cursor: "pointer",
               fontSize: 11, fontWeight: 700,
-              color: isPublic ? "#4ade80" : "#7a8299",
+              color: isPublic ? "#0CCE6B" : "#64748B",
             }}>
               <span style={{
                 width: 14, height: 14, borderRadius: "50%",
-                background: isPublic ? "#4ade80" : "#7a8299",
+                background: isPublic ? "#0CCE6B" : "#64748B",
                 display: "inline-block", transition: "background 0.2s",
               }} />
               {isPublic ? "Visible en Explorar" : "Perfil privado"}
             </button>
             <button onClick={() => setShowInvitar(!showInvitar)} style={{
               display: "flex", alignItems: "center", gap: 5,
-              background: "#60a5fa18", border: "1px solid #60a5fa33",
+              background: "#EFF6FF", border: "1px solid #BFDBFE",
               borderRadius: 20, padding: "4px 10px", cursor: "pointer",
-              fontSize: 11, fontWeight: 700, color: "#60a5fa",
+              fontSize: 11, fontWeight: 700, color: "#3B82F6",
             }}>{"👪"} Familia</button>
           </div>
           {showInvitar && (
-            <div style={{ marginTop: 12, background: "#0f1117", borderRadius: 12, padding: 12 }}>
-              <div style={{ fontSize: 12, color: "#7a8299", marginBottom: 8 }}>
+            <div style={{ marginTop: 12, background: "#F4F6FB", borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 8 }}>
                 Compartí este link con tu familia. Cuando lo abran (con su cuenta), podrán ver y gestionar a {selected?.name}.
               </div>
               <button onClick={() => copyFamiliaLink(selected?.id)} style={{
-                width: "100%", background: copiedFamilia ? "#60a5fa22" : "#252a3a",
-                color: copiedFamilia ? "#60a5fa" : "#f0f4ff",
-                border: `1px solid ${copiedFamilia ? "#60a5fa44" : "#353a4a"}`,
+                width: "100%", background: copiedFamilia ? "#EFF6FF" : "#E2E8F0",
+                color: copiedFamilia ? "#3B82F6" : "#0F1E3D",
+                border: `1px solid ${copiedFamilia ? "#BFDBFE" : "#CBD5E1"}`,
                 borderRadius: 10, padding: "9px 12px", fontWeight: 800, fontSize: 13, cursor: "pointer",
               }}>
                 {copiedFamilia ? "✅ Link copiado!" : "📋 Copiar link de acceso familiar"}
               </button>
               {familiaMembers.length > 0 && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Con acceso</div>
+                  <div style={{ fontSize: 11, color: "#64748B", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Con acceso</div>
                   {familiaMembers.map((f: any, i: number) => (
-                    <div key={i} style={{ fontSize: 12, color: "#f0f4ff", padding: "4px 0", borderBottom: "1px solid #1a2030" }}>
+                    <div key={i} style={{ fontSize: 12, color: "#0F1E3D", padding: "4px 0", borderBottom: "1px solid #1a2030" }}>
                       👤 {f.profiles?.full_name || "Usuario"}
                     </div>
                   ))}
@@ -428,11 +429,11 @@ export default function Dashboard() {
         const citasProximas = citas.filter(c => c.date >= today);
         const hasData = lastVac || nextVac || lastVisita || citasProximas.length > 0;
         return (
-          <Card style={{ border: "1px solid #4ade8022", padding: 0, overflow: "hidden" }}>
-            <div style={{ background: "#0f2a1a", padding: "10px 16px", borderBottom: "1px solid #4ade8022", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontWeight: 800, fontSize: 13, color: "#4ade80" }}>🏥 Estado de salud</span>
+          <Card style={{ border: "1px solid #E8FFF2", padding: 0, overflow: "hidden" }}>
+            <div style={{ background: "#E8FFF2", padding: "10px 16px", borderBottom: "1px solid #E8FFF2", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 800, fontSize: 13, color: "#0CCE6B" }}>🏥 Estado de salud</span>
               <button onClick={() => setShowAgendarCita(true)} style={{
-                background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
                 borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
               }}>+ Agendar cita</button>
             </div>
@@ -440,56 +441,56 @@ export default function Dashboard() {
               {lastVisita && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1a2030" }}>
                   <div>
-                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Última visita</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 1 }}>Última visita</div>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{lastVisita.title}</div>
                   </div>
-                  <span style={{ fontSize: 11, color: "#7a8299" }}>{lastVisita.date}</span>
+                  <span style={{ fontSize: 11, color: "#64748B" }}>{lastVisita.date}</span>
                 </div>
               )}
               {lastVac && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1a2030" }}>
                   <div>
-                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Última vacuna</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 1 }}>Última vacuna</div>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{lastVac.name}</div>
                   </div>
-                  <span style={{ fontSize: 11, color: "#7a8299" }}>{lastVac.date}</span>
+                  <span style={{ fontSize: 11, color: "#64748B" }}>{lastVac.date}</span>
                 </div>
               )}
               {nextVac && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: citasProximas.length > 0 ? "1px solid #1a2030" : "none" }}>
                   <div>
-                    <div style={{ fontSize: 11, color: "#7a8299", marginBottom: 1 }}>Próxima vacuna</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 1 }}>Próxima vacuna</div>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{nextVac.name}</div>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>{nextVac.next_date}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0CCE6B" }}>{nextVac.next_date}</span>
                 </div>
               )}
               {!hasData && (
-                <div style={{ textAlign: "center", padding: "12px 0", color: "#7a8299", fontSize: 13 }}>
+                <div style={{ textAlign: "center", padding: "12px 0", color: "#64748B", fontSize: 13 }}>
                   Sin datos de salud registrados aún
                 </div>
               )}
               {citasProximas.length > 0 && (
                 <div style={{ paddingTop: 8 }}>
-                  <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6 }}>PRÓXIMAS CITAS</div>
+                  <div style={{ fontSize: 11, color: "#8B5CF6", fontWeight: 700, marginBottom: 6 }}>PRÓXIMAS CITAS</div>
                   {citasProximas.map((c: any) => (
                     <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #1a2030" }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{c.summary}</div>
-                        {c.vet && <div style={{ fontSize: 11, color: "#7a8299" }}>{c.vet}</div>}
+                        {c.vet && <div style={{ fontSize: 11, color: "#64748B" }}>{c.vet}</div>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "#a78bfa" }}>{c.date}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#8B5CF6" }}>{c.date}</span>
                         <button onClick={() => addToGoogleCalendar(c)} title="Agregar a Google Calendar" style={{
-                          background: "transparent", border: "none", color: "#60a5fa",
+                          background: "transparent", border: "none", color: "#3B82F6",
                           fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
                         }}>📅</button>
                         <button onClick={() => downloadIcal(c)} title="Descargar .ics" style={{
-                          background: "transparent", border: "none", color: "#a78bfa",
+                          background: "transparent", border: "none", color: "#8B5CF6",
                           fontSize: 13, cursor: "pointer", padding: "0 2px", lineHeight: 1,
                         }}>⬇️</button>
                         <button onClick={() => eliminarCita(c.id)} style={{
-                          background: "transparent", border: "none", color: "#f87171",
+                          background: "transparent", border: "none", color: "#EF4444",
                           fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1,
                         }}>×</button>
                       </div>
@@ -505,16 +506,16 @@ export default function Dashboard() {
       {/* Vacunas */}
       {vacunas.length > 0 && (
         <>
-          <div style={{ color: "#7a8299", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "#64748B", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>
             Vacunas
           </div>
           {vacunas.map((v: any, i: number) => (
             <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px" }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{v.name}</div>
-                <div style={{ color: "#7a8299", fontSize: 12 }}>Aplicada: {v.date} · Próxima: {v.next_date}</div>
+                <div style={{ color: "#64748B", fontSize: 12 }}>Aplicada: {v.date} · Próxima: {v.next_date}</div>
               </div>
-              <Badge color={v.status === "ok" ? "#4ade80" : "#f87171"}>
+              <Badge color={v.status === "ok" ? "#0CCE6B" : "#EF4444"}>
                 {v.status === "ok" ? "Al día" : "Vencida"}
               </Badge>
             </Card>
@@ -523,25 +524,25 @@ export default function Dashboard() {
       )}
 
       {/* Reporte de salud */}
-      <Card style={{ border: "1px solid #60a5fa22", padding: 0, overflow: "hidden" }}>
-        <div style={{ background: "#0f1a2a", padding: "10px 16px", borderBottom: "1px solid #60a5fa22", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 800, fontSize: 13, color: "#60a5fa" }}>📋 Reporte de salud</span>
+      <Card style={{ border: "1px solid #EFF6FF", padding: 0, overflow: "hidden" }}>
+        <div style={{ background: "#F0F7FF", padding: "10px 16px", borderBottom: "1px solid #EFF6FF", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 800, fontSize: 13, color: "#3B82F6" }}>📋 Reporte de salud</span>
           <button onClick={generarReporte} disabled={loadingReporte} style={{
-            background: "#60a5fa22", color: "#60a5fa", border: "1px solid #60a5fa44",
+            background: "#EFF6FF", color: "#3B82F6", border: "1px solid #BFDBFE",
             borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
             opacity: loadingReporte ? 0.6 : 1,
           }}>{loadingReporte ? "Generando..." : reporte ? "Regenerar" : "Generar con IA"}</button>
         </div>
         {!reporte && !loadingReporte && (
-          <div style={{ padding: "14px 16px", color: "#7a8299", fontSize: 13 }}>
+          <div style={{ padding: "14px 16px", color: "#64748B", fontSize: 13 }}>
             Generá un resumen completo del estado de salud de {selected?.name} con análisis, alertas y recomendaciones.
           </div>
         )}
         {loadingReporte && (
-          <div style={{ padding: "14px 16px", color: "#7a8299", fontSize: 13 }}>Analizando historial...</div>
+          <div style={{ padding: "14px 16px", color: "#64748B", fontSize: 13 }}>Analizando historial...</div>
         )}
         {reporte && (
-          <div style={{ padding: 16, fontSize: 13, color: "#f0f4ff", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+          <div style={{ padding: 16, fontSize: 13, color: "#0F1E3D", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
             {reporte.split("**").join("")}
           </div>
         )}
@@ -555,19 +556,19 @@ export default function Dashboard() {
         <span style={{ fontSize: 28, flexShrink: 0 }}>{"⬛"}</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>QR de identificacion</div>
-          <div style={{ color: "#7a8299", fontSize: 11 }}>Colocalo en el collar. Si lo encuentran, ven todos sus datos</div>
+          <div style={{ color: "#64748B", fontSize: 11 }}>Colocalo en el collar. Si lo encuentran, ven todos sus datos</div>
         </div>
         <a href={"/mascota/" + selected?.id} target="_blank" rel="noreferrer" style={{
-          background: "#252a3a", color: "#f0f4ff", borderRadius: 8, padding: "6px 12px",
+          background: "#E2E8F0", color: "#0F1E3D", borderRadius: 8, padding: "6px 12px",
           fontSize: 11, fontWeight: 700, textDecoration: "none", flexShrink: 0,
         }}>Ver</a>
       </Card>
 
       {/* Peso */}
       <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px" }}>
-        <div style={{ fontWeight: 700, fontSize: 14 }}>{"⚖️"} Peso: <span style={{ color: "#fb923c" }}>{selected?.weight || "no registrado"}</span></div>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>{"⚖️"} Peso: <span style={{ color: "#F97316" }}>{selected?.weight || "no registrado"}</span></div>
         <button onClick={() => setShowPeso(!showPeso)} style={{
-          background: "#fb923c22", color: "#fb923c", border: "1px solid #fb923c44",
+          background: "#FFF7ED", color: "#F97316", border: "1px solid #FED7AA",
           borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer",
         }}>Actualizar</button>
       </Card>
@@ -576,32 +577,32 @@ export default function Dashboard() {
           <input type="number" placeholder="Nuevo peso en kg" value={nuevoPeso}
             onChange={e => setNuevoPeso(e.target.value)} style={{ flex: 1 }} />
           <button onClick={handleAgregarPeso} style={{
-            background: "#4ade80", color: "#000", border: "none", borderRadius: 8,
+            background: "#0CCE6B", color: "#000", border: "none", borderRadius: 8,
             padding: "8px 14px", fontWeight: 800, cursor: "pointer",
           }}>Guardar</button>
         </div>
       )}
 
       {/* URGENCIAS */}
-      <Card style={{ border: "1px solid #f8717133", padding: 0, overflow: "hidden" }}>
-        <div style={{ background: "#1a0f0f", padding: "10px 16px", borderBottom: "1px solid #f8717122", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 800, fontSize: 13, color: "#f87171" }}>🚨 Urgencias y contactos clave</span>
+      <Card style={{ border: "1px solid #FECACA", padding: 0, overflow: "hidden" }}>
+        <div style={{ background: "#FFF0F0", padding: "10px 16px", borderBottom: "1px solid #FFF0F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 800, fontSize: 13, color: "#EF4444" }}>🚨 Urgencias y contactos clave</span>
           <button onClick={() => setShowAddUrgencia(!showAddUrgencia)} style={{
-            background: "#f8717122", color: "#f87171", border: "1px solid #f8717144",
+            background: "#FFF0F0", color: "#EF4444", border: "1px solid #FECACA",
             borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
           }}>+ Agregar</button>
         </div>
 
         {showAddUrgencia && (
-          <div style={{ padding: 16, borderBottom: "1px solid #252a3a" }}>
+          <div style={{ padding: 16, borderBottom: "1px solid #E2E8F0" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <input placeholder="Nombre (ej: Dr. García, Clínica VetCentro)" value={urgenciaForm.name} onChange={e => setUrgenciaForm(f => ({ ...f, name: e.target.value }))} />
               <input placeholder="Teléfono" value={urgenciaForm.phone} onChange={e => setUrgenciaForm(f => ({ ...f, phone: e.target.value }))} />
               <input placeholder="Especialidad (ej: Clínica general, Guardia 24hs)" value={urgenciaForm.specialty} onChange={e => setUrgenciaForm(f => ({ ...f, specialty: e.target.value }))} />
               <input placeholder="Notas (ej: atiende los sábados)" value={urgenciaForm.notes} onChange={e => setUrgenciaForm(f => ({ ...f, notes: e.target.value }))} />
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setShowAddUrgencia(false)} style={{ flex: 1, background: "#252a3a", color: "#7a8299", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 700 }}>Cancelar</button>
-                <button onClick={handleAddUrgencia} style={{ flex: 1, background: "#f87171", color: "#fff", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 800 }}>Guardar</button>
+                <button onClick={() => setShowAddUrgencia(false)} style={{ flex: 1, background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 700 }}>Cancelar</button>
+                <button onClick={handleAddUrgencia} style={{ flex: 1, background: "#EF4444", color: "#fff", border: "none", borderRadius: 8, padding: 10, cursor: "pointer", fontWeight: 800 }}>Guardar</button>
               </div>
             </div>
           </div>
@@ -609,27 +610,27 @@ export default function Dashboard() {
 
         <div style={{ padding: urgencias.length > 0 ? "8px 16px 12px" : "14px 16px" }}>
           {urgencias.length === 0 && !showAddUrgencia && (
-            <p style={{ color: "#7a8299", fontSize: 13, margin: 0 }}>Guardá los datos del veterinario de confianza para tenerlos a mano en emergencias.</p>
+            <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>Guardá los datos del veterinario de confianza para tenerlos a mano en emergencias.</p>
           )}
           {urgencias.map((u: any) => (
             <div key={u.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "10px 0", borderBottom: "1px solid #1a2030" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{u.name}</div>
-                {u.specialty && <div style={{ fontSize: 11, color: "#f87171", fontWeight: 600, marginBottom: 2 }}>{u.specialty}</div>}
+                {u.specialty && <div style={{ fontSize: 11, color: "#EF4444", fontWeight: 600, marginBottom: 2 }}>{u.specialty}</div>}
                 {u.phone && (
-                  <a href={`tel:${u.phone}`} style={{ fontSize: 13, color: "#7a8299", textDecoration: "none", display: "block" }}>📞 {u.phone}</a>
+                  <a href={`tel:${u.phone}`} style={{ fontSize: 13, color: "#64748B", textDecoration: "none", display: "block" }}>📞 {u.phone}</a>
                 )}
-                {u.notes && <div style={{ fontSize: 11, color: "#7a8299", marginTop: 2 }}>{u.notes}</div>}
+                {u.notes && <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>{u.notes}</div>}
               </div>
               <div style={{ display: "flex", gap: 6, marginLeft: 8, flexShrink: 0 }}>
                 {u.phone && (
                   <a href={`https://wa.me/${u.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
-                    background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                    background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
                     borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, textDecoration: "none",
                   }}>WA</a>
                 )}
                 <button onClick={() => eliminarUrgencia(u.id)} style={{
-                  background: "transparent", border: "none", color: "#f87171",
+                  background: "transparent", border: "none", color: "#EF4444",
                   fontSize: 18, cursor: "pointer", padding: "0 2px", lineHeight: 1,
                 }}>×</button>
               </div>
@@ -641,12 +642,12 @@ export default function Dashboard() {
       {/* Acciones */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <Link href="/mascota/nueva" style={{
-          flex: 1, background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+          flex: 1, background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
           borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13,
           textDecoration: "none", textAlign: "center",
         }}>+ Agregar mascota</Link>
         <button onClick={() => setShowBaja(true)} style={{
-          flex: 1, background: "#f8717122", color: "#f87171", border: "1px solid #f8717144",
+          flex: 1, background: "#FFF0F0", color: "#EF4444", border: "1px solid #FECACA",
           borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>{"🕊️"} Dar de baja</button>
       </div>
@@ -660,19 +661,19 @@ export default function Dashboard() {
           position: "fixed", inset: 0, background: "#00000088", zIndex: 200,
           display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
         }}>
-          <div style={{ background: "#181c27", border: "1px solid #f8717144", borderRadius: 16, padding: 24, maxWidth: 340, width: "100%" }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #FECACA", borderRadius: 16, padding: 24, maxWidth: 340, width: "100%" }}>
             <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🕊️</div>
             <h3 style={{ textAlign: "center", marginBottom: 8 }}>Dar de baja a {selected?.name}</h3>
-            <p style={{ color: "#7a8299", fontSize: 13, textAlign: "center", marginBottom: 20 }}>
+            <p style={{ color: "#64748B", fontSize: 13, textAlign: "center", marginBottom: 20 }}>
               Lamentamos mucho tu pérdida. El perfil quedará guardado en tu historial pero no aparecerá activo.
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setShowBaja(false)} style={{
-                flex: 1, background: "#252a3a", color: "#7a8299", border: "none",
+                flex: 1, background: "#E2E8F0", color: "#64748B", border: "none",
                 borderRadius: 10, padding: 12, fontWeight: 700, cursor: "pointer",
               }}>Cancelar</button>
               <button onClick={handleBaja} style={{
-                flex: 1, background: "#f87171", color: "#fff", border: "none",
+                flex: 1, background: "#EF4444", color: "#fff", border: "none",
                 borderRadius: 10, padding: 12, fontWeight: 700, cursor: "pointer",
               }}>Confirmar</button>
             </div>
@@ -683,19 +684,19 @@ export default function Dashboard() {
       {/* Modal agendar cita */}
       {showAgendarCita && (
         <div style={{ position: "fixed", inset: 0, background: "#00000088", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: "#181c27", border: "1px solid #a78bfa44", borderRadius: 16, padding: 24, maxWidth: 340, width: "100%" }}>
-            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16, color: "#a78bfa" }}>📅 Agendar cita</div>
+          <div style={{ background: "#FFFFFF", border: "1px solid #DDD6FE", borderRadius: 16, padding: 24, maxWidth: 340, width: "100%" }}>
+            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16, color: "#8B5CF6" }}>📅 Agendar cita</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <input type="date" value={citaForm.date} onChange={e => setCitaForm(f => ({ ...f, date: e.target.value }))} />
               <input placeholder="Motivo (ej: Control anual, Castración)" value={citaForm.summary} onChange={e => setCitaForm(f => ({ ...f, summary: e.target.value }))} />
               <input placeholder="Veterinario / Clínica (opcional)" value={citaForm.vet} onChange={e => setCitaForm(f => ({ ...f, vet: e.target.value }))} />
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => setShowAgendarCita(false)} style={{
-                  flex: 1, background: "#252a3a", color: "#7a8299", border: "none",
+                  flex: 1, background: "#E2E8F0", color: "#64748B", border: "none",
                   borderRadius: 10, padding: 12, fontWeight: 700, cursor: "pointer",
                 }}>Cancelar</button>
                 <button onClick={handleAgendarCita} style={{
-                  flex: 1, background: "#a78bfa", color: "#fff", border: "none",
+                  flex: 1, background: "#8B5CF6", color: "#fff", border: "none",
                   borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
                 }}>Agendar</button>
               </div>
@@ -706,15 +707,15 @@ export default function Dashboard() {
 
       {isAdmin && (
         <Link href="/admin" style={{
-          display: "block", width: "100%", background: "#f472b622", color: "#f472b6",
-          border: "1px solid #f472b644", borderRadius: 12, padding: 12, fontWeight: 700,
+          display: "block", width: "100%", background: "#FDF2F8", color: "#EC4899",
+          border: "1px solid #FBCFE8", borderRadius: 12, padding: 12, fontWeight: 700,
           fontSize: 13, marginTop: 12, textAlign: "center", textDecoration: "none",
         }}>⚙️ Panel admin</Link>
       )}
 
       <button onClick={handleLogout} style={{
-        width: "100%", background: "transparent", border: "1px solid #252a3a",
-        borderRadius: 12, padding: 12, color: "#7a8299", fontSize: 13, marginTop: 8, cursor: "pointer",
+        width: "100%", background: "transparent", border: "1px solid #E2E8F0",
+        borderRadius: 12, padding: 12, color: "#64748B", fontSize: 13, marginTop: 8, cursor: "pointer",
       }}>Cerrar sesión</button>
     </div>
   );

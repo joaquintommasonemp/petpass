@@ -7,7 +7,7 @@ const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: f
 
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
+    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
       {children}
     </div>
   );
@@ -100,26 +100,26 @@ export default function Perdidas() {
     <div>
       {!locationAsked && (
         <div style={{
-          background: "#0f1a2a", border: "1px solid #60a5fa44",
+          background: "#EFF6FF", border: "1px solid #BFDBFE",
           borderRadius: 14, padding: 16, marginBottom: 16,
           display: "flex", gap: 14, alignItems: "flex-start",
         }}>
           <span style={{ fontSize: 28, flexShrink: 0 }}>📍</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 14, color: "#60a5fa", marginBottom: 4 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: "#3B82F6", marginBottom: 4 }}>
               Activar ubicacion
             </div>
-            <p style={{ color: "#7a8299", fontSize: 12, lineHeight: 1.5, marginBottom: 10 }}>
+            <p style={{ color: "#64748B", fontSize: 12, lineHeight: 1.5, marginBottom: 10 }}>
               Para mostrar mascotas perdidas cerca tuyo y centrar el mapa en tu zona, necesitamos acceder a tu ubicacion. No la guardamos ni la compartimos.
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={requestLocation} style={{
-                background: "#60a5fa", color: "#000", border: "none",
+                background: "#3B82F6", color: "#000", border: "none",
                 borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer",
               }}>Aceptar</button>
               <button onClick={() => setLocationAsked(true)} style={{
-                background: "transparent", border: "1px solid #252a3a",
-                color: "#7a8299", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer",
+                background: "transparent", border: "1px solid #E2E8F0",
+                color: "#64748B", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer",
               }}>Omitir</button>
             </div>
           </div>
@@ -129,8 +129,8 @@ export default function Perdidas() {
       <button
         onClick={() => setReporting(!reporting)}
         style={{
-          width: "100%", background: "#f8717122", color: "#f87171",
-          border: "1px solid #f8717144", borderRadius: 12, padding: 12,
+          width: "100%", background: "#FFF0F0", color: "#EF4444",
+          border: "1px solid #FECACA", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 14, marginBottom: 16,
         }}
       >
@@ -138,8 +138,8 @@ export default function Perdidas() {
       </button>
 
       {reporting && (
-        <Card style={{ border: "1px solid #f8717144" }}>
-          <div style={{ fontWeight: 700, color: "#f87171", marginBottom: 12 }}>Nueva alerta</div>
+        <Card style={{ border: "1px solid #FECACA" }}>
+          <div style={{ fontWeight: 700, color: "#EF4444", marginBottom: 12 }}>Nueva alerta</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {fields.map(([label, key]) => (
               <input
@@ -155,8 +155,8 @@ export default function Perdidas() {
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               style={{
-                background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10,
-                padding: "10px 14px", color: "#f0f4ff", resize: "none",
+                background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
+                padding: "10px 14px", color: "#0F1E3D", resize: "none",
               }}
             />
 
@@ -165,11 +165,11 @@ export default function Perdidas() {
               <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
               {photoPreview ? (
                 <div style={{ position: "relative", display: "inline-block" }}>
-                  <img src={photoPreview} style={{ height: 100, borderRadius: 10, border: "1px solid #f8717144", objectFit: "cover" }} />
+                  <img src={photoPreview} style={{ height: 100, borderRadius: 10, border: "1px solid #FECACA", objectFit: "cover" }} />
                   <button
                     onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (fileRef.current) fileRef.current.value = ""; }}
                     style={{
-                      position: "absolute", top: -8, right: -8, background: "#f87171", color: "#fff",
+                      position: "absolute", top: -8, right: -8, background: "#EF4444", color: "#fff",
                       border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: 13,
                       cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                     }}
@@ -179,8 +179,8 @@ export default function Perdidas() {
                 <button
                   onClick={() => fileRef.current?.click()}
                   style={{
-                    width: "100%", background: "#0f1117", border: "1px dashed #f8717155",
-                    borderRadius: 10, padding: 12, color: "#f87171", fontWeight: 700,
+                    width: "100%", background: "#F4F6FB", border: "1px dashed #FECACA",
+                    borderRadius: 10, padding: 12, color: "#EF4444", fontWeight: 700,
                     fontSize: 13, cursor: "pointer",
                   }}
                 >
@@ -193,7 +193,7 @@ export default function Perdidas() {
               onClick={handleReport}
               disabled={loading}
               style={{
-                background: "#f87171", color: "#fff", border: "none",
+                background: "#EF4444", color: "#fff", border: "none",
                 borderRadius: 10, padding: 12, fontWeight: 800,
                 opacity: loading ? 0.6 : 1,
               }}
@@ -209,7 +209,7 @@ export default function Perdidas() {
       </div>
 
       <div style={{
-        color: "#7a8299", fontSize: 11, fontWeight: 700,
+        color: "#64748B", fontSize: 11, fontWeight: 700,
         letterSpacing: 2, textTransform: "uppercase", marginBottom: 10,
       }}>
         Alertas activas
@@ -219,7 +219,7 @@ export default function Perdidas() {
         <Card>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 40 }}>🐾</div>
-            <p style={{ color: "#7a8299", fontSize: 13, marginTop: 8 }}>
+            <p style={{ color: "#64748B", fontSize: 13, marginTop: 8 }}>
               No hay mascotas perdidas reportadas en este momento.
             </p>
           </div>
@@ -243,16 +243,16 @@ export default function Perdidas() {
               )}
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>{p.pet_name}</div>
-                <div style={{ color: "#7a8299", fontSize: 12 }}>{p.breed}{p.color ? " - " + p.color : ""}</div>
-                {p.zone && <div style={{ color: "#7a8299", fontSize: 12 }}>📍 {p.zone}</div>}
+                <div style={{ color: "#64748B", fontSize: 12 }}>{p.breed}{p.color ? " - " + p.color : ""}</div>
+                {p.zone && <div style={{ color: "#64748B", fontSize: 12 }}>📍 {p.zone}</div>}
                 {p.description && (
-                  <div style={{ fontSize: 12, color: "#f0f4ff", marginTop: 4 }}>{p.description}</div>
+                  <div style={{ fontSize: 12, color: "#0F1E3D", marginTop: 4 }}>{p.description}</div>
                 )}
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <span style={{
-                  background: days <= 2 ? "#f8717122" : "#fb923c22",
-                  color: days <= 2 ? "#f87171" : "#fb923c",
+                  background: days <= 2 ? "#FFF0F0" : "#FFF7ED",
+                  color: days <= 2 ? "#EF4444" : "#F97316",
                   borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700,
                 }}>
                   hace {days}d
@@ -263,8 +263,8 @@ export default function Perdidas() {
                     target="_blank"
                     rel="noreferrer"
                     style={{
-                      display: "block", marginTop: 6, background: "#4ade8022",
-                      color: "#4ade80", border: "1px solid #4ade8044", borderRadius: 8,
+                      display: "block", marginTop: 6, background: "#E8FFF2",
+                      color: "#0CCE6B", border: "1px solid #C6F6E0", borderRadius: 8,
                       padding: "4px 8px", fontSize: 11, fontWeight: 700, textDecoration: "none",
                     }}
                   >
