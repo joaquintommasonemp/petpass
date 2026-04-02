@@ -105,11 +105,11 @@ export default function Dashboard() {
     loadFamilia(m.id);
     const { data: vacs } = await supabase.from("vacunas").select("*").eq("mascota_id", m.id);
     setVacunas(vacs || []);
-    const { data: diags } = await supabase.from("historial").select("*")
+    const EXCLUDED_TITLES = ["Actualización de peso", "Peso inicial", "📄 Documento", "📅 Cita"];
+    const { data: allHist } = await supabase.from("historial").select("*")
       .eq("mascota_id", m.id)
-      .not("title", "in", '("Actualización de peso","Peso inicial","📄 Documento","📅 Cita")')
-      .order("created_at", { ascending: false }).limit(5);
-    setDiagnosticos(diags || []);
+      .order("created_at", { ascending: false }).limit(30);
+    setDiagnosticos((allHist || []).filter((h: any) => !EXCLUDED_TITLES.includes(h.title)).slice(0, 5));
     const { data: cits } = await supabase.from("historial").select("*")
       .eq("mascota_id", m.id).eq("title", "📅 Cita")
       .order("date", { ascending: true });

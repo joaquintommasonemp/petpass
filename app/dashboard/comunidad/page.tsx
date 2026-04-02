@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-// useRef already imported above
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
+import { timeAgo } from "@/lib/utils";
 
 type Tab = "explorar" | "adopciones" | "perdidas" | "descuentos";
 
@@ -136,14 +136,6 @@ function TabExplorar() {
     reader.readAsDataURL(f);
   }
 
-  function timeAgo(d: string) {
-    const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-    if (mins < 1) return "ahora";
-    if (mins < 60) return `hace ${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `hace ${hrs}h`;
-    return `hace ${Math.floor(hrs / 24)}d`;
-  }
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
 
