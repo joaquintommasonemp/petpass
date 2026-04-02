@@ -18,9 +18,9 @@ const TESTIMONIALS = [
 
 export default function Home() {
   return (
-    <main style={{ maxWidth: 440, margin: "0 auto", background: "#0f1117", minHeight: "100vh" }}>
+    <main className="landing-wrapper">
 
-      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      {/* HERO */}
       <div style={{
         background: "linear-gradient(160deg, #0f2a1a 0%, #0f1117 65%)",
         padding: "52px 24px 40px",
@@ -30,41 +30,43 @@ export default function Home() {
         <div style={{ position: "absolute", top: -80, right: -80, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, #4ade8025, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -40, left: -60, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, #22c55e15, transparent 70%)", pointerEvents: "none" }} />
 
-        <div style={{ fontSize: 52, marginBottom: 16 }}>🐾</div>
+        <div className="landing-hero-inner">
+          <div style={{ fontSize: 52, marginBottom: 16 }}>🐾</div>
 
-        <h1 style={{ fontSize: 36, fontWeight: 900, lineHeight: 1.15, marginBottom: 16 }}>
-          <span style={{ color: "#f0f4ff" }}>Todo lo que tu mascota</span>
-          <br />
-          <span style={{
-            background: "linear-gradient(90deg, #4ade80, #22d3ee)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>necesita, en un solo lugar.</span>
-        </h1>
+          <h1 style={{ fontSize: 36, fontWeight: 900, lineHeight: 1.15, marginBottom: 16 }}>
+            <span style={{ color: "#f0f4ff" }}>Todo lo que tu mascota</span>
+            <br />
+            <span style={{
+              background: "linear-gradient(90deg, #4ade80, #22d3ee)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>necesita, en un solo lugar.</span>
+          </h1>
 
-        <p style={{ color: "#94a3b8", fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 340, margin: "0 auto 28px" }}>
-          Historia clínica digital, IA veterinaria 24/7, QR de identificación, alertas de pérdida y comunidad — todo gratis.
-        </p>
+          <p style={{ color: "#94a3b8", fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 420, margin: "0 auto 28px" }}>
+            Historia clínica digital, IA veterinaria 24/7, QR de identificación, alertas de pérdida y comunidad. Todo gratis.
+          </p>
 
-        <Link href="/registro" style={{
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          background: "linear-gradient(135deg, #4ade80, #22c55e)",
-          color: "#000", borderRadius: 14, padding: "16px 24px",
-          fontWeight: 900, fontSize: 16, textDecoration: "none",
-          boxShadow: "0 8px 32px #4ade8050", marginBottom: 12,
-        }}>
-          🐾 Registrá tu mascota gratis
-        </Link>
+          <Link href="/registro" style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            background: "linear-gradient(135deg, #4ade80, #22c55e)",
+            color: "#000", borderRadius: 14, padding: "16px 24px",
+            fontWeight: 900, fontSize: 16, textDecoration: "none",
+            boxShadow: "0 8px 32px #4ade8050", marginBottom: 12,
+          }}>
+            {"🐾"} Registrá tu mascota gratis
+          </Link>
 
-        <Link href="/login" style={{
-          display: "block", textAlign: "center",
-          color: "#64748b", fontSize: 13, textDecoration: "none", padding: "8px",
-        }}>
-          Ya tengo cuenta →
-        </Link>
+          <Link href="/login" style={{
+            display: "block", textAlign: "center",
+            color: "#64748b", fontSize: 13, textDecoration: "none", padding: "8px",
+          }}>
+            Ya tengo cuenta {">"}
+          </Link>
+        </div>
       </div>
 
-      {/* ── MOCKUP ───────────────────────────────────────────────────── */}
-      <div style={{ padding: "32px 24px 0" }}>
+      {/* MOCKUP */}
+      <div className="landing-mockup-wrap">
         <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 20, overflow: "hidden" }}>
           <div style={{ background: "#181c27", borderBottom: "1px solid #252a3a", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontWeight: 800, fontSize: 14, color: "#4ade80" }}>PetPass 🐾</span>
@@ -100,8 +102,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── STATS ────────────────────────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "24px 24px 0" }}>
+      {/* STATS */}
+      <div className="landing-stats-row">
         {[
           ["🐾", "+5.000", "mascotas"],
           ["🤖", "24/7", "Vet IA"],
@@ -115,13 +117,13 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ── FEATURES ─────────────────────────────────────────────────── */}
-      <div style={{ padding: "28px 24px 0" }}>
+      {/* FEATURES */}
+      <div className="landing-section">
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>Todo incluido, todo gratis</div>
           <div style={{ fontSize: 14, color: "#94a3b8" }}>Una app pensada para el día a día de tu mascota</div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="landing-features-grid">
           {FEATURES.map((f, i) => (
             <div key={i} style={{
               background: "#181c27", border: `1px solid ${f.color}20`,
@@ -140,12 +142,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── TESTIMONIOS ──────────────────────────────────────────────── */}
-      <div style={{ padding: "28px 24px 0" }}>
+      {/* TESTIMONIOS */}
+      <div className="landing-section">
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>Lo que dicen los dueños</div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="landing-testimonials-grid">
           {TESTIMONIALS.map((t, i) => (
             <div key={i} style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16 }}>
               <div style={{ fontSize: 20, marginBottom: 8, color: "#4ade80" }}>★★★★★</div>
@@ -162,8 +164,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── CTA FINAL ────────────────────────────────────────────────── */}
-      <div style={{ padding: "28px 24px 52px" }}>
+      {/* CTA FINAL */}
+      <div className="landing-cta">
         <div style={{
           background: "linear-gradient(135deg, #0f2a1a, #0f1a2a)",
           border: "1px solid #4ade8030", borderRadius: 20, padding: "32px 24px", textAlign: "center",

@@ -41,6 +41,76 @@ a { transition: opacity 0.15s; }
 a:active { opacity: 0.7; }
 button:active { transform: scale(0.97); }
 
+/* Landing page */
+.landing-wrapper {
+  background: #0f1117;
+  min-height: 100vh;
+}
+
+.landing-hero-inner {
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.landing-section {
+  padding: 28px 24px 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.landing-features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.landing-testimonials-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.landing-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 24px 24px 0;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 24px;
+}
+
+.landing-mockup-wrap {
+  padding: 32px 24px 0;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.landing-cta {
+  padding: 28px 24px 52px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .landing-hero-inner {
+    max-width: 680px;
+  }
+
+  .landing-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .landing-testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
