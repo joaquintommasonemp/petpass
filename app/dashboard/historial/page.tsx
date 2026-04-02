@@ -28,6 +28,8 @@ function detectStudyType(fileName: string): string {
 }
 
 type HistTab = "consultas" | "alimentacion" | "documentos";
+const HIST_TABS: HistTab[] = ["consultas", "alimentacion", "documentos"];
+const HIST_TAB_LABELS: Record<HistTab, string> = { consultas: "Consultas", alimentacion: "Alimentacion", documentos: "Docs" };
 
 export default function Historial() {
   const [mascotas, setMascotas] = useState<any[]>([]);
@@ -216,9 +218,9 @@ export default function Historial() {
     } else {
       console.error("Upload error:", error.message);
       if (error.message.includes("Bucket not found")) {
-        alert("El bucket 'documentos' no existe. Crealo en Supabase → Storage.");
+        alert("El bucket 'documentos' no existe. Crealo en Supabase -> Storage.");
       } else if (error.message.includes("row-level security") || error.message.includes("policy")) {
-        alert("Sin permisos. Revisá las políticas del bucket 'documentos' en Supabase → Storage → Policies.");
+        alert("Sin permisos. Revisa las politicas del bucket 'documentos' en Supabase -> Storage -> Policies.");
       } else {
         alert("Error al subir: " + error.message);
       }
@@ -241,7 +243,7 @@ export default function Historial() {
   function shareDoc(pathOrUrl: string, fileName: string) {
     const url = getPublicUrl(pathOrUrl);
     navigator.clipboard.writeText(url);
-    alert(`Link de "${fileName}" copiado al portapapeles.`);
+    alert("Link de \"" + fileName + "\" copiado al portapapeles.");
   }
 
   return (
@@ -266,7 +268,7 @@ export default function Historial() {
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 17, fontFamily: "Georgia, serif" }}>{mascota.name}</div>
             <div style={{ color: "#7a8299", fontSize: 12, marginTop: 2 }}>
-              {mascota.breed} · {mascota.age} · {mascota.sex}
+              {mascota.breed} | {mascota.age} | {mascota.sex}
             </div>
           </div>
           <span style={{
@@ -300,13 +302,13 @@ export default function Historial() {
 
       {/* Sub-tabs */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "#0f1117", borderRadius: 12, padding: 4 }}>
-        {([["consultas", "🏥 Consultas"], ["alimentacion", "🍖 Alimentación"], ["documentos", "📄 Docs"]] as const).map(([key, label]) => (
+        {HIST_TABS.map((key) => (
           <button key={key} onClick={() => setHistTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "7px 4px",
             background: histTab === key ? "#252a3a" : "transparent",
             color: histTab === key ? "#f0f4ff" : "#7a8299",
             fontWeight: 700, fontSize: 11, cursor: "pointer",
-          }}>{label}</button>
+          }}>{HIST_TAB_LABELS[key]}</button>
         ))}
       </div>
 
@@ -353,7 +355,7 @@ export default function Historial() {
         </Card>
       ))}
 
-      {/* ── ALIMENTACIÓN ─────────────────────────────────────────────── */}
+      {/* ALIMENTACION */}
       {histTab === "alimentacion" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -414,7 +416,7 @@ export default function Historial() {
             </Card>
           ))}
 
-          {/* ── Recetas recomendadas IA ── */}
+          {/* Recetas recomendadas IA */}
           <div style={{ marginTop: 8 }}>
             <button onClick={pedirRecetas} disabled={loadingRecetas} style={{
               width: "100%", background: loadingRecetas ? "#252a3a" : "linear-gradient(135deg, #fb923c, #f97316)",
@@ -433,7 +435,7 @@ export default function Historial() {
                 <button onClick={() => setRecetas(null)} style={{
                   background: "transparent", border: "none", color: "#7a8299",
                   fontSize: 18, cursor: "pointer", lineHeight: 1,
-                }}>×</button>
+                }}>x</button>
               </div>
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "#f0f4ff", whiteSpace: "pre-wrap" }}>
                 {recetas.replace(/\*\*/g, "")}
@@ -445,7 +447,7 @@ export default function Historial() {
 
       {histTab === "documentos" && (
         <div>
-          {/* OPCIÓN A — El tutor sube desde su dispositivo */}
+          {/* OPCION A - El tutor sube desde su dispositivo */}
           <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>
             Subir desde tu dispositivo
           </div>
@@ -461,7 +463,7 @@ export default function Historial() {
             </label>
           </Card>
 
-          {/* OPCIÓN B — Link para la veterinaria */}
+          {/* OPCION B - Link para la veterinaria */}
           <div style={{ fontSize: 11, fontWeight: 800, color: "#60a5fa", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10, marginTop: 8 }}>
             Compartir link con la veterinaria
           </div>
