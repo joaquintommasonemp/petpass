@@ -36,13 +36,14 @@ export default function Paseos() {
       .select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (sess?.length) {
       setSessions(sess);
-      const updMap: Record<string, any[]> = {};
-      for (const s of sess) {
-        const { data: upds } = await supabase.from("paseo_updates")
-          .select("*").eq("session_id", s.id).order("created_at", { ascending: false });
-        updMap[s.id] = upds || [];
-      }
-      setUpdates(updMap);
+      const results = await Promise.all(
+        sess.map((s: any) =>
+          supabase.from("paseo_updates")
+            .select("*").eq("session_id", s.id).order("created_at", { ascending: false })
+            .then(({ data }) => [s.id, data || []] as [string, any[]])
+        )
+      );
+      setUpdates(Object.fromEntries(results));
     }
     setLoading(false);
   }
