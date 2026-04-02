@@ -50,7 +50,6 @@ export default function Historial() {
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [vacunas, setVacunas] = useState<any[]>([]);
-  const [citas, setCitas] = useState<any[]>([]);
   const [alimentacion, setAlimentacion] = useState<any[]>([]);
   const [estudioLinks, setEstudioLinks] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -90,22 +89,19 @@ export default function Historial() {
     setMascota(m);
     setHistorial([]);
     setVacunas([]);
-    setCitas([]);
     setAlimentacion([]);
     setEstudioLinks([]);
     setNewLink(null);
     const authResult = await supabase.auth.getUser();
     const user = authResult.data.user;
-    const [histResult, vacResult, citasResult, alimResult, linksResult] = await Promise.all([
+    const [histResult, vacResult, alimResult, linksResult] = await Promise.all([
       supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false }),
       supabase.from("vacunas").select("*").eq("mascota_id", m.id).order("date", { ascending: false }),
-      supabase.from("citas").select("*").eq("mascota_id", m.id).order("date", { ascending: true }),
       supabase.from("alimentacion").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false }),
       supabase.from("estudio_links").select("*").eq("mascota_id", m.id).eq("user_id", user!.id).order("created_at", { ascending: false }),
     ]);
     setHistorial(histResult.data || []);
     setVacunas(vacResult.data || []);
-    setCitas(citasResult.data || []);
     setAlimentacion(alimResult.data || []);
     setEstudioLinks(linksResult.data || []);
   }
@@ -123,13 +119,17 @@ export default function Historial() {
 
   async function addCita() {
     if (!citaForm.date.trim() || !citaForm.summary.trim() || !mascota) return;
-    const insertResult = await supabase.from("citas").insert({ ...citaForm, mascota_id: mascota.id }).select();
+    const entry = {
+      mascota_id: mascota.id,
+      title: "📅 Cita",
+      date: citaForm.date,
+      summary: citaForm.summary,
+      vet: citaForm.vet,
+    };
+    const insertResult = await supabase.from("historial").insert(entry).select();
     if (insertResult.data) {
       const d = insertResult.data;
-      setCitas(function(prev) {
-        const next = [...prev, d[0]];
-        return next.sort(function(a, b) { return a.date > b.date ? 1 : -1; });
-      });
+      setHistorial(function(prev) { return [d[0], ...prev]; });
     }
     setCitaForm({ date: "", summary: "", vet: "" });
     setAddingCita(false);
@@ -544,14 +544,16 @@ export default function Historial() {
             </Card>
           )}
 
-          {citas.length === 0 && !addingCita && (
+          {historial.filter(function(h) { return h.title === "📅 Cita"; }).length === 0 && !addingCita && (
             <Card style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
               <p style={{ color: "#7a8299", fontSize: 13 }}>No hay turnos agendados.</p>
             </Card>
           )}
 
-          {citas.map(function(c: any, i: number) {
+          {historial.filter(function(h) { return h.title === "📅 Cita"; })
+            .sort(function(a, b) { return a.date > b.date ? 1 : -1; })
+            .map(function(c: any, i: number) {
             const today = new Date().toISOString().slice(0, 10);
             const pasado = c.date < today;
             return (

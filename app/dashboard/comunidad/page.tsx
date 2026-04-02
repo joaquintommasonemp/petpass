@@ -678,9 +678,11 @@ function TabProfesionales() {
   const supabase = createClient();
 
   useEffect(function() {
-    supabase.from("profesionales").select("*").eq("active", true).order("nombre")
-      .then(function(result) {
-        setProfesionales(result.data || []);
+    const url = "https://amyosmkbldgdxuqepxqu.supabase.co/storage/v1/object/public/comunidad/profesionales.json";
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        setProfesionales(Array.isArray(data) ? data.filter(function(p: any) { return p.active !== false; }) : []);
         setLoading(false);
       })
       .catch(function() { setLoading(false); });
