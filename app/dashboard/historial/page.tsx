@@ -194,7 +194,7 @@ export default function Historial() {
     if (!file || !mascota) return;
     setUploading(true);
 
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const safeName = Array.from(file.name).map((c: string) => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-".includes(c) ? c : "_").join("");
     const path = mascota.id + "/" + Date.now() + "_" + safeName;
 
     const { error } = await supabase.storage.from("documentos").upload(path, file, { upsert: true });
@@ -229,7 +229,7 @@ export default function Historial() {
     setUploading(false);
   }
 
-  function getPublicUrl(pathOrUrl: string): string {
+  function getPublicUrl(pathOrUrl: string) {
     if (pathOrUrl.startsWith("http")) return pathOrUrl;
     const { data } = supabase.storage.from("documentos").getPublicUrl(pathOrUrl);
     return data.publicUrl;
