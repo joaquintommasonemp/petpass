@@ -111,6 +111,19 @@ button:active { transform: scale(0.97); }
   }
 }
 
+/* Dashboard 2-column layout */
+.db-layout { display: block; }
+.db-col-left, .db-col-right { display: block; }
+
+@media (min-width: 768px) {
+  .db-layout {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 0 24px;
+    align-items: start;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

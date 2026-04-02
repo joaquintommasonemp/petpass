@@ -311,6 +311,9 @@ export default function Dashboard() {
         </div>
       )}
 
+      <div className="db-layout">
+      <div className="db-col-left">
+
       {/* Perfil principal */}
       <Card style={{ display: "flex", gap: 16, alignItems: "center" }}>
         {/* Foto con upload */}
@@ -416,19 +419,6 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {/* QR compacto */}
-      <Card style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" }}>
-        <span style={{ fontSize: 28, flexShrink: 0 }}>⬛</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>QR de identificación</div>
-          <div style={{ color: "#7a8299", fontSize: 11 }}>Colocalo en el collar — si lo encuentran, ven todos sus datos</div>
-        </div>
-        <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
-          background: "#252a3a", color: "#f0f4ff", borderRadius: 8, padding: "6px 12px",
-          fontSize: 11, fontWeight: 700, textDecoration: "none", flexShrink: 0,
-        }}>Ver →</a>
-      </Card>
-
       {/* Resumen de salud */}
       {(() => {
         const lastVac = [...vacunas].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())[0];
@@ -512,25 +502,6 @@ export default function Dashboard() {
         );
       })()}
 
-      {/* Peso actual — solo botón actualizar */}
-      <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px" }}>
-        <div style={{ fontWeight: 700, fontSize: 14 }}>⚖️ Peso: <span style={{ color: "#fb923c" }}>{selected?.weight || "no registrado"}</span></div>
-        <button onClick={() => setShowPeso(!showPeso)} style={{
-          background: "#fb923c22", color: "#fb923c", border: "1px solid #fb923c44",
-          borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer",
-        }}>Actualizar</button>
-      </Card>
-      {showPeso && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 12, marginTop: -8 }}>
-          <input type="number" placeholder="Nuevo peso en kg" value={nuevoPeso}
-            onChange={e => setNuevoPeso(e.target.value)} style={{ flex: 1 }} />
-          <button onClick={handleAgregarPeso} style={{
-            background: "#4ade80", color: "#000", border: "none", borderRadius: 8,
-            padding: "8px 14px", fontWeight: 800, cursor: "pointer",
-          }}>Guardar</button>
-        </div>
-      )}
-
       {/* Vacunas */}
       {vacunas.length > 0 && (
         <>
@@ -575,6 +546,41 @@ export default function Dashboard() {
           </div>
         )}
       </Card>
+
+      </div>{/* /db-col-left */}
+      <div className="db-col-right">
+
+      {/* QR compacto */}
+      <Card style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" }}>
+        <span style={{ fontSize: 28, flexShrink: 0 }}>{"⬛"}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>QR de identificacion</div>
+          <div style={{ color: "#7a8299", fontSize: 11 }}>Colocalo en el collar. Si lo encuentran, ven todos sus datos</div>
+        </div>
+        <a href={"/mascota/" + selected?.id} target="_blank" rel="noreferrer" style={{
+          background: "#252a3a", color: "#f0f4ff", borderRadius: 8, padding: "6px 12px",
+          fontSize: 11, fontWeight: 700, textDecoration: "none", flexShrink: 0,
+        }}>Ver</a>
+      </Card>
+
+      {/* Peso */}
+      <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px" }}>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>{"⚖️"} Peso: <span style={{ color: "#fb923c" }}>{selected?.weight || "no registrado"}</span></div>
+        <button onClick={() => setShowPeso(!showPeso)} style={{
+          background: "#fb923c22", color: "#fb923c", border: "1px solid #fb923c44",
+          borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+        }}>Actualizar</button>
+      </Card>
+      {showPeso && (
+        <div style={{ display: "flex", gap: 8, marginBottom: 12, marginTop: -8 }}>
+          <input type="number" placeholder="Nuevo peso en kg" value={nuevoPeso}
+            onChange={e => setNuevoPeso(e.target.value)} style={{ flex: 1 }} />
+          <button onClick={handleAgregarPeso} style={{
+            background: "#4ade80", color: "#000", border: "none", borderRadius: 8,
+            padding: "8px 14px", fontWeight: 800, cursor: "pointer",
+          }}>Guardar</button>
+        </div>
+      )}
 
       {/* URGENCIAS */}
       <Card style={{ border: "1px solid #f8717133", padding: 0, overflow: "hidden" }}>
@@ -642,8 +648,11 @@ export default function Dashboard() {
         <button onClick={() => setShowBaja(true)} style={{
           flex: 1, background: "#f8717122", color: "#f87171", border: "1px solid #f8717144",
           borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13, cursor: "pointer",
-        }}>🕊️ Dar de baja</button>
+        }}>{"🕊️"} Dar de baja</button>
       </div>
+
+      </div>{/* /db-col-right */}
+      </div>{/* /db-layout */}
 
       {/* Modal baja */}
       {showBaja && (
