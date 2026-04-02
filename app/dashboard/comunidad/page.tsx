@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 import { timeAgo } from "@/lib/utils";
 
-type Tab = "explorar" | "adopciones" | "perdidas" | "descuentos";
+type Tab = "explorar" | "adopciones" | "perdidas" | "profesionales" | "descuentos";
 
 const DESCUENTOS = [
   { nombre: "Puppis", descripcion: "En todos los productos de la tienda online", icon: "🛍️" },
@@ -26,8 +26,9 @@ function Card({ children, style = {} }: any) {
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "explorar", label: "Explorar", icon: "🐾" },
-    { key: "adopciones", label: "Adopciones", icon: "❤️" },
+    { key: "adopciones", label: "Adopcion", icon: "❤️" },
     { key: "perdidas", label: "Perdidas", icon: "📍" },
+    { key: "profesionales", label: "Pros", icon: "🏥" },
     { key: "descuentos", label: "Descuentos", icon: "🎁" },
   ];
   return (
@@ -667,6 +668,115 @@ function TabPerdidas() {
   );
 }
 
+// ─── Tab: Profesionales ───────────────────────────────────────────────────────
+const ESPECIALIDADES = ["Todos", "Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"];
+
+function TabProfesionales() {
+  const [profesionales, setProfesionales] = useState<any[]>([]);
+  const [filtro, setFiltro] = useState("Todos");
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(function() {
+    supabase.from("profesionales").select("*").eq("active", true).order("nombre")
+      .then(function(result) {
+        setProfesionales(result.data || []);
+        setLoading(false);
+      })
+      .catch(function() { setLoading(false); });
+  }, []);
+
+  const lista = filtro === "Todos" ? profesionales : profesionales.filter(function(p) { return p.especialidad === filtro; });
+
+  const iconEsp: Record<string, string> = {
+    Veterinario: "🏥", Peluquero: "✂️", Adestrador: "🎓",
+    Guarderia: "🏠", Nutricionista: "🥗", Otro: "🐾",
+  };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7a8299" }}>Cargando...</div>;
+
+  return (
+    <div>
+      <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 14 }}>
+        Veterinarios, peluqueros y especialistas recomendados por la comunidad.
+      </p>
+
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+        {ESPECIALIDADES.map(function(e) {
+          return (
+            <button key={e} onClick={function() { setFiltro(e); }} style={{
+              background: filtro === e ? "#60a5fa22" : "#181c27",
+              border: "1px solid " + (filtro === e ? "#60a5fa" : "#252a3a"),
+              color: filtro === e ? "#60a5fa" : "#7a8299",
+              borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
+              cursor: "pointer", whiteSpace: "nowrap",
+            }}>{e}</button>
+          );
+        })}
+      </div>
+
+      {lista.length === 0 && (
+        <Card style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🏥</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Sin profesionales todavia</div>
+          <p style={{ color: "#7a8299", fontSize: 13, lineHeight: 1.6 }}>
+            Pronto vamos a listar veterinarios, peluqueros y especialistas de tu zona.
+          </p>
+        </Card>
+      )}
+
+      {lista.map(function(p: any, i: number) {
+        return (
+          <Card key={i} style={{ border: "1px solid #60a5fa22" }}>
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+                background: "#60a5fa18", border: "1px solid #60a5fa33",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 26, overflow: "hidden",
+              }}>
+                {p.foto_url
+                  ? <img src={p.foto_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : iconEsp[p.especialidad] || "🐾"}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div style={{ fontWeight: 800, fontSize: 15 }}>{p.nombre}</div>
+                  <span style={{ background: "#60a5fa18", color: "#60a5fa", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800, flexShrink: 0, marginLeft: 8 }}>
+                    {p.especialidad}
+                  </span>
+                </div>
+                {p.descripcion && <div style={{ color: "#7a8299", fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{p.descripcion}</div>}
+                {p.zona && <div style={{ color: "#60a5fa", fontSize: 12, marginTop: 4 }}>📍 {p.zona}</div>}
+                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                  {p.telefono && (
+                    <a href={"https://wa.me/" + p.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
+                      background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
+                    }}>WhatsApp</a>
+                  )}
+                  {p.instagram && (
+                    <a href={"https://instagram.com/" + p.instagram.replace("@", "")} target="_blank" rel="noreferrer" style={{
+                      background: "#f472b622", color: "#f472b6", border: "1px solid #f472b644",
+                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
+                    }}>Instagram</a>
+                  )}
+                  {p.email && (
+                    <a href={"mailto:" + p.email} style={{
+                      background: "#a78bfa22", color: "#a78bfa", border: "1px solid #a78bfa44",
+                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
+                    }}>Email</a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Comunidad() {
   const [tab, setTab] = useState<Tab>("adopciones");
@@ -674,13 +784,14 @@ export default function Comunidad() {
   return (
     <div>
       <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
-      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Explorá mascotas, adopciones, perdidas y descuentos</p>
+      <p style={{ color: "#7a8299", fontSize: 12, marginBottom: 16 }}>Explora mascotas, adopciones, profesionales y descuentos</p>
 
       <TabBar active={tab} onChange={setTab} />
 
       {tab === "explorar" && <TabExplorar />}
       {tab === "adopciones" && <Adopciones />}
       {tab === "perdidas" && <TabPerdidas />}
+      {tab === "profesionales" && <TabProfesionales />}
       {tab === "descuentos" && <TabDescuentos />}
     </div>
   );

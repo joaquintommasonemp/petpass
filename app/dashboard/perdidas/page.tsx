@@ -24,6 +24,7 @@ export default function Perdidas() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [locationAsked, setLocationAsked] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -31,13 +32,19 @@ export default function Perdidas() {
     supabase.from("perdidas").select("*").eq("active", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => setPerdidas(data || []));
-
-    navigator.geolocation?.getCurrentPosition(pos => {
-      const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-      setUserLocation(coords);
-      setForm(f => ({ ...f, lat: coords[0], lng: coords[1] }));
-    });
   }, []);
+
+  function requestLocation() {
+    setLocationAsked(true);
+    navigator.geolocation?.getCurrentPosition(
+      pos => {
+        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        setUserLocation(coords);
+        setForm(f => ({ ...f, lat: coords[0], lng: coords[1] }));
+      },
+      function() { /* permiso denegado */ }
+    );
+  }
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -91,6 +98,34 @@ export default function Perdidas() {
 
   return (
     <div>
+      {!locationAsked && (
+        <div style={{
+          background: "#0f1a2a", border: "1px solid #60a5fa44",
+          borderRadius: 14, padding: 16, marginBottom: 16,
+          display: "flex", gap: 14, alignItems: "flex-start",
+        }}>
+          <span style={{ fontSize: 28, flexShrink: 0 }}>📍</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: "#60a5fa", marginBottom: 4 }}>
+              Activar ubicacion
+            </div>
+            <p style={{ color: "#7a8299", fontSize: 12, lineHeight: 1.5, marginBottom: 10 }}>
+              Para mostrar mascotas perdidas cerca tuyo y centrar el mapa en tu zona, necesitamos acceder a tu ubicacion. No la guardamos ni la compartimos.
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={requestLocation} style={{
+                background: "#60a5fa", color: "#000", border: "none",
+                borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer",
+              }}>Aceptar</button>
+              <button onClick={() => setLocationAsked(true)} style={{
+                background: "transparent", border: "1px solid #252a3a",
+                color: "#7a8299", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer",
+              }}>Omitir</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={() => setReporting(!reporting)}
         style={{

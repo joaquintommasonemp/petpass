@@ -36,10 +36,12 @@ function detectStudyType(fileName: string) {
   return "Documento";
 }
 
-const HIST_TABS = ["consultas", "alimentacion", "documentos"];
+const HIST_TABS = ["consultas", "vacunas", "turnos", "alimentacion", "documentos"];
 const HIST_TAB_LABELS: Record<string, string> = {
-  consultas: "Consultas",
-  alimentacion: "Alimentacion",
+  consultas: "Clinica",
+  vacunas: "Vacunas",
+  turnos: "Turnos",
+  alimentacion: "Alimento",
   documentos: "Docs",
 };
 
@@ -47,12 +49,18 @@ export default function Historial() {
   const [mascotas, setMascotas] = useState<any[]>([]);
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
+  const [vacunas, setVacunas] = useState<any[]>([]);
+  const [citas, setCitas] = useState<any[]>([]);
   const [alimentacion, setAlimentacion] = useState<any[]>([]);
   const [estudioLinks, setEstudioLinks] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
+  const [vacForm, setVacForm] = useState({ name: "", date: "", next_date: "", vet: "", notes: "" });
+  const [citaForm, setCitaForm] = useState({ date: "", summary: "", vet: "" });
   const [alimentForm, setAlimentForm] = useState({ marca: "", tipo: "", cantidad: "", frecuencia: "", notas: "" });
   const [adding, setAdding] = useState(false);
+  const [addingVac, setAddingVac] = useState(false);
+  const [addingCita, setAddingCita] = useState(false);
   const [addingAliment, setAddingAliment] = useState(false);
   const [histTab, setHistTab] = useState("consultas");
   const [linkNotes, setLinkNotes] = useState("");
@@ -81,19 +89,50 @@ export default function Historial() {
   async function selectMascota(m: any) {
     setMascota(m);
     setHistorial([]);
+    setVacunas([]);
+    setCitas([]);
     setAlimentacion([]);
     setEstudioLinks([]);
     setNewLink(null);
     const authResult = await supabase.auth.getUser();
     const user = authResult.data.user;
-    const [histResult, alimResult, linksResult] = await Promise.all([
+    const [histResult, vacResult, citasResult, alimResult, linksResult] = await Promise.all([
       supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false }),
+      supabase.from("vacunas").select("*").eq("mascota_id", m.id).order("date", { ascending: false }),
+      supabase.from("citas").select("*").eq("mascota_id", m.id).order("date", { ascending: true }),
       supabase.from("alimentacion").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false }),
       supabase.from("estudio_links").select("*").eq("mascota_id", m.id).eq("user_id", user!.id).order("created_at", { ascending: false }),
     ]);
     setHistorial(histResult.data || []);
+    setVacunas(vacResult.data || []);
+    setCitas(citasResult.data || []);
     setAlimentacion(alimResult.data || []);
     setEstudioLinks(linksResult.data || []);
+  }
+
+  async function addVacuna() {
+    if (!vacForm.name.trim() || !vacForm.date.trim() || !mascota) return;
+    const insertResult = await supabase.from("vacunas").insert({ ...vacForm, mascota_id: mascota.id }).select();
+    if (insertResult.data) {
+      const d = insertResult.data;
+      setVacunas(function(prev) { return [d[0], ...prev]; });
+    }
+    setVacForm({ name: "", date: "", next_date: "", vet: "", notes: "" });
+    setAddingVac(false);
+  }
+
+  async function addCita() {
+    if (!citaForm.date.trim() || !citaForm.summary.trim() || !mascota) return;
+    const insertResult = await supabase.from("citas").insert({ ...citaForm, mascota_id: mascota.id }).select();
+    if (insertResult.data) {
+      const d = insertResult.data;
+      setCitas(function(prev) {
+        const next = [...prev, d[0]];
+        return next.sort(function(a, b) { return a.date > b.date ? 1 : -1; });
+      });
+    }
+    setCitaForm({ date: "", summary: "", vet: "" });
+    setAddingCita(false);
   }
 
   async function crearEstudioLink() {
@@ -390,6 +429,148 @@ export default function Historial() {
           </Card>
         );
       })}
+
+      {histTab === "vacunas" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800 }}>Vacunas y Aplicaciones</h2>
+            <button onClick={function() { setAddingVac(!addingVac); }} style={{
+              background: "#60a5fa22", color: "#60a5fa", border: "1px solid #60a5fa44",
+              borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>+ Agregar</button>
+          </div>
+
+          {addingVac && (
+            <Card style={{ border: "1px solid #60a5fa44" }}>
+              <div style={{ fontWeight: 700, color: "#60a5fa", marginBottom: 12 }}>Nueva vacuna / aplicacion</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input placeholder="Nombre de la vacuna (ej: Antirrábica)" value={vacForm.name}
+                  onChange={function(e) { setVacForm(function(f) { return { ...f, name: e.target.value }; }); }} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 11, color: "#7a8299", display: "block", marginBottom: 4 }}>Fecha de aplicacion *</label>
+                    <input type="date" value={vacForm.date}
+                      onChange={function(e) { setVacForm(function(f) { return { ...f, date: e.target.value }; }); }}
+                      style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, color: "#7a8299", display: "block", marginBottom: 4 }}>Proxima aplicacion</label>
+                    <input type="date" value={vacForm.next_date}
+                      onChange={function(e) { setVacForm(function(f) { return { ...f, next_date: e.target.value }; }); }}
+                      style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff" }} />
+                  </div>
+                </div>
+                <input placeholder="Veterinario/a" value={vacForm.vet}
+                  onChange={function(e) { setVacForm(function(f) { return { ...f, vet: e.target.value }; }); }} />
+                <input placeholder="Notas (lote, marca, reaccion...)" value={vacForm.notes}
+                  onChange={function(e) { setVacForm(function(f) { return { ...f, notes: e.target.value }; }); }} />
+                <button onClick={addVacuna} style={{
+                  background: "#60a5fa", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                }}>Guardar</button>
+              </div>
+            </Card>
+          )}
+
+          {vacunas.length === 0 && !addingVac && (
+            <Card style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>💉</div>
+              <p style={{ color: "#7a8299", fontSize: 13 }}>No hay vacunas registradas. Agrega la primera.</p>
+            </Card>
+          )}
+
+          {vacunas.map(function(v: any, i: number) {
+            const today = new Date().toISOString().slice(0, 10);
+            const vencida = v.next_date && v.next_date < today;
+            const proxima = v.next_date && !vencida;
+            return (
+              <Card key={i} style={{ border: "1px solid #60a5fa22" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>💉 {v.name}</div>
+                  {vencida
+                    ? <span style={{ background: "#f8717122", color: "#f87171", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>VENCIDA</span>
+                    : proxima
+                    ? <span style={{ background: "#4ade8022", color: "#4ade80", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>Al dia</span>
+                    : null
+                  }
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                  {v.date && (
+                    <span style={{ background: "#60a5fa22", color: "#60a5fa", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+                      Aplicada: {v.date}
+                    </span>
+                  )}
+                  {v.next_date && (
+                    <span style={{ background: vencida ? "#f8717122" : "#4ade8022", color: vencida ? "#f87171" : "#4ade80", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+                      Proxima: {v.next_date}
+                    </span>
+                  )}
+                </div>
+                {v.vet && <div style={{ color: "#7a8299", fontSize: 12 }}>Dr/a. {v.vet}</div>}
+                {v.notes && <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 4, fontStyle: "italic" }}>{v.notes}</div>}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {histTab === "turnos" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800 }}>Turnos y Citas</h2>
+            <button onClick={function() { setAddingCita(!addingCita); }} style={{
+              background: "#a78bfa22", color: "#a78bfa", border: "1px solid #a78bfa44",
+              borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>+ Agendar</button>
+          </div>
+
+          {addingCita && (
+            <Card style={{ border: "1px solid #a78bfa44" }}>
+              <div style={{ fontWeight: 700, color: "#a78bfa", marginBottom: 12 }}>Nuevo turno</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 11, color: "#7a8299", display: "block", marginBottom: 4 }}>Fecha del turno *</label>
+                  <input type="date" value={citaForm.date}
+                    onChange={function(e) { setCitaForm(function(f) { return { ...f, date: e.target.value }; }); }}
+                    style={{ background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: "#f0f4ff" }} />
+                </div>
+                <input placeholder="Motivo (ej: Control anual, castración)" value={citaForm.summary}
+                  onChange={function(e) { setCitaForm(function(f) { return { ...f, summary: e.target.value }; }); }} />
+                <input placeholder="Veterinario / Clinica" value={citaForm.vet}
+                  onChange={function(e) { setCitaForm(function(f) { return { ...f, vet: e.target.value }; }); }} />
+                <button onClick={addCita} style={{
+                  background: "#a78bfa", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                }}>Guardar turno</button>
+              </div>
+            </Card>
+          )}
+
+          {citas.length === 0 && !addingCita && (
+            <Card style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
+              <p style={{ color: "#7a8299", fontSize: 13 }}>No hay turnos agendados.</p>
+            </Card>
+          )}
+
+          {citas.map(function(c: any, i: number) {
+            const today = new Date().toISOString().slice(0, 10);
+            const pasado = c.date < today;
+            return (
+              <Card key={i} style={{ border: pasado ? "1px solid #252a3a" : "1px solid #a78bfa33" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontWeight: 800, fontSize: 14 }}>📅 {c.summary}</span>
+                  <span style={{
+                    background: pasado ? "#25252a" : "#a78bfa22",
+                    color: pasado ? "#7a8299" : "#a78bfa",
+                    borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700,
+                  }}>{c.date}</span>
+                </div>
+                {c.vet && <div style={{ color: "#7a8299", fontSize: 12 }}>Dr/a. {c.vet}</div>}
+                {pasado && <div style={{ fontSize: 11, color: "#7a8299", marginTop: 4 }}>Turno pasado</div>}
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {histTab === "alimentacion" && (
         <div>

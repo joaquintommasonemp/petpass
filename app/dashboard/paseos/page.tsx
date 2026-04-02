@@ -86,9 +86,9 @@ export default function Paseos() {
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>🐕 Paseador y guardería</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>🐕 Cuidadores</h2>
         <p style={{ color: "#7a8299", fontSize: 13 }}>
-          Compartí un link con el cuidador para que registre novedades durante el paseo o la estadía.
+          Compartí un link con el cuidador para que registre fotos y novedades durante el paseo o la estadia.
         </p>
       </div>
 

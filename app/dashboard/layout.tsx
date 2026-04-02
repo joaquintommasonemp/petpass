@@ -7,8 +7,8 @@ const TABS = [
   { href: "/dashboard",            label: "Perfil",      icon: "🐾", desc: "Tu mascota" },
   { href: "/dashboard/historial",  label: "Historial",   icon: "🏥", desc: "Consultas y docs" },
   { href: "/dashboard/chat",       label: "Vet IA",      icon: "🤖", desc: "Consultá con IA" },
-  { href: "/dashboard/educacion",  label: "Educación",   icon: "📚", desc: "Tips y adiestramiento" },
-  { href: "/dashboard/paseos",     label: "Guardería",   icon: "🐕", desc: "Paseadores" },
+  { href: "/dashboard/educacion",  label: "Training",    icon: "🎓", desc: "Entrenamiento y tips" },
+  { href: "/dashboard/paseos",     label: "Cuidadores",  icon: "🐕", desc: "Paseos y guarderia" },
   { href: "/dashboard/comunidad",  label: "Comunidad",   icon: "👥", desc: "Explorar y adopciones" },
 ];
 

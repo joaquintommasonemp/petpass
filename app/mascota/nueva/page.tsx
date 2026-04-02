@@ -30,7 +30,18 @@ const RAZAS: Record<string, string[]> = {
     "Tonquinés", "Turkish Van",
     "Otro",
   ],
-  Otro: ["Conejo", "Hurón", "Hámster", "Tortuga", "Pájaro", "Reptil", "Pez", "Otro"],
+  Otro: [
+    // Pequeños mamíferos
+    "Conejo", "Cobayo / Guinea pig", "Chinchilla", "Hurón", "Hámster", "Jerbo", "Rata", "Ratón", "Erizo",
+    // Aves
+    "Loro / Cotorra", "Canario", "Cacatúa", "Agapornis", "Periquito", "Ninfas",
+    // Reptiles y anfibios
+    "Tortuga", "Iguana", "Dragón Barbudo", "Gecko Leopardo", "Camaleón", "Serpiente", "Rana / Sapo",
+    // Acuáticos
+    "Pez", "Tortuga acuática",
+    // Otros
+    "Otro exótico",
+  ],
 };
 
 const CABA_BARRIOS = [

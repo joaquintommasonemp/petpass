@@ -225,7 +225,7 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>📚 Educación y adiestramiento</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>🎓 Training & Adiestramiento</h2>
         <p style={{ color: "#7a8299", fontSize: 13 }}>
           Guías paso a paso y tips personalizados con IA para {mascota?.name || "tu mascota"}.
         </p>
