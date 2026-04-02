@@ -39,6 +39,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { vetName, note, fileBase64, fileName, fileType } = await req.json();
   if (!fileBase64 || !fileName) return NextResponse.json({ error: "Falta el archivo" }, { status: 400 });
 
+  // Limit: ~10 MB base64
+  if (fileBase64.length > 13_500_000) {
+    return NextResponse.json({ error: "El archivo supera el limite de 10 MB" }, { status: 413 });
+  }
+
   // Subir archivo al bucket
   const buffer = Buffer.from(fileBase64, "base64");
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -80,7 +85,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
       const data = await res.json();
       if (!data.error) aiSummary = data.content?.[0]?.text || "";
-    } catch {}
+    } catch (e) {
+      console.error("[estudio] AI analysis failed:", e);
+    }
   }
 
   // Detectar tipo de estudio

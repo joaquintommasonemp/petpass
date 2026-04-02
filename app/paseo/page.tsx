@@ -25,15 +25,16 @@ export default function PanelCuidador() {
     const ids: string[] = JSON.parse(localStorage.getItem("petpass_sesiones_cuidador") || "[]");
     if (!ids.length) { setLoading(false); return; }
 
-    const results: any[] = [];
-    for (const id of ids) {
-      const { data: sess } = await supabase.from("paseo_sessions").select("*").eq("id", id).single();
-      if (!sess) continue;
+    const settled = await Promise.all(ids.map(async (id: string) => {
+      const [{ data: sess }, { data: updates }] = await Promise.all([
+        supabase.from("paseo_sessions").select("*").eq("id", id).single(),
+        supabase.from("paseo_updates").select("*").eq("session_id", id).order("created_at", { ascending: false }).limit(1),
+      ]);
+      if (!sess) return null;
       const { data: mascota } = await supabase.from("mascotas").select("name, photo_url, breed").eq("id", sess.mascota_id).single();
-      const { data: updates } = await supabase.from("paseo_updates").select("*").eq("session_id", id).order("created_at", { ascending: false }).limit(1);
-      results.push({ ...sess, mascota, lastUpdate: updates?.[0] || null });
-    }
-    setSessions(results);
+      return { ...sess, mascota, lastUpdate: updates?.[0] || null };
+    }));
+    setSessions(settled.filter(Boolean));
     setLoading(false);
   }
 

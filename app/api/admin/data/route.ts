@@ -5,28 +5,20 @@ export async function GET(req: NextRequest) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
   if (!token) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  // Verificar que el usuario sea el admin
-  const supabaseAuth = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
-  );
-  const { data: { user } } = await supabaseAuth.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-
-  // Verificar is_admin en la tabla profiles
-  const adminCheck = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-  const { data: profile } = await adminCheck.from("profiles").select("is_admin").eq("id", user.id).single();
-  if (!profile?.is_admin) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-  }
-
-  // Usar service role para bypassar RLS y leer todos los datos
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
+
+  // Verificar identidad del token y rol admin con un solo cliente
+  const { data: { user } } = await admin.auth.getUser(token);
+  if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+
+  const { data: profile } = await admin.from("profiles").select("is_admin").eq("id", user.id).single();
+  if (!profile?.is_admin) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
 
   const [
     { data: mascotas },

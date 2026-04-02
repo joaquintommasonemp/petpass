@@ -48,7 +48,7 @@ export default function Chat() {
       const currentMonth = new Date().toISOString().slice(0, 7);
       const { data: profile } = await supabase
         .from("profiles").select("ia_uses_count, ia_uses_month, is_premium").eq("id", user.id).single();
-      setIsPremium(profile?.is_premium === true || user.email === "joaquintommasone@gmail.com");
+      setIsPremium(profile?.is_premium === true);
       const sameMonth = profile?.ia_uses_month === currentMonth;
       setUsedCount(sameMonth ? (profile?.ia_uses_count || 0) : 0);
     }
