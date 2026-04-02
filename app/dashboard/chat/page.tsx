@@ -4,6 +4,23 @@ import { createClient } from "@/lib/supabase";
 
 type Message = { role: string; text: string; image?: string };
 
+function renderMsg(text: string) {
+  return text.split('\n').map(function(line, li) {
+    const isBullet = line.startsWith('- ') || line.startsWith('* ');
+    const isNumbered = /^\d+\. /.test(line);
+    const content = isBullet ? line.slice(2) : isNumbered ? line.replace(/^\d+\. /, '') : line;
+    const parts = content.split('**');
+    const rendered = parts.map(function(p, pi) {
+      if (pi % 2 === 1) return <strong key={pi}>{p}</strong>;
+      return p || null;
+    });
+    if (!line.trim()) return <div key={li} style={{ height: 6 }} />;
+    if (isBullet) return <div key={li} style={{ paddingLeft: 4, marginBottom: 3 }}>{"• "}{rendered}</div>;
+    if (isNumbered) return <div key={li} style={{ paddingLeft: 4, marginBottom: 3 }}>{li + 1}{". "}{rendered}</div>;
+    return <div key={li} style={{ marginBottom: 2 }}>{rendered}</div>;
+  });
+}
+
 const FREE_LIMIT = 5;
 
 export default function Chat() {
@@ -252,7 +269,7 @@ export default function Chat() {
               border: m.role === "assistant" ? "1px solid #252a3a" : "none",
             }}>
               {m.image && <img src={m.image} style={{ width: "100%", borderRadius: 8, marginBottom: 6, maxHeight: 200, objectFit: "cover" }} />}
-              {m.text}
+              {m.role === "assistant" ? renderMsg(m.text) : m.text}
             </div>
           </div>
         ))}
