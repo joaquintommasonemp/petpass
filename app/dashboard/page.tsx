@@ -571,7 +571,7 @@ export default function Dashboard() {
         )}
         {reporte && (
           <div style={{ padding: 16, fontSize: 13, color: "#f0f4ff", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-            {reporte.replace(/\*\*(.*?)\*\*/g, "$1")}
+            {reporte.split("**").join("")}
           </div>
         )}
       </Card>

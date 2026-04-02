@@ -93,7 +93,7 @@ export default function Historial() {
       active: true,
     }).select();
     if (data?.[0]) {
-      const url = `${window.location.origin}/estudio/${data[0].id}`;
+      const url = window.location.origin + "/estudio/" + data[0].id;
       setNewLink(url);
       setEstudioLinks(prev => [data[0], ...prev]);
       navigator.clipboard.writeText(url);
@@ -110,7 +110,7 @@ export default function Historial() {
   }
 
   function copyLink(id: string) {
-    const url = `${window.location.origin}/estudio/${id}`;
+    const url = window.location.origin + "/estudio/" + id;
     navigator.clipboard.writeText(url);
     setNewLink(url);
     setCopiedLink(true);
@@ -195,16 +195,16 @@ export default function Historial() {
     setUploading(true);
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${mascota.id}/${Date.now()}_${safeName}`;
+    const path = mascota.id + "/" + Date.now() + "_" + safeName;
 
     const { error } = await supabase.storage.from("documentos").upload(path, file, { upsert: true });
 
     if (!error) {
-      // Guardar el PATH (no la URL pública) — se generan URLs firmadas al ver
+      // Guardar el PATH (no la URL publica) - se generan URLs firmadas al ver
       const entry = {
         mascota_id: mascota.id,
         title: detectStudyType(file.name),
-        summary: `${file.name}::${path}`,
+        summary: file.name + "::" + path,
         date: new Date().toLocaleDateString("es-AR"),
         vet: "",
       };
