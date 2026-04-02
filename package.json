@@ -13,6 +13,7 @@
     "react-dom": "^18",
     "@supabase/supabase-js": "^2.43.0",
     "@supabase/ssr": "^0.3.0",
+    "pg": "^8.11.0",
     "leaflet": "^1.9.4",
     "react-leaflet": "^4.2.1"
   },
