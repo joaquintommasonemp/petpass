@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
     { data: perdidas },
     { data: historial },
     { data: solicitudes },
+    { data: sugerencias },
   ] = await Promise.all([
     admin.from("mascotas").select("*").order("created_at", { ascending: false }),
     admin.from("profiles").select("*"),
@@ -34,7 +35,10 @@ export async function GET(req: NextRequest) {
     admin.from("comunidad_mensajes").select("*")
       .like("author_name", "SOLICITUD:%")
       .order("created_at", { ascending: false }),
+    admin.from("comunidad_mensajes").select("*")
+      .eq("author_name", "SUGERENCIA")
+      .order("created_at", { ascending: false }),
   ]);
 
-  return NextResponse.json({ mascotas, profiles, perdidas, historial, solicitudes });
+  return NextResponse.json({ mascotas, profiles, perdidas, historial, solicitudes, sugerencias });
 }

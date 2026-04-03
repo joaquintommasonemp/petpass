@@ -44,35 +44,140 @@ const RAZAS: Record<string, string[]> = {
   ],
 };
 
-const CABA_BARRIOS = [
-  "Agronomía","Almagro","Balvanera","Barracas","Belgrano","Boedo","Caballito",
-  "Chacarita","Coghlan","Colegiales","Constitución","Flores","Floresta","La Boca",
-  "La Paternal","Liniers","Mataderos","Monte Castro","Montserrat","Nueva Pompeya",
-  "Núñez","Palermo","Parque Avellaneda","Parque Chacabuco","Parque Chas",
-  "Parque Patricios","Puerto Madero","Recoleta","Retiro","Saavedra","San Cristóbal",
-  "San Nicolás","San Telmo","Versalles","Villa Crespo","Villa del Parque",
-  "Villa Devoto","Villa General Mitre","Villa Lugano","Villa Luro","Villa Ortúzar",
-  "Villa Pueyrredón","Villa Real","Villa Riachuelo","Villa Santa Rita","Villa Soldati",
-  "Villa Urquiza","Villa Vélez Sarsfield",
-];
+const MUNICIPIOS_POR_PROVINCIA: Record<string, string[]> = {
+  "CABA": [
+    "Agronomía","Almagro","Balvanera","Barracas","Belgrano","Boedo","Caballito",
+    "Chacarita","Coghlan","Colegiales","Constitución","Flores","Floresta","La Boca",
+    "La Paternal","Liniers","Mataderos","Monte Castro","Montserrat","Nueva Pompeya",
+    "Núñez","Palermo","Parque Avellaneda","Parque Chacabuco","Parque Chas",
+    "Parque Patricios","Puerto Madero","Recoleta","Retiro","Saavedra","San Cristóbal",
+    "San Nicolás","San Telmo","Versalles","Villa Crespo","Villa del Parque",
+    "Villa Devoto","Villa General Mitre","Villa Lugano","Villa Luro","Villa Ortúzar",
+    "Villa Pueyrredón","Villa Real","Villa Riachuelo","Villa Santa Rita","Villa Soldati",
+    "Villa Urquiza","Villa Vélez Sarsfield",
+  ],
+  "Buenos Aires": [
+    "La Plata","Mar del Plata","Bahía Blanca","Quilmes","Lanús","Lomas de Zamora",
+    "La Matanza","Merlo","Morón","Tigre","San Isidro","Vicente López","San Fernando",
+    "Tres de Febrero","Avellaneda","General San Martín","Almirante Brown","Florencio Varela",
+    "Berazategui","Esteban Echeverría","Ezeiza","Presidente Perón","San Vicente",
+    "Pilar","Escobar","Malvinas Argentinas","José C. Paz","San Miguel","Hurlingham",
+    "Ituzaingó","Moreno","Marcos Paz","Cañuelas","Luján","General Rodríguez",
+    "Campana","Zárate","San Nicolás de los Arroyos","Pergamino","Junín",
+    "Tandil","Necochea","Olavarría","Azul","Bragado","Chivilcoy","Mercedes",
+    "San Pedro","Ramallo","Villa Gesell","Pinamar","Mar de Ajó","Miramar",
+    "Balcarce","Tres Arroyos","Coronel Suárez","Benito Juárez","Bolívar",
+    "Saladillo","Chascomús","Dolores","Berisso","Ensenada","Brandsen",
+    "General Pueyrredón","General Alvear","Lobos","Monte","Maipú",
+  ],
+  "Catamarca": [
+    "San Fernando del Valle de Catamarca","Andalgalá","Tinogasta","Santa María",
+    "Belén","Fiambalá","Recreo","Chumbicha","Huillapima","Pomán","Antofagasta de la Sierra",
+  ],
+  "Chaco": [
+    "Resistencia","Barranqueras","Fontana","Villa Ángela","Presidencia Roque Sáenz Peña",
+    "Charata","General San Martín","Quitilipi","Las Breñas","Juan José Castelli",
+    "Tres Isletas","Corzuela","Machagai","Avia Terai","Pampa del Indio","El Sauzalito",
+  ],
+  "Chubut": [
+    "Rawson","Comodoro Rivadavia","Esquel","Trelew","Puerto Madryn","Rada Tilly",
+    "Sarmiento","Río Mayo","Lago Puelo","El Bolsón","Gaiman","Dolavon","28 de Julio",
+  ],
+  "Córdoba": [
+    "Córdoba capital","Villa María","San Francisco","Río Cuarto","Río Tercero","Alta Gracia",
+    "Villa Carlos Paz","La Falda","Cosquín","Bell Ville","Marcos Juárez","Jesús María",
+    "Unquillo","Mendiolaza","Malagueño","Pilar","Oncativo","General Cabrera",
+    "Laboulaye","Leones","Oliva","La Carlota","General Deheza","Villa Allende",
+    "Saldán","Dean Funes","Cruz del Eje","Mina Clavero","Villa General Belgrano",
+    "Santa Rosa de Calamuchita","Embalse","Villa Cura Brochero","Huerta Grande",
+  ],
+  "Corrientes": [
+    "Corrientes capital","Goya","Curuzú Cuatiá","Mercedes","Paso de los Libres",
+    "Santo Tomé","Bella Vista","Esquina","Monte Caseros","Ituzaingó","San Luis del Palmar",
+    "Mburucuyá","Saladas","General Alvear","Sauce","Yapeyú",
+  ],
+  "Entre Ríos": [
+    "Paraná","Concordia","Gualeguaychú","Concepción del Uruguay","Villaguay","La Paz",
+    "Colón","Federación","Victoria","Chajarí","San José","Basavilbaso",
+    "Crespo","Diamante","Federal","Nogoyá","Rosario del Tala",
+  ],
+  "Formosa": [
+    "Formosa capital","Clorinda","Pirané","El Colorado","Las Lomitas","Ibarreta",
+    "Ingeniero Juárez","Gran Guardia","Laguna Blanca","Comandante Fontana",
+  ],
+  "Jujuy": [
+    "San Salvador de Jujuy","San Pedro de Jujuy","Palpalá","Libertador General San Martín",
+    "Humahuaca","Tilcara","Purmamarca","La Quiaca","Abra Pampa","Perico",
+    "Monterrico","El Carmen","Fraile Pintado","Yala",
+  ],
+  "La Pampa": [
+    "Santa Rosa","General Pico","Toay","Macachín","Eduardo Castex","Realicó",
+    "General Acha","Victorica","Jacinto Aráuz","Guatraché","Doblas","Rancul","Trenel",
+  ],
+  "La Rioja": [
+    "La Rioja capital","Chilecito","Aimogasta","Chamical","Chepes","Villa Unión",
+    "Vinchina","Nonogasta","Villa Sanagasta","Patquía","Famatina",
+  ],
+  "Mendoza": [
+    "Mendoza capital","San Rafael","Godoy Cruz","Guaymallén","Las Heras","Luján de Cuyo",
+    "Maipú","Rivadavia","Junín","General Alvear","Malargüe","San Martín",
+    "Tupungato","Tunuyán","San Carlos","Lavalle","Palmira","Bowen","Potrerillos",
+  ],
+  "Misiones": [
+    "Posadas","Oberá","Eldorado","Apóstoles","Jardín América","Leandro N. Alem",
+    "Puerto Iguazú","Aristóbulo del Valle","Montecarlo","Campo Grande","Capioví",
+    "San Pedro","Bernardo de Irigoyen","Wanda","Puerto Rico",
+  ],
+  "Neuquén": [
+    "Neuquén capital","Zapala","San Martín de los Andes","Cutral Có","Plaza Huincul",
+    "Junín de los Andes","Centenario","Plottier","Rincón de los Sauces",
+    "Chos Malal","Piedra del Águila","Aluminé","Loncopué","Villa La Angostura",
+  ],
+  "Río Negro": [
+    "Viedma","San Carlos de Bariloche","General Roca","Cipolletti","Allen","El Bolsón",
+    "Cinco Saltos","Catriel","San Antonio Oeste","Sierra Grande",
+    "Jacobacci","Maquinchao","Los Menucos","Ingeniero Jacobacci",
+  ],
+  "Salta": [
+    "Salta capital","San Ramón de la Nueva Orán","Tartagal","Rosario de la Frontera",
+    "General Güemes","Embarcación","Metán","Cafayate","Cachi","La Quiaca",
+    "San Antonio de los Cobres","Rosario de Lerma","La Caldera","Cerrillos","El Bordo",
+  ],
+  "San Juan": [
+    "San Juan capital","Rawson","Rivadavia","Caucete","Santa Lucía","Pocito",
+    "Chimbas","9 de Julio","Albardón","Angaco","Calingasta","Jáchal","Iglesia","Ullum",
+  ],
+  "San Luis": [
+    "San Luis capital","Villa Mercedes","Merlo","Justo Daract","La Toma","Quines",
+    "Tilisarao","Santa Rosa del Conlara","Carpintería","Naschel","Luján","Concarán",
+  ],
+  "Santa Cruz": [
+    "Río Gallegos","Caleta Olivia","Pico Truncado","Las Heras","Perito Moreno",
+    "El Calafate","El Chaltén","Puerto San Julián","Gobernador Gregores","Puerto Deseado",
+  ],
+  "Santa Fe": [
+    "Santa Fe capital","Rosario","Rafaela","Reconquista","Venado Tuerto","Villa Constitución",
+    "San Lorenzo","Casilda","Esperanza","Las Rosas","Firmat","Cañada de Gómez",
+    "Villa Gobernador Gálvez","Pérez","Gálvez","Sunchales","Santo Tomé",
+    "Rufino","San Jorge","Tostado","Vera","Avellaneda","Calchaquí","San Cristóbal",
+  ],
+  "Santiago del Estero": [
+    "Santiago del Estero capital","La Banda","Frías","Loreto","Añatuya","Quimilí",
+    "Monte Quemado","Fernández","Termas de Río Hondo","Villa Río Hondo",
+    "Clodomira","Beltrán","Los Telares",
+  ],
+  "Tierra del Fuego": [
+    "Ushuaia","Río Grande","Tolhuin",
+  ],
+  "Tucumán": [
+    "San Miguel de Tucumán","Yerba Buena","Banda del Río Salí","Alderetes",
+    "Concepción","Monteros","Aguilares","Famailla","Bella Vista","Lules",
+    "Simoca","Tafí Viejo","Las Talitas","El Manantial","Juan Bautista Alberdi",
+    "Tafí del Valle","Amaicha del Valle","Cafayate (Tucumán)",
+  ],
+};
 
-const PBA_MUNICIPIOS = [
-  "Almirante Brown","Avellaneda","Azul","Bahía Blanca","Berazategui","Berisso",
-  "Brandsen","Campana","Cañuelas","Ensenada","Escobar","Esteban Echeverría",
-  "Ezeiza","Florencio Varela","General Pueyrredón","General San Martín",
-  "Hurlingham","Ituzaingó","José C. Paz","La Matanza","La Plata","Lanús",
-  "Lomas de Zamora","Luján","Malvinas Argentinas","Marcos Paz","Mercedes",
-  "Merlo","Moreno","Morón","Pergamino","Pilar","Presidente Perón","Quilmes",
-  "San Fernando","San Isidro","San Miguel","San Nicolás","San Vicente",
-  "Tandil","Tigre","Tres de Febrero","Vicente López","Zárate",
-];
-
-const PROVINCIAS = [
-  "Buenos Aires (provincia)","Catamarca","Chaco","Chubut","Córdoba","Corrientes",
-  "Entre Ríos","Formosa","Jujuy","La Pampa","La Rioja","Mendoza","Misiones",
-  "Neuquén","Río Negro","Salta","San Juan","San Luis","Santa Cruz","Santa Fe",
-  "Santiago del Estero","Tierra del Fuego","Tucumán",
-];
+const PROVINCIAS_LIST = Object.keys(MUNICIPIOS_POR_PROVINCIA);
 
 export default function NuevaMascota() {
   const [form, setForm] = useState({
@@ -92,7 +197,7 @@ export default function NuevaMascota() {
     setForm(f => {
       const next = { ...f, [k]: v };
       if (k === "type") { next.breed = ""; next.zona_tipo = ""; next.zona_valor = ""; }
-      if (k === "zona_tipo") { next.zona_valor = ""; next.cp = ""; }
+      if (k === "zona_tipo") { next.zona_valor = ""; }
       return next;
     });
   }
@@ -118,10 +223,9 @@ export default function NuevaMascota() {
   }
 
   function buildLocation() {
-    if (form.zona_tipo === "CABA") return `${form.zona_valor}, CABA`;
-    if (form.zona_tipo === "PBA") return `${form.zona_valor}, Buenos Aires`;
-    if (form.zona_tipo === "Otra") return form.cp ? `${form.zona_valor} (CP: ${form.cp})` : form.zona_valor;
-    return "";
+    if (!form.zona_tipo) return "";
+    if (form.zona_tipo === "CABA") return form.zona_valor ? form.zona_valor + ", CABA" : "CABA";
+    return form.zona_valor ? form.zona_valor + ", " + form.zona_tipo : form.zona_tipo;
   }
 
   async function handleSave() {
@@ -322,23 +426,10 @@ export default function NuevaMascota() {
         {/* Zona */}
         <div>
           <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Zona donde vive</label>
-          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-            {["CABA", "PBA", "Otra"].map(z => (
-              <button key={z} onClick={() => update("zona_tipo", z)} style={{
-                flex: 1, padding: 8, borderRadius: 10, fontWeight: 700, fontSize: 12,
-                border: "1px solid", cursor: "pointer",
-                background: form.zona_tipo === z ? "#4ade8022" : "#181c27",
-                borderColor: form.zona_tipo === z ? "#4ade80" : "#252a3a",
-                color: form.zona_tipo === z ? "#4ade80" : "#7a8299",
-              }}>{z === "PBA" ? "Prov. BS AS" : z}</button>
-            ))}
-          </div>
-          {form.zona_tipo === "CABA" && sel("Barrio", "zona_valor", CABA_BARRIOS)}
-          {form.zona_tipo === "PBA" && sel("Municipio", "zona_valor", PBA_MUNICIPIOS)}
-          {form.zona_tipo === "Otra" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {sel("Provincia", "zona_valor", PROVINCIAS)}
-              <input value={form.cp} placeholder="Código postal" onChange={e => update("cp", e.target.value)} />
+          {sel("Provincia / Ciudad", "zona_tipo", PROVINCIAS_LIST)}
+          {form.zona_tipo && (
+            <div style={{ marginTop: 10 }}>
+              {sel(form.zona_tipo === "CABA" ? "Barrio" : "Municipio / Localidad", "zona_valor", MUNICIPIOS_POR_PROVINCIA[form.zona_tipo] || [])}
             </div>
           )}
         </div>

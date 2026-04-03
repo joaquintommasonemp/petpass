@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase";
 
 const TABS = [
@@ -16,10 +17,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [showSugerencia, setShowSugerencia] = useState(false);
+  const [sugerenciaText, setSugerenciaText] = useState("");
+  const [enviandoSug, setEnviandoSug] = useState(false);
+  const [sugEnviada, setSugEnviada] = useState(false);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/");
+  }
+
+  async function handleSugerencia() {
+    if (!sugerenciaText.trim()) return;
+    setEnviandoSug(true);
+    await supabase.from("comunidad_mensajes").insert({
+      author_name: "SUGERENCIA",
+      mascota_name: "pendiente",
+      message: sugerenciaText,
+    });
+    setSugEnviada(true);
+    setEnviandoSug(false);
   }
 
   return (
@@ -105,8 +122,64 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }}>
             <span style={{ fontSize: 14 }}>{"<-"}</span> Cerrar sesion
           </button>
+          <button onClick={() => { setShowSugerencia(true); setSugEnviada(false); setSugerenciaText(""); }} style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            background: "transparent", border: "1px solid #E2E8F0",
+            color: "#2CB8AD", borderRadius: 12, padding: "8px 16px",
+            fontWeight: 600, fontSize: 12, cursor: "pointer",
+          }}>
+            💡 Sugerencias
+          </button>
         </div>
       </aside>
+
+      {/* Modal Sugerencias */}
+      {showSugerencia && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 500,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        }}>
+          <div style={{
+            background: "#FFFFFF", borderRadius: 20, padding: 28,
+            maxWidth: 380, width: "100%", boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          }}>
+            {sugEnviada ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557", marginBottom: 8 }}>Gracias por tu sugerencia</div>
+                <p style={{ color: "#64748B", fontSize: 13, marginBottom: 20 }}>La recibimos y la vamos a tener en cuenta para mejorar PetPass.</p>
+                <button onClick={() => setShowSugerencia(false)} style={{
+                  background: "linear-gradient(135deg, #2CB8AD, #229E94)", color: "#fff",
+                  border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 800, fontSize: 14, cursor: "pointer",
+                }}>Cerrar</button>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557", marginBottom: 4 }}>💡 Envianos una sugerencia</div>
+                <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Tu opinión nos ayuda a mejorar PetPass</p>
+                <textarea
+                  placeholder="¿Qué mejorarías? ¿Qué falta? Contanos..."
+                  value={sugerenciaText}
+                  onChange={e => setSugerenciaText(e.target.value)}
+                  rows={4}
+                  style={{ width: "100%", background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 12, padding: "12px 14px", color: "#1C3557", fontSize: 13, resize: "none", marginBottom: 14 }}
+                />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => setShowSugerencia(false)} style={{
+                    flex: 1, background: "transparent", border: "1px solid #E2E8F0",
+                    color: "#64748B", borderRadius: 12, padding: "10px 0", fontSize: 13, fontWeight: 600, cursor: "pointer",
+                  }}>Cancelar</button>
+                  <button onClick={handleSugerencia} disabled={enviandoSug || !sugerenciaText.trim()} style={{
+                    flex: 2, background: "linear-gradient(135deg, #2CB8AD, #229E94)", color: "#fff",
+                    border: "none", borderRadius: 12, padding: "10px 0", fontWeight: 800, fontSize: 13, cursor: "pointer",
+                    opacity: enviandoSug || !sugerenciaText.trim() ? 0.6 : 1,
+                  }}>{enviandoSug ? "Enviando..." : "Enviar sugerencia"}</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="dashboard-content dashboard-content-pad">

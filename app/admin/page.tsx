@@ -31,12 +31,13 @@ export default function AdminPage() {
   const [perdidas, setPerdidas] = useState<any[]>([]);
   const [historialCount, setHistorialCount] = useState<Record<string, number>>({});
   const [solicitudes, setSolicitudes] = useState<any[]>([]);
+  const [sugerencias, setSugerencias] = useState<any[]>([]);
   const [procesandoId, setProcesandoId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filtroActivo, setFiltroActivo] = useState<"todos" | "activos" | "inactivos">("activos");
-  const [adminTab, setAdminTab] = useState<"mascotas" | "solicitudes">("mascotas");
+  const [adminTab, setAdminTab] = useState<"mascotas" | "solicitudes" | "sugerencias">("mascotas");
   const router = useRouter();
   const supabase = createClient();
 
@@ -60,6 +61,7 @@ export default function AdminPage() {
       setProfiles(data.profiles || []);
       setPerdidas(data.perdidas || []);
       setSolicitudes(data.solicitudes || []);
+      setSugerencias(data.sugerencias || []);
 
       // Contar entradas de historial por mascota
       const counts: Record<string, number> = {};
@@ -134,23 +136,24 @@ export default function AdminPage() {
         <StatCard icon="👤" label="Usuarios" value={profiles.length} color="#3B82F6" />
         <StatCard icon="📍" label="Perdidas activas" value={perdidas.length} color="#EF4444" />
         <StatCard icon="📋" label="Solicitudes pend." value={solicitudesPendientes.length} color="#F97316" />
+        <StatCard icon="💡" label="Sugerencias" value={sugerencias.length} color="#8B5CF6" />
       </div>
 
       {/* Admin tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
-        {([["mascotas", "🐾 Mascotas"], ["solicitudes", "📋 Solicitudes"]] as const).map(([key, label]) => (
+        {([["mascotas", "🐾 Mascotas"], ["solicitudes", "📋 Solicitudes"], ["sugerencias", "💡 Sugerencias"]] as const).map(([key, label]) => (
           <button key={key} onClick={() => setAdminTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "10px 4px",
             background: adminTab === key ? "#E2E8F0" : "transparent",
             color: adminTab === key ? "#1C3557" : "#64748B",
-            fontWeight: 700, fontSize: 13, cursor: "pointer",
+            fontWeight: 700, fontSize: 12, cursor: "pointer",
           }}>
             {label}
             {key === "solicitudes" && solicitudesPendientes.length > 0 && (
-              <span style={{
-                marginLeft: 6, background: "#F97316", color: "#000",
-                borderRadius: 20, padding: "1px 7px", fontSize: 10, fontWeight: 800,
-              }}>{solicitudesPendientes.length}</span>
+              <span style={{ marginLeft: 4, background: "#F97316", color: "#fff", borderRadius: 20, padding: "1px 6px", fontSize: 10, fontWeight: 800 }}>{solicitudesPendientes.length}</span>
+            )}
+            {key === "sugerencias" && sugerencias.length > 0 && (
+              <span style={{ marginLeft: 4, background: "#8B5CF6", color: "#fff", borderRadius: 20, padding: "1px 6px", fontSize: 10, fontWeight: 800 }}>{sugerencias.length}</span>
             )}
           </button>
         ))}
@@ -232,6 +235,29 @@ export default function AdminPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Tab: Sugerencias */}
+      {adminTab === "sugerencias" && (
+        <div>
+          {sugerencias.length === 0 && (
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 40, textAlign: "center", color: "#64748B", fontSize: 13 }}>
+              No hay sugerencias todavía.
+            </div>
+          )}
+          {sugerencias.map((s: any) => (
+            <div key={s.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "14px 18px", marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 20 }}>💡</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#8B5CF6" }}>Sugerencia de usuario</span>
+                </div>
+                <span style={{ fontSize: 11, color: "#64748B" }}>{new Date(s.created_at).toLocaleDateString("es-AR")}</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6 }}>{s.message}</p>
+            </div>
+          ))}
         </div>
       )}
 

@@ -249,9 +249,9 @@ export default function Chat() {
       if (!isImage && !isPdf) continue;
 
       try {
-        const urlResult = supabase.storage.from("documentos").getPublicUrl(path);
-        const publicUrl = urlResult.data.publicUrl;
-        const res = await fetch(publicUrl);
+        const { data: signedData } = await supabase.storage.from("documentos").createSignedUrl(path, 300);
+        if (!signedData?.signedUrl) continue;
+        const res = await fetch(signedData.signedUrl);
         if (!res.ok) continue;
         const blob = await res.blob();
         const b64 = await blobToBase64(blob);

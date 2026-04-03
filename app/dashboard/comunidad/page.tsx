@@ -28,7 +28,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
     { key: "explorar", label: "Explorar", icon: "🐾" },
     { key: "adopciones", label: "Adopcion", icon: "❤️" },
     { key: "perdidas", label: "Perdidas", icon: "📍" },
-    { key: "profesionales", label: "Pros", icon: "🏥" },
+    { key: "profesionales", label: "Profesionales", icon: "🏥" },
     { key: "descuentos", label: "Descuentos", icon: "🎁" },
   ];
   return (
