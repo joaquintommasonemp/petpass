@@ -22,9 +22,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [enviandoSug, setEnviandoSug] = useState(false);
   const [sugEnviada, setSugEnviada] = useState(false);
 
+  const [showEliminar, setShowEliminar] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState("");
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/");
+  }
+
+  async function handleEliminarCuenta() {
+    if (confirmText !== "ELIMINAR") return;
+    setEliminando(true);
+    setErrorEliminar("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { router.push("/"); return; }
+      const res = await fetch("/api/cuenta/eliminar", {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorEliminar(data.error || "Error al eliminar la cuenta");
+        setEliminando(false);
+        return;
+      }
+      await supabase.auth.signOut();
+      router.push("/?cuenta=eliminada");
+    } catch {
+      setErrorEliminar("Error de conexión. Intentá de nuevo.");
+      setEliminando(false);
+    }
   }
 
   async function handleSugerencia() {
@@ -145,9 +175,88 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{ display: "flex", justifyContent: "center", gap: 12, paddingTop: 4 }}>
             <Link href="/terminos" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Términos</Link>
             <Link href="/privacidad" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Privacidad</Link>
+            <button
+              onClick={() => { setShowEliminar(true); setConfirmText(""); setErrorEliminar(""); }}
+              style={{ fontSize: 10, color: "#FCA5A5", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit" }}
+            >Eliminar cuenta</button>
           </div>
         </div>
       </aside>
+
+      {/* Modal Eliminar Cuenta */}
+      {showEliminar && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        }}>
+          <div style={{
+            background: "#FFFFFF", borderRadius: 20, padding: 28,
+            maxWidth: 380, width: "100%",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
+            border: "1px solid #FECACA",
+          }}>
+            <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>⚠️</div>
+            <h3 style={{ fontSize: 18, fontWeight: 900, color: "#1C3557", marginBottom: 8, textAlign: "center" }}>
+              Eliminar cuenta
+            </h3>
+            <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 8 }}>
+              Esta acción es <strong style={{ color: "#EF4444" }}>permanente e irreversible</strong>. Se borrarán:
+            </p>
+            <ul style={{ fontSize: 12, color: "#64748B", paddingLeft: 18, marginBottom: 16, lineHeight: 1.8 }}>
+              <li>Tu cuenta y perfil</li>
+              <li>Todas tus mascotas y su historial</li>
+              <li>Vacunas, documentos y citas</li>
+              <li>Alertas de mascotas perdidas</li>
+              <li>Sesiones de paseo y actualizaciones</li>
+              <li>Mensajes en la comunidad</li>
+              <li>Archivos y fotos subidas</li>
+            </ul>
+            <p style={{ fontSize: 13, color: "#1C3557", fontWeight: 700, marginBottom: 8 }}>
+              Escribí <span style={{ color: "#EF4444", fontFamily: "monospace" }}>ELIMINAR</span> para confirmar:
+            </p>
+            <input
+              value={confirmText}
+              onChange={e => setConfirmText(e.target.value)}
+              placeholder="ELIMINAR"
+              autoComplete="off"
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 10, marginBottom: 12,
+                border: `1px solid ${confirmText === "ELIMINAR" ? "#EF4444" : "#E2E8F0"}`,
+                fontSize: 14, fontFamily: "monospace", letterSpacing: "0.05em",
+              }}
+            />
+            {errorEliminar && (
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "8px 12px", color: "#EF4444", fontSize: 12, marginBottom: 12 }}>
+                {errorEliminar}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setShowEliminar(false)}
+                disabled={eliminando}
+                style={{
+                  flex: 1, background: "transparent", border: "1px solid #E2E8F0",
+                  color: "#64748B", borderRadius: 12, padding: "10px 0",
+                  fontSize: 13, fontWeight: 600, cursor: "pointer",
+                }}
+              >Cancelar</button>
+              <button
+                onClick={handleEliminarCuenta}
+                disabled={confirmText !== "ELIMINAR" || eliminando}
+                style={{
+                  flex: 2, background: confirmText === "ELIMINAR" ? "#EF4444" : "#E2E8F0",
+                  color: confirmText === "ELIMINAR" ? "#fff" : "#94A3B8",
+                  border: "none", borderRadius: 12, padding: "10px 0",
+                  fontSize: 13, fontWeight: 800, cursor: confirmText === "ELIMINAR" ? "pointer" : "not-allowed",
+                  transition: "all 0.15s",
+                }}
+              >
+                {eliminando ? "Eliminando..." : "Eliminar mi cuenta"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Sugerencias */}
       {showSugerencia && (

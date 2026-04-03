@@ -1,5 +1,22 @@
 "use client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function CuentaEliminadaBanner() {
+  const params = useSearchParams();
+  if (params.get("cuenta") !== "eliminada") return null;
+  return (
+    <div style={{
+      background: "#F0FDF4", border: "1px solid #BBF7D0",
+      borderRadius: 12, padding: "14px 20px", marginBottom: 16,
+      fontSize: 13, color: "#166534", display: "flex", gap: 10, alignItems: "center",
+    }}>
+      <span style={{ fontSize: 18 }}>✅</span>
+      <span>Tu cuenta fue eliminada correctamente. Todos tus datos fueron borrados. Gracias por haber usado PetPass.</span>
+    </div>
+  );
+}
 
 const FEATURES = [
   { icon: "🤖", title: "Vet IA 24/7", desc: "Consultá síntomas, mandá fotos y recibí orientación instantánea con el historial de tu mascota como contexto.", color: "#2CB8AD" },
@@ -19,6 +36,13 @@ const TESTIMONIALS = [
 export default function Home() {
   return (
     <main className="landing-wrapper">
+
+      {/* Banner cuenta eliminada */}
+      <Suspense fallback={null}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 24px 0" }}>
+          <CuentaEliminadaBanner />
+        </div>
+      </Suspense>
 
       {/* NAV */}
       <div style={{
