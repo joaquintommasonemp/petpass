@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-function Badge({ children, color = "#0CCE6B" }: { children: React.ReactNode; color?: string }) {
+function Badge({ children, color = "#0AAD5C" }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{
       background: color + "22", color, borderRadius: 20, padding: "2px 10px",
@@ -282,7 +282,7 @@ export default function Dashboard() {
       <h2 style={{ marginTop: 16, marginBottom: 8 }}>Registrá tu primera mascota</h2>
       <p style={{ color: "#64748B", marginBottom: 24 }}>Todavía no tenés ninguna mascota en PetPass.</p>
       <Link href="/mascota/nueva" style={{
-        background: "linear-gradient(135deg, #0CCE6B, #09A855)", color: "#fff", borderRadius: 12, padding: "12px 24px",
+        background: "linear-gradient(135deg, #0AAD5C, #088A48)", color: "#fff", borderRadius: 12, padding: "12px 24px",
         fontWeight: 800, textDecoration: "none", fontSize: 14,
       }}>+ Agregar mascota</Link>
     </div>
@@ -296,9 +296,9 @@ export default function Dashboard() {
           {mascotas.map(m => (
             <button key={m.id} onClick={() => selectMascota(m)} style={{
               background: selected?.id === m.id ? "#E8FFF2" : "#FFFFFF",
-              border: `1px solid ${selected?.id === m.id ? "#0CCE6B" : "#E2E8F0"}`,
+              border: `1px solid ${selected?.id === m.id ? "#0AAD5C" : "#E2E8F0"}`,
               borderRadius: 20, padding: "6px 14px",
-              color: selected?.id === m.id ? "#0CCE6B" : "#64748B",
+              color: selected?.id === m.id ? "#0AAD5C" : "#64748B",
               fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", cursor: "pointer",
               display: "flex", alignItems: "center", gap: 6,
             }}>
@@ -352,7 +352,7 @@ export default function Dashboard() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {selected?.chip && (
               <a href={`/mascota/${selected.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                <Badge color="#0CCE6B">🔗 Chip: ...{selected.chip.slice(-6)}</Badge>
+                <Badge color="#0AAD5C">🔗 Chip: ...{selected.chip.slice(-6)}</Badge>
               </a>
             )}
             {selected?.location && <Badge color="#3B82F6">{selected.location}</Badge>}
@@ -365,8 +365,8 @@ export default function Dashboard() {
           </div>
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <a href={`/mascota/${selected?.id}`} target="_blank" rel="noreferrer" style={{
-              fontSize: 11, color: "#0CCE6B", textDecoration: "none", fontWeight: 700,
-              background: "#E8FFF2", border: "1px solid rgba(12,206,107,0.2)", borderRadius: 8,
+              fontSize: 11, color: "#0AAD5C", textDecoration: "none", fontWeight: 700,
+              background: "#E8FFF2", border: "1px solid rgba(10,173,92,0.2)", borderRadius: 8,
               padding: "4px 10px", display: "inline-block",
             }}>🌐 Ver perfil</a>
             {/* Toggle público/privado */}
@@ -376,11 +376,11 @@ export default function Dashboard() {
               border: `1px solid ${isPublic ? "#C6F6E0" : "#CBD5E1"}`,
               borderRadius: 20, padding: "4px 10px", cursor: "pointer",
               fontSize: 11, fontWeight: 700,
-              color: isPublic ? "#0CCE6B" : "#64748B",
+              color: isPublic ? "#0AAD5C" : "#64748B",
             }}>
               <span style={{
                 width: 14, height: 14, borderRadius: "50%",
-                background: isPublic ? "#0CCE6B" : "#64748B",
+                background: isPublic ? "#0AAD5C" : "#64748B",
                 display: "inline-block", transition: "background 0.2s",
               }} />
               {isPublic ? "Visible en Explorar" : "Perfil privado"}
@@ -431,9 +431,9 @@ export default function Dashboard() {
         return (
           <Card style={{ border: "1px solid #E8FFF2", padding: 0, overflow: "hidden" }}>
             <div style={{ background: "#E8FFF2", padding: "10px 16px", borderBottom: "1px solid #E8FFF2", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontWeight: 800, fontSize: 13, color: "#0CCE6B" }}>🏥 Estado de salud</span>
+              <span style={{ fontWeight: 800, fontSize: 13, color: "#0AAD5C" }}>🏥 Estado de salud</span>
               <button onClick={() => setShowAgendarCita(true)} style={{
-                background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
+                background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
                 borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
               }}>+ Agendar cita</button>
             </div>
@@ -462,7 +462,7 @@ export default function Dashboard() {
                     <div style={{ fontSize: 11, color: "#64748B", marginBottom: 1 }}>Próxima vacuna</div>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{nextVac.name}</div>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0CCE6B" }}>{nextVac.next_date}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0AAD5C" }}>{nextVac.next_date}</span>
                 </div>
               )}
               {!hasData && (
@@ -515,7 +515,7 @@ export default function Dashboard() {
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{v.name}</div>
                 <div style={{ color: "#64748B", fontSize: 12 }}>Aplicada: {v.date} · Próxima: {v.next_date}</div>
               </div>
-              <Badge color={v.status === "ok" ? "#0CCE6B" : "#EF4444"}>
+              <Badge color={v.status === "ok" ? "#0AAD5C" : "#EF4444"}>
                 {v.status === "ok" ? "Al día" : "Vencida"}
               </Badge>
             </Card>
@@ -577,7 +577,7 @@ export default function Dashboard() {
           <input type="number" placeholder="Nuevo peso en kg" value={nuevoPeso}
             onChange={e => setNuevoPeso(e.target.value)} style={{ flex: 1 }} />
           <button onClick={handleAgregarPeso} style={{
-            background: "#0CCE6B", color: "#000", border: "none", borderRadius: 8,
+            background: "#0AAD5C", color: "#000", border: "none", borderRadius: 8,
             padding: "8px 14px", fontWeight: 800, cursor: "pointer",
           }}>Guardar</button>
         </div>
@@ -625,7 +625,7 @@ export default function Dashboard() {
               <div style={{ display: "flex", gap: 6, marginLeft: 8, flexShrink: 0 }}>
                 {u.phone && (
                   <a href={`https://wa.me/${u.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
-                    background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
+                    background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
                     borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, textDecoration: "none",
                   }}>WA</a>
                 )}
@@ -642,7 +642,7 @@ export default function Dashboard() {
       {/* Acciones */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <Link href="/mascota/nueva" style={{
-          flex: 1, background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
+          flex: 1, background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
           borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13,
           textDecoration: "none", textAlign: "center",
         }}>+ Agregar mascota</Link>

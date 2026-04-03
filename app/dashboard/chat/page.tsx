@@ -293,7 +293,7 @@ export default function Chat() {
           background: usedCount >= FREE_LIMIT ? "#FFF0F0" : "#E8FFF2",
           border: `1px solid ${usedCount >= FREE_LIMIT ? "#FECACA" : "#C6F6E0"}`,
           borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12,
-          color: usedCount >= FREE_LIMIT ? "#EF4444" : "#0CCE6B",
+          color: usedCount >= FREE_LIMIT ? "#EF4444" : "#0AAD5C",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <span>🤖 {usedCount >= FREE_LIMIT ? "Límite mensual alcanzado" : `${remaining} consulta${remaining !== 1 ? "s" : ""} gratis restante${remaining !== 1 ? "s" : ""} este mes`}</span>
@@ -352,7 +352,7 @@ export default function Chat() {
           <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
             <div style={{
               maxWidth: "82%",
-              background: m.role === "user" ? "#0CCE6B" : "#F4F6FB",
+              background: m.role === "user" ? "#0AAD5C" : "#F4F6FB",
               color: m.role === "user" ? "#000" : "#0F1E3D",
               borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
               padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
@@ -398,7 +398,7 @@ export default function Chat() {
           disabled={usedCount >= FREE_LIMIT && !isPremium}
           style={{ flex: 1 }} />
         <button onClick={sendMessage} disabled={loading || (!input.trim() && !imageData)} style={{
-          background: "#0CCE6B", color: "#000", border: "none", borderRadius: 12,
+          background: "#0AAD5C", color: "#000", border: "none", borderRadius: 12,
           padding: "10px 18px", fontWeight: 800, fontSize: 14,
           opacity: loading || (!input.trim() && !imageData) ? 0.5 : 1, cursor: "pointer",
         }}>↑</button>
@@ -434,7 +434,7 @@ export default function Chat() {
               <div style={{ fontWeight: 800, color: "#EC4899", marginBottom: 10, textAlign: "center" }}>✨ Premium · $X/mes</div>
               {["Consultas IA ilimitadas", "Análisis de fotos ilimitado", "Historial clínico completo", "Soporte prioritario"].map(f => (
                 <div key={f} style={{ fontSize: 13, color: "#0F1E3D", padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={{ color: "#0CCE6B" }}>✓</span> {f}
+                  <span style={{ color: "#0AAD5C" }}>✓</span> {f}
                 </div>
               ))}
             </div>

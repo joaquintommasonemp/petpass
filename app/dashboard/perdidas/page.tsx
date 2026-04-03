@@ -264,7 +264,7 @@ export default function Perdidas() {
                     rel="noreferrer"
                     style={{
                       display: "block", marginTop: 6, background: "#E8FFF2",
-                      color: "#0CCE6B", border: "1px solid #C6F6E0", borderRadius: 8,
+                      color: "#0AAD5C", border: "1px solid #C6F6E0", borderRadius: 8,
                       padding: "4px 8px", fontSize: 11, fontWeight: 700, textDecoration: "none",
                     }}
                   >

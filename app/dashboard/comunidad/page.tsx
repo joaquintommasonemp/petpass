@@ -159,16 +159,16 @@ function TabExplorar() {
         <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
           <button onClick={() => setRaza("")} style={{
             background: !raza ? "#E8FFF2" : "#FFFFFF",
-            border: `1px solid ${!raza ? "#0CCE6B" : "#E2E8F0"}`,
-            color: !raza ? "#0CCE6B" : "#64748B",
+            border: `1px solid ${!raza ? "#0AAD5C" : "#E2E8F0"}`,
+            color: !raza ? "#0AAD5C" : "#64748B",
             borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
             cursor: "pointer", whiteSpace: "nowrap",
           }}>Todas</button>
           {razas.map(r => (
             <button key={r} onClick={() => setRaza(r === raza ? "" : r)} style={{
               background: raza === r ? "#E8FFF2" : "#FFFFFF",
-              border: `1px solid ${raza === r ? "#0CCE6B" : "#E2E8F0"}`,
-              color: raza === r ? "#0CCE6B" : "#64748B",
+              border: `1px solid ${raza === r ? "#0AAD5C" : "#E2E8F0"}`,
+              color: raza === r ? "#0AAD5C" : "#64748B",
               borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
               cursor: "pointer", whiteSpace: "nowrap",
             }}>{r}</button>
@@ -216,7 +216,7 @@ function TabExplorar() {
                 {owner?.phone && (
                   <a href={"https://wa.me/" + owner.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer"
                     style={{
-                      display: "block", background: "#E8FFF2", color: "#0CCE6B",
+                      display: "block", background: "#E8FFF2", color: "#0AAD5C",
                       border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 0",
                       fontSize: 11, fontWeight: 700, textDecoration: "none", textAlign: "center",
                     }}>💬 Contactar</a>
@@ -263,7 +263,7 @@ function TabExplorar() {
             }}>📷</button>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
             <button onClick={sendMsg} disabled={sendingMsg || !msgText.trim()} style={{
-              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #0CCE6B, #09A855)" : "#E2E8F0",
+              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #0AAD5C, #088A48)" : "#E2E8F0",
               color: msgText.trim() ? "#000" : "#64748B", border: "none",
               borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer",
               opacity: sendingMsg ? 0.6 : 1,
@@ -291,7 +291,7 @@ function TabExplorar() {
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 13 }}>{msg.author_name || "Tutor"}</div>
                   {msg.mascota_name && (
-                    <div style={{ fontSize: 11, color: "#0CCE6B" }}>🐕 {msg.mascota_name}</div>
+                    <div style={{ fontSize: 11, color: "#0AAD5C" }}>🐕 {msg.mascota_name}</div>
                   )}
                 </div>
               </div>
@@ -504,7 +504,7 @@ function TabPerdidas() {
     <div>
       {/* Sub-tabs Perdidas / Encontradas */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
-        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#0CCE6B"]] as const).map(([key, label, color]) => (
+        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#0AAD5C"]] as const).map(([key, label, color]) => (
           <button key={key} onClick={() => setSubTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
             background: subTab === key ? "#E2E8F0" : "transparent",
@@ -524,7 +524,7 @@ function TabPerdidas() {
           📍 Reportar perdida
         </button>
         <button onClick={() => { setReportingType("encontrada"); setReporting(!reporting || reportingType !== "encontrada"); }} style={{
-          flex: 1, background: "#E8FFF2", color: "#0CCE6B",
+          flex: 1, background: "#E8FFF2", color: "#0AAD5C",
           border: "1px solid #C6F6E0", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
@@ -534,7 +534,7 @@ function TabPerdidas() {
 
       {reporting && (
         <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#FECACA" : "#C6F6E0"}` }}>
-          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#0CCE6B", marginBottom: 12 }}>
+          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#0AAD5C", marginBottom: 12 }}>
             {reportingType === "perdida" ? "📍 Nueva alerta de mascota perdida" : "✅ Reportar mascota encontrada"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -570,7 +570,7 @@ function TabPerdidas() {
             </div>
 
             <button onClick={handleReport} disabled={loading} style={{
-              background: reportingType === "perdida" ? "#EF4444" : "#0CCE6B",
+              background: reportingType === "perdida" ? "#EF4444" : "#0AAD5C",
               color: reportingType === "perdida" ? "#fff" : "#000", border: "none",
               borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1, cursor: "pointer",
             }}>{loading ? "Publicando..." : "Publicar"}</button>
@@ -626,7 +626,7 @@ function TabPerdidas() {
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
                     {isEncontrada && (
-                      <span style={{ background: "#E8FFF2", color: "#0CCE6B", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
+                      <span style={{ background: "#E8FFF2", color: "#0AAD5C", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
                     )}
                   </div>
                   <span style={{
@@ -659,7 +659,7 @@ function TabPerdidas() {
 
                 {p.phone && (
                   <a href={"https://wa.me/" + p.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                    display: "inline-block", background: "#E8FFF2", color: "#0CCE6B",
+                    display: "inline-block", background: "#E8FFF2", color: "#0AAD5C",
                     border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 14px",
                     fontSize: 12, fontWeight: 700, textDecoration: "none",
                   }}>💬 Contactar por WhatsApp</a>
@@ -776,7 +776,7 @@ function TabProfesionales() {
                 <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                   {p.telefono && (
                     <a href={"https://wa.me/" + p.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                      background: "#E8FFF2", color: "#0CCE6B", border: "1px solid #C6F6E0",
+                      background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
                       borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
                     }}>WhatsApp</a>
                   )}
