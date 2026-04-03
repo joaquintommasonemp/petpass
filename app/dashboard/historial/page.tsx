@@ -319,13 +319,13 @@ export default function Historial() {
     <div>
       {mascota && (
         <div style={{
-          background: "#FFFFFF", border: "1px solid #C6F6E0", borderRadius: 16,
+          background: "#FFFFFF", border: "1px solid #B2E8E5", borderRadius: 16,
           padding: "14px 16px", marginBottom: mascotas.length > 1 ? 12 : 20,
           display: "flex", alignItems: "center", gap: 14,
         }}>
           <div style={{
             width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
-            background: "#E2E8F0", border: "2px solid #C6F6E0",
+            background: "#E2E8F0", border: "2px solid #B2E8E5",
             display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
           }}>
             {mascota.photo_url
@@ -340,7 +340,7 @@ export default function Historial() {
             </div>
           </div>
           <span style={{
-            background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+            background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
             borderRadius: 20, padding: "3px 10px", fontSize: 10, fontWeight: 800,
           }}>Historia clinica</span>
         </div>
@@ -352,10 +352,10 @@ export default function Historial() {
             const isSelected = mascota && mascota.id === m.id;
             return (
               <button key={m.id} onClick={function() { selectMascota(m); }} style={{
-                background: isSelected ? "#E8FFF2" : "#FFFFFF",
-                border: "1px solid " + (isSelected ? "#0AAD5C" : "#E2E8F0"),
+                background: isSelected ? "#E5F7F6" : "#FFFFFF",
+                border: "1px solid " + (isSelected ? "#2CB8AD" : "#E2E8F0"),
                 borderRadius: 20, padding: "6px 14px",
-                color: isSelected ? "#0AAD5C" : "#64748B",
+                color: isSelected ? "#2CB8AD" : "#64748B",
                 fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 6,
               }}>
@@ -376,7 +376,7 @@ export default function Historial() {
             <button key={key} onClick={function() { setHistTab(key); }} style={{
               flex: 1, border: "none", borderRadius: 10, padding: "7px 4px",
               background: histTab === key ? "#E2E8F0" : "transparent",
-              color: histTab === key ? "#0F1E3D" : "#64748B",
+              color: histTab === key ? "#1C3557" : "#64748B",
               fontWeight: 700, fontSize: 11, cursor: "pointer",
             }}>{HIST_TAB_LABELS[key]}</button>
           );
@@ -387,24 +387,24 @@ export default function Historial() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h2 style={{ fontSize: 18, fontWeight: 800 }}>Consultas</h2>
           <button onClick={function() { setAdding(!adding); }} style={{
-            background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+            background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
             borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
           }}>+ Agregar</button>
         </div>
       )}
 
       {histTab === "consultas" && adding && (
-        <Card style={{ border: "1px solid #C6F6E0" }}>
-          <div style={{ fontWeight: 700, color: "#0AAD5C", marginBottom: 12 }}>Nueva consulta</div>
+        <Card style={{ border: "1px solid #B2E8E5" }}>
+          <div style={{ fontWeight: 700, color: "#2CB8AD", marginBottom: 12 }}>Nueva consulta</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <input placeholder="Titulo (ej: Control anual)" value={form.title} onChange={function(e) { setForm(function(f) { return { ...f, title: e.target.value }; }); }} />
             <input placeholder="Veterinario/a" value={form.vet} onChange={function(e) { setForm(function(f) { return { ...f, vet: e.target.value }; }); }} />
             <input placeholder="Fecha (ej: 15 Ene 2025)" value={form.date} onChange={function(e) { setForm(function(f) { return { ...f, date: e.target.value }; }); }} />
             <textarea placeholder="Resumen de la consulta..." rows={3} value={form.summary}
               onChange={function(e) { setForm(function(f) { return { ...f, summary: e.target.value }; }); }}
-              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", resize: "none" }} />
+              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
             <button onClick={addEntry} style={{
-              background: "#0AAD5C", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800,
+              background: "#2CB8AD", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800,
             }}>Guardar</button>
           </div>
         </Card>
@@ -451,13 +451,13 @@ export default function Historial() {
                     <label style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Fecha de aplicacion *</label>
                     <input type="date" value={vacForm.date}
                       onChange={function(e) { setVacForm(function(f) { return { ...f, date: e.target.value }; }); }}
-                      style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D" }} />
+                      style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557" }} />
                   </div>
                   <div>
                     <label style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Proxima aplicacion</label>
                     <input type="date" value={vacForm.next_date}
                       onChange={function(e) { setVacForm(function(f) { return { ...f, next_date: e.target.value }; }); }}
-                      style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D" }} />
+                      style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557" }} />
                   </div>
                 </div>
                 <input placeholder="Veterinario/a" value={vacForm.vet}
@@ -489,7 +489,7 @@ export default function Historial() {
                   {vencida
                     ? <span style={{ background: "#FFF0F0", color: "#EF4444", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>VENCIDA</span>
                     : proxima
-                    ? <span style={{ background: "#E8FFF2", color: "#0AAD5C", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>Al dia</span>
+                    ? <span style={{ background: "#E5F7F6", color: "#2CB8AD", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>Al dia</span>
                     : null
                   }
                 </div>
@@ -500,7 +500,7 @@ export default function Historial() {
                     </span>
                   )}
                   {v.next_date && (
-                    <span style={{ background: vencida ? "#FFF0F0" : "#E8FFF2", color: vencida ? "#EF4444" : "#0AAD5C", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+                    <span style={{ background: vencida ? "#FFF0F0" : "#E5F7F6", color: vencida ? "#EF4444" : "#2CB8AD", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
                       Proxima: {v.next_date}
                     </span>
                   )}
@@ -531,7 +531,7 @@ export default function Historial() {
                   <label style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Fecha del turno *</label>
                   <input type="date" value={citaForm.date}
                     onChange={function(e) { setCitaForm(function(f) { return { ...f, date: e.target.value }; }); }}
-                    style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D" }} />
+                    style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557" }} />
                 </div>
                 <input placeholder="Motivo (ej: Control anual, castración)" value={citaForm.summary}
                   onChange={function(e) { setCitaForm(function(f) { return { ...f, summary: e.target.value }; }); }} />
@@ -594,7 +594,7 @@ export default function Historial() {
                 <input placeholder="Frecuencia (ej: 2 veces por dia)" value={alimentForm.frecuencia} onChange={function(e) { setAlimentForm(function(f) { return { ...f, frecuencia: e.target.value }; }); }} />
                 <textarea placeholder="Notas adicionales..." rows={2} value={alimentForm.notas}
                   onChange={function(e) { setAlimentForm(function(f) { return { ...f, notas: e.target.value }; }); }}
-                  style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", resize: "none" }} />
+                  style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
                 <button onClick={addAlimentacion} style={{
                   background: "#F97316", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
                 }}>Guardar</button>
@@ -656,7 +656,7 @@ export default function Historial() {
                   fontSize: 18, cursor: "pointer", lineHeight: 1,
                 }}>x</button>
               </div>
-              <div style={{ fontSize: 13, lineHeight: 1.7, color: "#0F1E3D", whiteSpace: "pre-wrap" }}>
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: "#1C3557", whiteSpace: "pre-wrap" }}>
                 {recetas.split("**").join("")}
               </div>
             </Card>
@@ -674,7 +674,7 @@ export default function Historial() {
               <div style={{ fontSize: 32, marginBottom: 8 }}>📎</div>
               <div style={{ color: "#64748B", fontSize: 13, marginBottom: 10 }}>Analisis, radiografias, recetas, ecografias</div>
               <div style={{
-                background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+                background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                 borderRadius: 10, padding: "8px 20px", fontSize: 13, fontWeight: 700, display: "inline-block",
               }}>{uploading ? "Subiendo..." : "Seleccionar archivo"}</div>
               <input type="file" style={{ display: "none" }} onChange={handleFile} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
@@ -700,7 +700,7 @@ export default function Historial() {
                 }}>Copiar</button>
                 <a href={"https://wa.me/?text=Te%20comparto%20el%20link%20para%20subir%20los%20estudios%20de%20" + encodeURIComponent(mascota ? mascota.name : "") + "%20a%20PetPass%3A%20" + encodeURIComponent(newLink)}
                   target="_blank" rel="noreferrer" style={{
-                    flex: 1, background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+                    flex: 1, background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                     borderRadius: 10, padding: 10, fontWeight: 800, fontSize: 13, cursor: "pointer",
                     textDecoration: "none", textAlign: "center", display: "block",
                   }}>WhatsApp</a>
@@ -730,7 +730,7 @@ export default function Historial() {
                 return (
                   <div key={l.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: "10px 14px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, color: "#0F1E3D", fontWeight: 700 }}>{l.notes || "Sin indicaciones"}</div>
+                      <div style={{ fontSize: 12, color: "#1C3557", fontWeight: 700 }}>{l.notes || "Sin indicaciones"}</div>
                       <div style={{ fontSize: 11, color: "#64748B" }}>{new Date(l.created_at).toLocaleDateString("es-AR")}</div>
                     </div>
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
@@ -784,7 +784,7 @@ export default function Historial() {
                       <div style={{ fontSize: 12, color: "#64748B", marginTop: 4, fontStyle: "italic" }}>{vetNote}</div>
                     )}
                     {iaText && (
-                      <div style={{ marginTop: 6, background: "#F4F6FB", borderRadius: 8, padding: "6px 10px", fontSize: 12, color: "#0AAD5C", lineHeight: 1.5 }}>
+                      <div style={{ marginTop: 6, background: "#F4F6FB", borderRadius: 8, padding: "6px 10px", fontSize: 12, color: "#2CB8AD", lineHeight: 1.5 }}>
                         {iaText.length > 120 ? iaText.slice(0, 120) + "..." : iaText}
                       </div>
                     )}
@@ -792,7 +792,7 @@ export default function Historial() {
                 </div>
                 <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                   <button onClick={function() { openDoc(pathOrUrl); }} style={{
-                    flex: 1, background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+                    flex: 1, background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                     borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
                   }}>Ver</button>
                   <button onClick={function() { shareDoc(pathOrUrl, name); }} style={{

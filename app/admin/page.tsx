@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-function StatCard({ icon, label, value, color = "#0AAD5C" }: { icon: string; label: string; value: number | string; color?: string }) {
+function StatCard({ icon, label, value, color = "#2CB8AD" }: { icon: string; label: string; value: number | string; color?: string }) {
   return (
     <div style={{
       background: "#FFFFFF", border: `1px solid ${color}33`, borderRadius: 16,
@@ -16,7 +16,7 @@ function StatCard({ icon, label, value, color = "#0AAD5C" }: { icon: string; lab
   );
 }
 
-function Badge({ children, color = "#0AAD5C" }: { children: React.ReactNode; color?: string }) {
+function Badge({ children, color = "#2CB8AD" }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{
       background: color + "22", color, borderRadius: 20, padding: "2px 10px",
@@ -129,7 +129,7 @@ export default function AdminPage() {
 
       {/* Stats */}
       <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
-        <StatCard icon="🐾" label="Mascotas activas" value={mascotasActivas} color="#0AAD5C" />
+        <StatCard icon="🐾" label="Mascotas activas" value={mascotasActivas} color="#2CB8AD" />
         <StatCard icon="🕊️" label="Dados de baja" value={mascotasInactivas} color="#64748B" />
         <StatCard icon="👤" label="Usuarios" value={profiles.length} color="#3B82F6" />
         <StatCard icon="📍" label="Perdidas activas" value={perdidas.length} color="#EF4444" />
@@ -142,7 +142,7 @@ export default function AdminPage() {
           <button key={key} onClick={() => setAdminTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "10px 4px",
             background: adminTab === key ? "#E2E8F0" : "transparent",
-            color: adminTab === key ? "#0F1E3D" : "#64748B",
+            color: adminTab === key ? "#1C3557" : "#64748B",
             fontWeight: 700, fontSize: 13, cursor: "pointer",
           }}>
             {label}
@@ -172,7 +172,7 @@ export default function AdminPage() {
             return (
               <div key={s.id} style={{
                 background: "#FFFFFF",
-                border: "1px solid " + (isPendiente ? "#FED7AA" : s.mascota_name === "aprobado" ? "#C6F6E0" : "#FECACA"),
+                border: "1px solid " + (isPendiente ? "#FED7AA" : s.mascota_name === "aprobado" ? "#B2E8E5" : "#FECACA"),
                 borderRadius: 16, padding: "14px 18px", marginBottom: 10,
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
@@ -191,13 +191,13 @@ export default function AdminPage() {
                     {tipo === "descuento" && datos.rubro && (
                       <div style={{ fontSize: 12, color: "#64748B" }}>{datos.rubro}</div>
                     )}
-                    {datos.descripcion && <div style={{ fontSize: 12, color: "#0F1E3D", marginTop: 4 }}>{datos.descripcion}</div>}
-                    {datos.descuento && <div style={{ fontSize: 12, color: "#0F1E3D", marginTop: 4 }}>{datos.descuento}</div>}
+                    {datos.descripcion && <div style={{ fontSize: 12, color: "#1C3557", marginTop: 4 }}>{datos.descripcion}</div>}
+                    {datos.descuento && <div style={{ fontSize: 12, color: "#1C3557", marginTop: 4 }}>{datos.descuento}</div>}
                     {datos.email && <div style={{ fontSize: 11, color: "#8B5CF6", marginTop: 4 }}>✉ {datos.email}</div>}
-                    {datos.telefono && <div style={{ fontSize: 11, color: "#0AAD5C", marginTop: 2 }}>📞 {datos.telefono}</div>}
+                    {datos.telefono && <div style={{ fontSize: 11, color: "#2CB8AD", marginTop: 2 }}>📞 {datos.telefono}</div>}
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <Badge color={isPendiente ? "#F97316" : s.mascota_name === "aprobado" ? "#0AAD5C" : "#EF4444"}>
+                    <Badge color={isPendiente ? "#F97316" : s.mascota_name === "aprobado" ? "#2CB8AD" : "#EF4444"}>
                       {s.mascota_name === "pendiente" ? "Pendiente" : s.mascota_name === "aprobado" ? "Aprobado" : "Rechazado"}
                     </Badge>
                     <div style={{ fontSize: 11, color: "#64748B", marginTop: 6 }}>
@@ -211,8 +211,8 @@ export default function AdminPage() {
                       onClick={() => accionSolicitud(s.id, "aprobar", tipo)}
                       disabled={procesandoId === s.id}
                       style={{
-                        flex: 1, background: "#E8FFF2", color: "#0AAD5C",
-                        border: "1px solid #C6F6E0", borderRadius: 10, padding: "8px 0",
+                        flex: 1, background: "#E5F7F6", color: "#2CB8AD",
+                        border: "1px solid #B2E8E5", borderRadius: 10, padding: "8px 0",
                         fontWeight: 800, fontSize: 13, cursor: "pointer",
                         opacity: procesandoId === s.id ? 0.5 : 1,
                       }}
@@ -249,9 +249,9 @@ export default function AdminPage() {
         <div style={{ display: "flex", gap: 6 }}>
           {(["activos", "todos", "inactivos"] as const).map(f => (
             <button key={f} onClick={() => setFiltroActivo(f)} style={{
-              background: filtroActivo === f ? "#E8FFF2" : "#FFFFFF",
-              color: filtroActivo === f ? "#0AAD5C" : "#64748B",
-              border: `1px solid ${filtroActivo === f ? "#C6F6E0" : "#E2E8F0"}`,
+              background: filtroActivo === f ? "#E5F7F6" : "#FFFFFF",
+              color: filtroActivo === f ? "#2CB8AD" : "#64748B",
+              border: `1px solid ${filtroActivo === f ? "#B2E8E5" : "#E2E8F0"}`,
               borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer",
               textTransform: "capitalize",
             }}>{f}</button>
@@ -308,7 +308,7 @@ export default function AdminPage() {
                   <span style={{ fontWeight: 800, fontSize: 15 }}>{m.name}</span>
                   {m.active === false
                     ? <Badge color="#64748B">Dado de baja</Badge>
-                    : <Badge color="#0AAD5C">Activo</Badge>
+                    : <Badge color="#2CB8AD">Activo</Badge>
                   }
                   {perdidas.some(p => p.user_id === m.user_id) && (
                     <Badge color="#EF4444">Perdida reportada</Badge>

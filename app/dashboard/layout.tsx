@@ -36,10 +36,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <img src="/logo.png" alt="PetPass" style={{ height: 36, width: "auto", objectFit: "contain" }} />
         </div>
         <Link href="/mascota/nueva" style={{
-          background: "linear-gradient(135deg, #0AAD5C, #088A48)",
+          background: "linear-gradient(135deg, #2CB8AD, #229E94)",
           color: "#fff", border: "none",
           borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 800, textDecoration: "none",
-          boxShadow: "0 2px 12px rgba(10,173,92,0.25)",
+          boxShadow: "0 2px 12px rgba(44,184,173,0.25)",
         }}>+ Mascota</Link>
       </div>
 
@@ -63,22 +63,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "10px 12px", borderRadius: 12,
                 textDecoration: "none",
-                background: active ? "#E8FFF2" : "transparent",
-                borderLeft: active ? "3px solid #0AAD5C" : "3px solid transparent",
+                background: active ? "#E5F7F6" : "transparent",
+                borderLeft: active ? "3px solid #2CB8AD" : "3px solid transparent",
                 transition: "all 0.15s",
               }}>
                 <span style={{ fontSize: 18, flexShrink: 0, width: 24, textAlign: "center" }}>{tab.icon}</span>
                 <div>
                   <div style={{
                     fontSize: 13, fontWeight: 700,
-                    color: active ? "#0AAD5C" : "#0F1E3D",
+                    color: active ? "#2CB8AD" : "#1C3557",
                   }}>{tab.label}</div>
                   <div style={{ fontSize: 11, color: "#64748B", marginTop: 1 }}>{tab.desc}</div>
                 </div>
                 {active && (
                   <div style={{
                     marginLeft: "auto", width: 6, height: 6, borderRadius: "50%",
-                    background: "#0AAD5C",
+                    background: "#2CB8AD",
                   }} />
                 )}
               </Link>
@@ -91,10 +91,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{ height: 1, background: "#E2E8F0", marginBottom: 4 }} />
           <Link href="/mascota/nueva" style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "linear-gradient(135deg, #0AAD5C, #088A48)",
+            background: "linear-gradient(135deg, #2CB8AD, #229E94)",
             color: "#fff", borderRadius: 12, padding: "10px 16px",
             fontWeight: 800, fontSize: 13, textDecoration: "none",
-            boxShadow: "0 4px 16px rgba(10,173,92,0.25)",
+            boxShadow: "0 4px 16px rgba(44,184,173,0.25)",
           }}>
             <span style={{ fontSize: 16 }}>+</span> Nueva mascota
           </Link>
@@ -124,8 +124,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alignItems: "center", padding: "8px 2px 6px", gap: 1,
             }}>
               <span style={{ fontSize: 16 }}>{tab.icon}</span>
-              <span style={{ fontSize: 8, fontWeight: 700, color: active ? "#0AAD5C" : "#64748B" }}>{tab.label}</span>
-              {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#0AAD5C" }} />}
+              <span style={{ fontSize: 8, fontWeight: 700, color: active ? "#2CB8AD" : "#64748B" }}>{tab.label}</span>
+              {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#2CB8AD" }} />}
             </Link>
           );
         })}

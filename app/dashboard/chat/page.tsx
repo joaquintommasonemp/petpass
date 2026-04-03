@@ -290,10 +290,10 @@ export default function Chat() {
         </div>
       ) : (
         <div style={{
-          background: usedCount >= FREE_LIMIT ? "#FFF0F0" : "#E8FFF2",
-          border: `1px solid ${usedCount >= FREE_LIMIT ? "#FECACA" : "#C6F6E0"}`,
+          background: usedCount >= FREE_LIMIT ? "#FFF0F0" : "#E5F7F6",
+          border: `1px solid ${usedCount >= FREE_LIMIT ? "#FECACA" : "#B2E8E5"}`,
           borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12,
-          color: usedCount >= FREE_LIMIT ? "#EF4444" : "#0AAD5C",
+          color: usedCount >= FREE_LIMIT ? "#EF4444" : "#2CB8AD",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <span>🤖 {usedCount >= FREE_LIMIT ? "Límite mensual alcanzado" : `${remaining} consulta${remaining !== 1 ? "s" : ""} gratis restante${remaining !== 1 ? "s" : ""} este mes`}</span>
@@ -352,8 +352,8 @@ export default function Chat() {
           <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
             <div style={{
               maxWidth: "82%",
-              background: m.role === "user" ? "#0AAD5C" : "#F4F6FB",
-              color: m.role === "user" ? "#000" : "#0F1E3D",
+              background: m.role === "user" ? "#2CB8AD" : "#F4F6FB",
+              color: m.role === "user" ? "#000" : "#1C3557",
               borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
               padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
               border: m.role === "assistant" ? "1px solid #E2E8F0" : "none",
@@ -376,7 +376,7 @@ export default function Chat() {
       {/* Preview imagen */}
       {imagePreview && (
         <div style={{ position: "relative", marginBottom: 8, display: "inline-block" }}>
-          <img src={imagePreview} style={{ height: 80, borderRadius: 8, border: "1px solid #C6F6E0" }} />
+          <img src={imagePreview} style={{ height: 80, borderRadius: 8, border: "1px solid #B2E8E5" }} />
           <button onClick={clearImage} style={{
             position: "absolute", top: -6, right: -6, background: "#EF4444", color: "#fff",
             border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
@@ -398,7 +398,7 @@ export default function Chat() {
           disabled={usedCount >= FREE_LIMIT && !isPremium}
           style={{ flex: 1 }} />
         <button onClick={sendMessage} disabled={loading || (!input.trim() && !imageData)} style={{
-          background: "#0AAD5C", color: "#000", border: "none", borderRadius: 12,
+          background: "#2CB8AD", color: "#000", border: "none", borderRadius: 12,
           padding: "10px 18px", fontWeight: 800, fontSize: 14,
           opacity: loading || (!input.trim() && !imageData) ? 0.5 : 1, cursor: "pointer",
         }}>↑</button>
@@ -426,15 +426,15 @@ export default function Chat() {
             <div style={{ fontSize: 52, marginBottom: 12 }}>🤖</div>
             <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 8 }}>Límite del plan gratuito</h3>
             <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
-              Usaste tus <strong style={{ color: "#0F1E3D" }}>{FREE_LIMIT} consultas gratuitas</strong> de este mes.<br />
+              Usaste tus <strong style={{ color: "#1C3557" }}>{FREE_LIMIT} consultas gratuitas</strong> de este mes.<br />
               Activá Premium para tener consultas ilimitadas con la IA veterinaria.
             </p>
 
             <div style={{ background: "#F4F6FB", borderRadius: 14, padding: 16, marginBottom: 20, textAlign: "left" }}>
               <div style={{ fontWeight: 800, color: "#EC4899", marginBottom: 10, textAlign: "center" }}>✨ Premium · $X/mes</div>
               {["Consultas IA ilimitadas", "Análisis de fotos ilimitado", "Historial clínico completo", "Soporte prioritario"].map(f => (
-                <div key={f} style={{ fontSize: 13, color: "#0F1E3D", padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={{ color: "#0AAD5C" }}>✓</span> {f}
+                <div key={f} style={{ fontSize: 13, color: "#1C3557", padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
+                  <span style={{ color: "#2CB8AD" }}>✓</span> {f}
                 </div>
               ))}
             </div>

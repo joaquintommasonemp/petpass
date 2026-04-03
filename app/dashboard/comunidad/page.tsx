@@ -37,7 +37,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
         <button key={t.key} onClick={() => onChange(t.key)} style={{
           flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
           background: active === t.key ? "#E2E8F0" : "transparent",
-          color: active === t.key ? "#0F1E3D" : "#64748B",
+          color: active === t.key ? "#1C3557" : "#64748B",
           fontWeight: 700, fontSize: 11, cursor: "pointer",
           display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
         }}>
@@ -158,17 +158,17 @@ function TabExplorar() {
       {razas.length > 0 && (
         <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
           <button onClick={() => setRaza("")} style={{
-            background: !raza ? "#E8FFF2" : "#FFFFFF",
-            border: `1px solid ${!raza ? "#0AAD5C" : "#E2E8F0"}`,
-            color: !raza ? "#0AAD5C" : "#64748B",
+            background: !raza ? "#E5F7F6" : "#FFFFFF",
+            border: `1px solid ${!raza ? "#2CB8AD" : "#E2E8F0"}`,
+            color: !raza ? "#2CB8AD" : "#64748B",
             borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
             cursor: "pointer", whiteSpace: "nowrap",
           }}>Todas</button>
           {razas.map(r => (
             <button key={r} onClick={() => setRaza(r === raza ? "" : r)} style={{
-              background: raza === r ? "#E8FFF2" : "#FFFFFF",
-              border: `1px solid ${raza === r ? "#0AAD5C" : "#E2E8F0"}`,
-              color: raza === r ? "#0AAD5C" : "#64748B",
+              background: raza === r ? "#E5F7F6" : "#FFFFFF",
+              border: `1px solid ${raza === r ? "#2CB8AD" : "#E2E8F0"}`,
+              color: raza === r ? "#2CB8AD" : "#64748B",
               borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
               cursor: "pointer", whiteSpace: "nowrap",
             }}>{r}</button>
@@ -216,8 +216,8 @@ function TabExplorar() {
                 {owner?.phone && (
                   <a href={"https://wa.me/" + owner.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer"
                     style={{
-                      display: "block", background: "#E8FFF2", color: "#0AAD5C",
-                      border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 0",
+                      display: "block", background: "#E5F7F6", color: "#2CB8AD",
+                      border: "1px solid #B2E8E5", borderRadius: 8, padding: "6px 0",
                       fontSize: 11, fontWeight: 700, textDecoration: "none", textAlign: "center",
                     }}>💬 Contactar</a>
                 )}
@@ -242,13 +242,13 @@ function TabExplorar() {
             rows={3}
             style={{
               background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
-              padding: "10px 14px", color: "#0F1E3D", resize: "none", width: "100%",
+              padding: "10px 14px", color: "#1C3557", resize: "none", width: "100%",
               fontSize: 13, marginBottom: 10,
             }}
           />
           {photoPreview && (
             <div style={{ position: "relative", display: "inline-block", marginBottom: 10 }}>
-              <img src={photoPreview} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", border: "1px solid #C6F6E0" }} />
+              <img src={photoPreview} style={{ width: 80, height: 80, borderRadius: 10, objectFit: "cover", border: "1px solid #B2E8E5" }} />
               <button onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{
                 position: "absolute", top: -6, right: -6, background: "#EF4444", color: "#fff",
                 border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 12,
@@ -263,7 +263,7 @@ function TabExplorar() {
             }}>📷</button>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
             <button onClick={sendMsg} disabled={sendingMsg || !msgText.trim()} style={{
-              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #0AAD5C, #088A48)" : "#E2E8F0",
+              flex: 1, background: msgText.trim() ? "linear-gradient(135deg, #2CB8AD, #229E94)" : "#E2E8F0",
               color: msgText.trim() ? "#000" : "#64748B", border: "none",
               borderRadius: 10, padding: "8px 16px", fontWeight: 800, fontSize: 13, cursor: "pointer",
               opacity: sendingMsg ? 0.6 : 1,
@@ -285,13 +285,13 @@ function TabExplorar() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{
-                  width: 32, height: 32, borderRadius: "50%", background: "#E8FFF2",
+                  width: 32, height: 32, borderRadius: "50%", background: "#E5F7F6",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
                 }}>🐾</div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 13 }}>{msg.author_name || "Tutor"}</div>
                   {msg.mascota_name && (
-                    <div style={{ fontSize: 11, color: "#0AAD5C" }}>🐕 {msg.mascota_name}</div>
+                    <div style={{ fontSize: 11, color: "#2CB8AD" }}>🐕 {msg.mascota_name}</div>
                   )}
                 </div>
               </div>
@@ -354,7 +354,7 @@ function TabDescuentos() {
       {/* CTA para negocios */}
       <div style={{ marginTop: 8 }}>
         {sent ? (
-          <Card style={{ textAlign: "center", border: "1px solid #C6F6E0" }}>
+          <Card style={{ textAlign: "center", border: "1px solid #B2E8E5" }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
             <div style={{ fontWeight: 800, marginBottom: 4 }}>¡Recibimos tu consulta!</div>
             <div style={{ color: "#64748B", fontSize: 13 }}>Te contactamos pronto para sumar tu negocio.</div>
@@ -504,7 +504,7 @@ function TabPerdidas() {
     <div>
       {/* Sub-tabs Perdidas / Encontradas */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
-        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#0AAD5C"]] as const).map(([key, label, color]) => (
+        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#2CB8AD"]] as const).map(([key, label, color]) => (
           <button key={key} onClick={() => setSubTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
             background: subTab === key ? "#E2E8F0" : "transparent",
@@ -524,8 +524,8 @@ function TabPerdidas() {
           📍 Reportar perdida
         </button>
         <button onClick={() => { setReportingType("encontrada"); setReporting(!reporting || reportingType !== "encontrada"); }} style={{
-          flex: 1, background: "#E8FFF2", color: "#0AAD5C",
-          border: "1px solid #C6F6E0", borderRadius: 12, padding: 12,
+          flex: 1, background: "#E5F7F6", color: "#2CB8AD",
+          border: "1px solid #B2E8E5", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
           ✅ Encontré una
@@ -533,8 +533,8 @@ function TabPerdidas() {
       </div>
 
       {reporting && (
-        <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#FECACA" : "#C6F6E0"}` }}>
-          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#0AAD5C", marginBottom: 12 }}>
+        <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#FECACA" : "#B2E8E5"}` }}>
+          <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#2CB8AD", marginBottom: 12 }}>
             {reportingType === "perdida" ? "📍 Nueva alerta de mascota perdida" : "✅ Reportar mascota encontrada"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -544,7 +544,7 @@ function TabPerdidas() {
             ))}
             <textarea placeholder="Descripción adicional..." rows={2} value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", resize: "none" }} />
+              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
             {/* Fotos */}
             <div>
               <div style={{ fontSize: 12, color: "#64748B", marginBottom: 8 }}>Fotos de la mascota</div>
@@ -570,7 +570,7 @@ function TabPerdidas() {
             </div>
 
             <button onClick={handleReport} disabled={loading} style={{
-              background: reportingType === "perdida" ? "#EF4444" : "#0AAD5C",
+              background: reportingType === "perdida" ? "#EF4444" : "#2CB8AD",
               color: reportingType === "perdida" ? "#fff" : "#000", border: "none",
               borderRadius: 10, padding: 12, fontWeight: 800, opacity: loading ? 0.6 : 1, cursor: "pointer",
             }}>{loading ? "Publicando..." : "Publicar"}</button>
@@ -597,7 +597,7 @@ function TabPerdidas() {
 
         const isEncontrada = p.tipo === "encontrada";
         return (
-          <Card key={i} style={{ border: `1px solid ${isEncontrada ? "#C6F6E0" : "#FFF0F0"}` }}>
+          <Card key={i} style={{ border: `1px solid ${isEncontrada ? "#B2E8E5" : "#FFF0F0"}` }}>
             {/* Fotos subidas por el usuario */}
             {uploadedPhotos.length > 0 && (
               <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto" }}>
@@ -626,7 +626,7 @@ function TabPerdidas() {
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 16 }}>{p.pet_name}</span>
                     {isEncontrada && (
-                      <span style={{ background: "#E8FFF2", color: "#0AAD5C", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
+                      <span style={{ background: "#E5F7F6", color: "#2CB8AD", borderRadius: 20, padding: "1px 8px", fontSize: 10, fontWeight: 800 }}>ENCONTRADA</span>
                     )}
                   </div>
                   <span style={{
@@ -643,14 +643,14 @@ function TabPerdidas() {
                   <div style={{ color: "#64748B", fontSize: 12, marginBottom: 4 }}>📍 {p.zone}</div>
                 )}
                 {p.description && (
-                  <div style={{ fontSize: 12, color: "#0F1E3D", marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
+                  <div style={{ fontSize: 12, color: "#1C3557", marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
                 )}
 
                 {/* Datos del dueño */}
                 <div style={{ background: "#F4F6FB", borderRadius: 10, padding: "8px 12px", marginBottom: 8 }}>
                   <div style={{ fontSize: 11, color: "#64748B", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Contacto</div>
                   {owner?.full_name && (
-                    <div style={{ fontSize: 13, color: "#0F1E3D", marginBottom: 2 }}>👤 {owner.full_name}</div>
+                    <div style={{ fontSize: 13, color: "#1C3557", marginBottom: 2 }}>👤 {owner.full_name}</div>
                   )}
                   {(p.phone || owner?.phone) && (
                     <div style={{ fontSize: 12, color: "#64748B" }}>📞 {p.phone || owner.phone}</div>
@@ -659,8 +659,8 @@ function TabPerdidas() {
 
                 {p.phone && (
                   <a href={"https://wa.me/" + p.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                    display: "inline-block", background: "#E8FFF2", color: "#0AAD5C",
-                    border: "1px solid #C6F6E0", borderRadius: 8, padding: "6px 14px",
+                    display: "inline-block", background: "#E5F7F6", color: "#2CB8AD",
+                    border: "1px solid #B2E8E5", borderRadius: 8, padding: "6px 14px",
                     fontSize: 12, fontWeight: 700, textDecoration: "none",
                   }}>💬 Contactar por WhatsApp</a>
                 )}
@@ -776,7 +776,7 @@ function TabProfesionales() {
                 <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                   {p.telefono && (
                     <a href={"https://wa.me/" + p.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                      background: "#E8FFF2", color: "#0AAD5C", border: "1px solid #C6F6E0",
+                      background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                       borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
                     }}>WhatsApp</a>
                   )}
@@ -827,7 +827,7 @@ function TabProfesionales() {
             {showSolicitud && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <input placeholder="Nombre / Nombre del negocio *" value={solicitudForm.nombre} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, nombre: e.target.value }; }); }} />
-                <select value={solicitudForm.especialidad} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, especialidad: e.target.value }; }); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#0F1E3D", fontSize: 13 }}>
+                <select value={solicitudForm.especialidad} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, especialidad: e.target.value }; }); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13 }}>
                   {["Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"].map(function(esp) { return <option key={esp} value={esp}>{esp}</option>; })}
                 </select>
                 <input placeholder="Descripcion breve" value={solicitudForm.descripcion} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, descripcion: e.target.value }; }); }} />

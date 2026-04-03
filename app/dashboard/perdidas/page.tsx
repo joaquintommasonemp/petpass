@@ -156,7 +156,7 @@ export default function Perdidas() {
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               style={{
                 background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
-                padding: "10px 14px", color: "#0F1E3D", resize: "none",
+                padding: "10px 14px", color: "#1C3557", resize: "none",
               }}
             />
 
@@ -246,7 +246,7 @@ export default function Perdidas() {
                 <div style={{ color: "#64748B", fontSize: 12 }}>{p.breed}{p.color ? " - " + p.color : ""}</div>
                 {p.zone && <div style={{ color: "#64748B", fontSize: 12 }}>📍 {p.zone}</div>}
                 {p.description && (
-                  <div style={{ fontSize: 12, color: "#0F1E3D", marginTop: 4 }}>{p.description}</div>
+                  <div style={{ fontSize: 12, color: "#1C3557", marginTop: 4 }}>{p.description}</div>
                 )}
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -263,8 +263,8 @@ export default function Perdidas() {
                     target="_blank"
                     rel="noreferrer"
                     style={{
-                      display: "block", marginTop: 6, background: "#E8FFF2",
-                      color: "#0AAD5C", border: "1px solid #C6F6E0", borderRadius: 8,
+                      display: "block", marginTop: 6, background: "#E5F7F6",
+                      color: "#2CB8AD", border: "1px solid #B2E8E5", borderRadius: 8,
                       padding: "4px 8px", fontSize: 11, fontWeight: 700, textDecoration: "none",
                     }}
                   >
