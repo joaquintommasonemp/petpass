@@ -147,6 +147,7 @@ button:active { transform: scale(0.97); }
 
 .dashboard-header {
   display: flex;
+  position: relative;
 }
 
 .dashboard-sidebar {

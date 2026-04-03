@@ -29,13 +29,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="dashboard-header" style={{
         background: "#FFFFFFee", backdropFilter: "blur(12px)",
         borderBottom: "1px solid #E2E8F0",
-        padding: "12px 20px", alignItems: "center",
-        justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100,
+        padding: "14px 20px",
+        alignItems: "center", justifyContent: "center",
+        position: "sticky", top: 0, zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <img src="/logo.png" alt="PetPass" style={{ height: 36, width: "auto", objectFit: "contain" }} />
-        </div>
+        <img src="/logo.png" alt="PetPass" style={{ height: 56, width: "auto", objectFit: "contain" }} />
         <Link href="/mascota/nueva" style={{
+          position: "absolute", right: 16,
           background: "linear-gradient(135deg, #2CB8AD, #229E94)",
           color: "#fff", border: "none",
           borderRadius: 10, padding: "7px 14px", fontSize: 12, fontWeight: 800, textDecoration: "none",
@@ -46,9 +46,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Desktop Sidebar */}
       <aside className="dashboard-sidebar">
         {/* Logo */}
-        <div style={{ padding: "28px 24px 20px" }}>
-          <img src="/logo.png" alt="PetPass" style={{ height: 44, width: "auto", objectFit: "contain", marginBottom: 4 }} />
-          <div style={{ color: "#64748B", fontSize: 11 }}>Tu mascota, siempre protegida</div>
+        <div style={{ padding: "28px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <img src="/logo.png" alt="PetPass" style={{ width: "100%", maxWidth: 180, height: "auto", objectFit: "contain" }} />
         </div>
 
         {/* Divider */}
