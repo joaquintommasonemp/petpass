@@ -62,28 +62,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Desktop Sidebar */}
       <aside className="dashboard-sidebar">
-        {/* Logo */}
-        <div style={{ padding: "28px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <img src="/logo.png" alt="PetPass" style={{ width: "100%", maxWidth: 180, height: "auto", objectFit: "contain" }} />
+        {/* Logo area with teal accent */}
+        <div style={{
+          padding: "24px 20px 20px",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          background: "linear-gradient(160deg, #F0FAFA 0%, #FFFFFF 100%)",
+          borderBottom: "2px solid #B2E8E5",
+        }}>
+          <img src="/logo.png" alt="PetPass" style={{ width: "100%", maxWidth: 160, height: "auto", objectFit: "contain" }} />
+          <div style={{
+            marginTop: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+            color: "#2CB8AD", textTransform: "uppercase", opacity: 0.85,
+          }}>Salud animal digital</div>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: "#E2E8F0", margin: "0 16px 12px" }} />
-
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "4px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
+        <nav style={{ flex: 1, padding: "8px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
           {TABS.map(tab => {
             const active = pathname === tab.href;
             return (
               <Link key={tab.href} href={tab.href} style={{
                 display: "flex", alignItems: "center", gap: 12,
-                padding: "10px 12px", borderRadius: 12,
+                padding: "10px 14px", borderRadius: 12,
                 textDecoration: "none",
                 background: active ? "#E5F7F6" : "transparent",
                 borderLeft: active ? "3px solid #2CB8AD" : "3px solid transparent",
                 transition: "all 0.15s",
+                boxShadow: active ? "0 2px 8px rgba(44,184,173,0.12)" : "none",
               }}>
-                <span style={{ fontSize: 18, flexShrink: 0, width: 24, textAlign: "center" }}>{tab.icon}</span>
+                <span style={{
+                  fontSize: 18, flexShrink: 0, width: 28, height: 28,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: active ? "#2CB8AD22" : "#F4F6FB",
+                  borderRadius: 8,
+                }}>{tab.icon}</span>
                 <div>
                   <div style={{
                     fontSize: 13, fontWeight: 700,
@@ -103,32 +115,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Bottom actions */}
-        <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ height: 1, background: "#E2E8F0", marginBottom: 4 }} />
           <Link href="/mascota/nueva" style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             background: "linear-gradient(135deg, #2CB8AD, #229E94)",
             color: "#fff", borderRadius: 12, padding: "10px 16px",
             fontWeight: 800, fontSize: 13, textDecoration: "none",
-            boxShadow: "0 4px 16px rgba(44,184,173,0.25)",
+            boxShadow: "0 4px 20px rgba(44,184,173,0.3)",
           }}>
             <span style={{ fontSize: 16 }}>+</span> Nueva mascota
           </Link>
+          <button onClick={() => { setShowSugerencia(true); setSugEnviada(false); setSugerenciaText(""); }} style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            background: "#F0FAFA", border: "1px solid #B2E8E5",
+            color: "#2CB8AD", borderRadius: 12, padding: "8px 16px",
+            fontWeight: 700, fontSize: 12, cursor: "pointer",
+          }}>
+            💡 Sugerencias
+          </button>
           <button onClick={handleLogout} style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             background: "transparent", border: "1px solid #E2E8F0",
-            color: "#64748B", borderRadius: 12, padding: "8px 16px",
-            fontWeight: 600, fontSize: 12, cursor: "pointer",
+            color: "#94A3B8", borderRadius: 12, padding: "7px 16px",
+            fontWeight: 600, fontSize: 11, cursor: "pointer",
           }}>
-            <span style={{ fontSize: 14 }}>{"<-"}</span> Cerrar sesion
-          </button>
-          <button onClick={() => { setShowSugerencia(true); setSugEnviada(false); setSugerenciaText(""); }} style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "transparent", border: "1px solid #E2E8F0",
-            color: "#2CB8AD", borderRadius: 12, padding: "8px 16px",
-            fontWeight: 600, fontSize: 12, cursor: "pointer",
-          }}>
-            💡 Sugerencias
+            ← Cerrar sesión
           </button>
         </div>
       </aside>
@@ -182,8 +194,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* Main Content */}
-      <div className="dashboard-content dashboard-content-pad">
-        {children}
+      <div className="dashboard-content">
+        {/* Desktop top bar */}
+        <div className="dashboard-topbar">
+          {(() => {
+            const tab = TABS.find(t => t.href === pathname) || TABS[0];
+            return (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{
+                  fontSize: 22, width: 40, height: 40,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "#E5F7F6", borderRadius: 10,
+                }}>{tab.icon}</span>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#1C3557" }}>{tab.label}</div>
+                  <div style={{ fontSize: 12, color: "#64748B" }}>{tab.desc}</div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+        <div className="dashboard-content-pad">
+          {children}
+        </div>
       </div>
 
       {/* Mobile Bottom Nav */}
