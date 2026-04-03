@@ -292,13 +292,21 @@ export default function Home() {
 
       {/* FOOTER */}
       <div style={{
-        padding: "24px 24px 40px",
+        padding: "32px 24px 48px",
         textAlign: "center",
         borderTop: "1px solid #E2E8F0",
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
       }}>
         <img src="/logo.png" alt="PetPass" style={{ height: 36, width: "auto", objectFit: "contain", opacity: 0.7 }} />
-        <div style={{ fontSize: 12, color: "#94A3B8" }}>© 2025 PetPass · Salud animal digital</div>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+          <Link href="/terminos" style={{ fontSize: 12, color: "#64748B", textDecoration: "none" }}>Términos y Condiciones</Link>
+          <Link href="/privacidad" style={{ fontSize: 12, color: "#64748B", textDecoration: "none" }}>Política de Privacidad</Link>
+          <a href="mailto:petpass.app@gmail.com" style={{ fontSize: 12, color: "#64748B", textDecoration: "none" }}>Contacto</a>
+        </div>
+        <div style={{ fontSize: 11, color: "#94A3B8" }}>© 2025 PetPass · Salud animal digital · Argentina</div>
+        <div style={{ fontSize: 10, color: "#CBD5E1", maxWidth: 480 }}>
+          Vet IA es una herramienta de orientación y no reemplaza la consulta veterinaria profesional.
+        </div>
       </div>
 
     </main>

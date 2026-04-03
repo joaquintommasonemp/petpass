@@ -6,6 +6,7 @@ import Link from "next/link";
 
 export default function Registro() {
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", password: "" });
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -23,15 +24,18 @@ export default function Registro() {
     if (form.password.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres"); return;
     }
+    if (!aceptaTerminos) {
+      setError("Debés aceptar los Términos y la Política de Privacidad para continuar"); return;
+    }
     setLoading(true);
     setError("");
-    const { data, error: signUpError } = await supabase.auth.signUp({ email: form.email, password: form.password });
+    const { data, error: signUpError } = await supabase.auth.signUp({ email: form.email.trim(), password: form.password });
     if (signUpError) { setError(signUpError.message); setLoading(false); return; }
     if (data.user) {
       await supabase.from("profiles").insert({
         id: data.user.id,
-        full_name: `${form.first_name} ${form.last_name}`,
-        phone: form.phone,
+        full_name: `${form.first_name.trim()} ${form.last_name.trim()}`,
+        phone: form.phone.trim(),
       });
     }
     router.push("/mascota/nueva");
@@ -63,10 +67,8 @@ export default function Registro() {
 
         {/* Card */}
         <div style={{
-          background: "#FFFFFF",
-          border: "1px solid #E2E8F0",
-          borderRadius: 20,
-          padding: "32px 28px",
+          background: "#FFFFFF", border: "1px solid #E2E8F0",
+          borderRadius: 20, padding: "32px 28px",
           boxShadow: "0 4px 24px rgba(28,53,87,0.08)",
         }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4, color: "#1C3557" }}>Crear cuenta</h2>
@@ -79,7 +81,24 @@ export default function Registro() {
             </div>
             <input placeholder="Email *" type="email" value={form.email} onChange={e => update("email", e.target.value)} />
             <input placeholder="Teléfono (WhatsApp)" value={form.phone} onChange={e => update("phone", e.target.value)} />
-            <input placeholder="Contraseña *" type="password" value={form.password} onChange={e => update("password", e.target.value)} />
+            <input placeholder="Contraseña * (mín. 8 caracteres)" type="password" value={form.password} onChange={e => update("password", e.target.value)} />
+
+            {/* Checkbox legal */}
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", padding: "10px 12px", background: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0" }}>
+              <input
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={e => setAceptaTerminos(e.target.checked)}
+                style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1, accentColor: "#2CB8AD" }}
+              />
+              <span style={{ fontSize: 12, color: "#475569", lineHeight: 1.6 }}>
+                Soy mayor de 18 años y acepto los{" "}
+                <Link href="/terminos" target="_blank" style={{ color: "#2CB8AD", fontWeight: 700, textDecoration: "none" }}>Términos y Condiciones</Link>
+                {" "}y la{" "}
+                <Link href="/privacidad" target="_blank" style={{ color: "#2CB8AD", fontWeight: 700, textDecoration: "none" }}>Política de Privacidad</Link>
+                {" "}de PetPass (Ley 25.326).
+              </span>
+            </label>
 
             {error && (
               <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", color: "#EF4444", fontSize: 13 }}>
@@ -95,10 +114,6 @@ export default function Registro() {
               boxShadow: "0 4px 20px rgba(44,184,173,0.3)",
               cursor: loading ? "not-allowed" : "pointer",
             }}>{loading ? "Creando cuenta..." : "Crear cuenta gratis →"}</button>
-
-            <p style={{ textAlign: "center", color: "#94A3B8", fontSize: 11, marginTop: 4 }}>
-              Al registrarte aceptás los términos de uso
-            </p>
           </div>
         </div>
 

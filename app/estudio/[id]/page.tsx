@@ -94,7 +94,10 @@ export default function EstudioPublico() {
       {aiSummary && (
         <div style={{ background: "#FFFFFF", border: "1px solid #2CB8AD33", borderRadius: 16, padding: 16, textAlign: "left", marginBottom: 20 }}>
           <div style={{ fontSize: 12, color: "#2CB8AD", fontWeight: 700, marginBottom: 8 }}>🤖 Análisis automático de la imagen</div>
-          <div style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{aiSummary}</div>
+          <div style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6, whiteSpace: "pre-wrap", marginBottom: 10 }}>{aiSummary}</div>
+          <div style={{ fontSize: 11, color: "#92400E", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "6px 10px" }}>
+            ⚕️ Este análisis es orientativo y no reemplaza la interpretación de un veterinario matriculado.
+          </div>
         </div>
       )}
       <button onClick={() => { setSent(false); setFile(null); setFilePreview(null); setNote(""); setAiSummary(null); }} style={{

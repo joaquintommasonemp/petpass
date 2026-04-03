@@ -44,8 +44,23 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "El archivo supera el limite de 10 MB" }, { status: 413 });
   }
 
-  // Subir archivo al bucket
+  // Validar MIME type permitido
+  const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  if (fileType && !ALLOWED_MIME.includes(fileType)) {
+    return NextResponse.json({ error: "Tipo de archivo no permitido" }, { status: 415 });
+  }
+
+  // Validar magic bytes del buffer para verificar tipo real
   const buffer = Buffer.from(fileBase64, "base64");
+  const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8;
+  const isPng  = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  const isPdf  = buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+  const isWebp = buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+
+  if (!isJpeg && !isPng && !isPdf && !isWebp) {
+    return NextResponse.json({ error: "El archivo no es una imagen o PDF válido" }, { status: 415 });
+  }
+
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = `estudios/${params.id}/${Date.now()}_${safeName}`;
 

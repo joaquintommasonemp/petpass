@@ -653,7 +653,7 @@ function TabPerdidas() {
                     <div style={{ fontSize: 13, color: "#1C3557", marginBottom: 2 }}>👤 {owner.full_name}</div>
                   )}
                   {(p.phone || owner?.phone) && (
-                    <div style={{ fontSize: 12, color: "#64748B" }}>📞 {p.phone || owner.phone}</div>
+                    <div style={{ fontSize: 12, color: "#64748B" }}>📞 Disponible por WhatsApp</div>
                   )}
                 </div>
 

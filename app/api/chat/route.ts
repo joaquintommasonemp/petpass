@@ -5,7 +5,16 @@ const FREE_LIMIT = 5;
 
 export async function POST(req: NextRequest) {
   try {
-    const { system, messages } = await req.json();
+    const body = await req.json();
+    const { system, messages } = body;
+
+    // Validaciones de entrada
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ reply: "Solicitud inválida." }, { status: 400 });
+    }
+    if (messages.length > 40) {
+      return NextResponse.json({ reply: "Conversación demasiado larga. Iniciá una nueva." }, { status: 400 });
+    }
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({ reply: "⚠️ API key de Anthropic no configurada. Agregá ANTHROPIC_API_KEY en Vercel." });

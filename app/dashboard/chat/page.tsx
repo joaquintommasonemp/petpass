@@ -306,6 +306,21 @@ export default function Chat() {
         </div>
       )}
 
+      {/* Aviso médico legal */}
+      <div style={{
+        background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10,
+        padding: "8px 14px", marginBottom: 10,
+        fontSize: 11, color: "#92400E", lineHeight: 1.5,
+        display: "flex", gap: 8, alignItems: "flex-start",
+      }}>
+        <span style={{ flexShrink: 0, fontSize: 14 }}>⚕️</span>
+        <span>
+          <strong>Aviso:</strong> Vet IA brinda orientación informativa y{" "}
+          <strong>no reemplaza la consulta con un veterinario matriculado.</strong>{" "}
+          Ante urgencias, consultá un profesional de inmediato.
+        </span>
+      </div>
+
       {/* Botones de análisis */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <button

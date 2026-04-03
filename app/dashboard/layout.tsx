@@ -142,6 +142,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }}>
             ← Cerrar sesión
           </button>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, paddingTop: 4 }}>
+            <Link href="/terminos" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Términos</Link>
+            <Link href="/privacidad" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Privacidad</Link>
+          </div>
         </div>
       </aside>
 

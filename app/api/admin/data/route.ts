@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     { data: sugerencias },
   ] = await Promise.all([
     admin.from("mascotas").select("*").order("created_at", { ascending: false }),
-    admin.from("profiles").select("*"),
+    admin.from("profiles").select("id, full_name, phone, is_admin, is_premium, created_at"),
     admin.from("perdidas").select("*").eq("active", true),
     admin.from("historial").select("id, mascota_id"),
     admin.from("comunidad_mensajes").select("*")
