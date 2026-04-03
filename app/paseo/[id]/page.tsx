@@ -85,34 +85,34 @@ export default function PaseoPublico() {
   }
 
   if (loading) return (
-    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#0f1117", minHeight: "100vh" }}>
-      <div style={{ color: "#7a8299" }}>Cargando...</div>
+    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
+      <div style={{ color: "#64748B" }}>Cargando...</div>
     </div>
   );
 
   if (notFound || !session?.active) return (
-    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#0f1117", minHeight: "100vh" }}>
+    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
       <div style={{ fontSize: 64, marginBottom: 16 }}>🐾</div>
-      <h2 style={{ color: "#f0f4ff", marginBottom: 8 }}>Sesión no disponible</h2>
-      <p style={{ color: "#7a8299", fontSize: 13 }}>Esta sesión no existe o ya fue finalizada por el dueño.</p>
+      <h2 style={{ color: "#1C3557", marginBottom: 8 }}>Sesión no disponible</h2>
+      <p style={{ color: "#64748B", fontSize: 13 }}>Esta sesión no existe o ya fue finalizada por el dueño.</p>
     </div>
   );
 
   const isGato = mascota?.breed?.toLowerCase().includes("gato");
 
   return (
-    <main style={{ maxWidth: 440, margin: "0 auto", background: "#0f1117", minHeight: "100vh" }}>
+    <main style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
 
       {/* Header */}
       <div style={{
-        background: "linear-gradient(160deg, #0f2a1a 0%, #0f1117 70%)",
-        padding: "24px 20px 20px", borderBottom: "1px solid #252a3a",
+        background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)",
+        padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", marginBottom: 16 }}>
           <span style={{ fontSize: 16 }}>🐾</span>
           <span style={{
             fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 14,
-            background: "linear-gradient(135deg, #f0f4ff, #4ade80)",
+            background: "linear-gradient(135deg, #1C3557, #2CB8AD)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>PetPass</span>
         </Link>
@@ -120,7 +120,7 @@ export default function PaseoPublico() {
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{
             width: 72, height: 72, borderRadius: "50%", flexShrink: 0,
-            background: "#252a3a", border: "3px solid #4ade8044",
+            background: "#E2E8F0", border: "3px solid #2CB8AD44",
             display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
           }}>
             {mascota?.photo_url
@@ -129,20 +129,20 @@ export default function PaseoPublico() {
           </div>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 900, fontFamily: "Georgia, serif", marginBottom: 4 }}>{mascota?.name}</h1>
-            <div style={{ color: "#7a8299", fontSize: 12, marginBottom: 6 }}>
+            <div style={{ color: "#64748B", fontSize: 12, marginBottom: 6 }}>
               {mascota?.breed}{mascota?.age ? ` · ${mascota.age}` : ""}
             </div>
             <span style={{
-              background: "#4ade8022", color: "#4ade80", borderRadius: 20, padding: "2px 10px",
-              fontSize: 11, fontWeight: 700, border: "1px solid #4ade8044",
+              background: "#2CB8AD22", color: "#2CB8AD", borderRadius: 20, padding: "2px 10px",
+              fontSize: 11, fontWeight: 700, border: "1px solid #2CB8AD44",
             }}>Sesión activa</span>
           </div>
         </div>
 
         {session.notes && (
-          <div style={{ marginTop: 14, background: "#0f1117", borderRadius: 12, padding: "10px 14px" }}>
-            <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 700, marginBottom: 4 }}>📋 Instrucciones del dueño</div>
-            <div style={{ fontSize: 13, color: "#f0f4ff", lineHeight: 1.5 }}>{session.notes}</div>
+          <div style={{ marginTop: 14, background: "#F4F6FB", borderRadius: 12, padding: "10px 14px" }}>
+            <div style={{ fontSize: 11, color: "#2CB8AD", fontWeight: 700, marginBottom: 4 }}>📋 Instrucciones del dueño</div>
+            <div style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.5 }}>{session.notes}</div>
           </div>
         )}
       </div>
@@ -150,8 +150,8 @@ export default function PaseoPublico() {
       <div style={{ padding: "20px 20px 60px" }}>
 
         {/* Formulario de actualización */}
-        <div style={{ background: "#181c27", border: "1px solid #4ade8044", borderRadius: 16, padding: 16, marginBottom: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: "#4ade80" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid #2CB8AD44", borderRadius: 16, padding: 16, marginBottom: 20 }}>
+          <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: "#2CB8AD" }}>
             📢 Enviá una novedad al dueño
           </div>
 
@@ -168,8 +168,8 @@ export default function PaseoPublico() {
               onChange={e => setMessage(e.target.value)}
               rows={3}
               style={{
-                background: "#0f1117", border: "1px solid #252a3a", borderRadius: 10,
-                padding: "10px 14px", color: "#f0f4ff", resize: "none", fontSize: 14,
+                background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
+                padding: "10px 14px", color: "#1C3557", resize: "none", fontSize: 14,
                 fontFamily: "inherit", outline: "none",
               }}
             />
@@ -187,13 +187,13 @@ export default function PaseoPublico() {
 
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => fileRef.current?.click()} style={{
-                background: "#252a3a", color: "#7a8299", border: "1px solid #353a4a",
+                background: "#E2E8F0", color: "#64748B", border: "1px solid #353a4a",
                 borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer",
               }}>📷 Foto</button>
               <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
               <button onClick={sendUpdate} disabled={sending || !message.trim()} style={{
-                flex: 1, background: "linear-gradient(135deg, #4ade80, #22c55e)",
-                color: "#000", border: "none", borderRadius: 10, padding: 12,
+                flex: 1, background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+                color: "#fff", border: "none", borderRadius: 10, padding: 12,
                 fontWeight: 900, fontSize: 15, cursor: "pointer",
                 opacity: sending || !message.trim() ? 0.6 : 1,
               }}>{sending ? "Enviando..." : "Enviar novedad"}</button>
@@ -204,14 +204,14 @@ export default function PaseoPublico() {
         {/* Timeline de updates */}
         {updates.length > 0 && (
           <>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
               Novedades ({updates.length})
             </div>
             {updates.map((u: any, i: number) => (
-              <div key={i} style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
+              <div key={i} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <span style={{ fontWeight: 700, fontSize: 13 }}>👤 {u.author_name || "Cuidador"}</span>
-                  <span style={{ fontSize: 11, color: "#7a8299" }}>{timeAgo(u.created_at)}</span>
+                  <span style={{ fontSize: 11, color: "#64748B" }}>{timeAgo(u.created_at)}</span>
                 </div>
                 <div style={{ fontSize: 14, lineHeight: 1.5 }}>{u.message}</div>
                 {u.photo_url && (
@@ -223,7 +223,7 @@ export default function PaseoPublico() {
         )}
 
         {updates.length === 0 && (
-          <div style={{ textAlign: "center", padding: "20px 0", color: "#7a8299", fontSize: 13 }}>
+          <div style={{ textAlign: "center", padding: "20px 0", color: "#64748B", fontSize: 13 }}>
             Aún no hay novedades. ¡Enviá la primera!
           </div>
         )}
@@ -231,8 +231,8 @@ export default function PaseoPublico() {
         {/* Link a panel multi-sesión */}
         <div style={{ marginTop: 24, textAlign: "center" }}>
           <Link href="/paseo" style={{
-            fontSize: 12, color: "#7a8299", textDecoration: "none",
-            background: "#181c27", border: "1px solid #252a3a",
+            fontSize: 12, color: "#64748B", textDecoration: "none",
+            background: "#FFFFFF", border: "1px solid #E2E8F0",
             borderRadius: 10, padding: "8px 16px", display: "inline-block",
           }}>
             📋 Ver todas mis sesiones activas →

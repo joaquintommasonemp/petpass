@@ -276,9 +276,9 @@ export default function NuevaMascota() {
 
   const sel = (label: string, key: string, opts: string[]) => (
     <div>
-      <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>{label}</label>
+      <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>{label}</label>
       <select value={(form as any)[key]} onChange={e => update(key, e.target.value)}
-        style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: (form as any)[key] ? "#f0f4ff" : "#7a8299", width: "100%" }}>
+        style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: (form as any)[key] ? "#1C3557" : "#64748B", width: "100%" }}>
         <option value="">Seleccioná...</option>
         {opts.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
@@ -294,18 +294,18 @@ export default function NuevaMascota() {
     <main style={{ maxWidth: 440, margin: "0 auto", padding: "30px 20px 80px" }}>
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <div style={{ fontSize: 48 }}>🐾</div>
-        <h1 style={{ fontFamily: "Georgia, serif", color: "#4ade80", fontSize: 24, marginTop: 8 }}>Registrá tu mascota</h1>
+        <h1 style={{ fontFamily: "Georgia, serif", color: "#2CB8AD", fontSize: 24, marginTop: 8 }}>Registrá tu mascota</h1>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
         {/* Foto */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Foto de perfil</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 8 }}>Foto de perfil</label>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div onClick={() => fileRef.current?.click()} style={{
               width: 80, height: 80, borderRadius: "50%", cursor: "pointer",
-              background: "#181c27", border: "2px dashed #252a3a",
+              background: "#FFFFFF", border: "2px dashed #E2E8F0",
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden", flexShrink: 0,
             }}>
@@ -316,12 +316,12 @@ export default function NuevaMascota() {
             </div>
             <div>
               <button onClick={() => fileRef.current?.click()} style={{
-                background: "#4ade8022", color: "#4ade80", border: "1px solid #4ade8044",
+                background: "#2CB8AD22", color: "#2CB8AD", border: "1px solid #2CB8AD44",
                 borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 700,
               }}>
                 {photoPreview ? "Cambiar foto" : "Agregar foto"}
               </button>
-              <div style={{ fontSize: 11, color: "#7a8299", marginTop: 4 }}>JPG o PNG · Opcional</div>
+              <div style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>JPG o PNG · Opcional</div>
             </div>
           </div>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
@@ -329,15 +329,15 @@ export default function NuevaMascota() {
 
         {/* Tipo */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Tipo de mascota *</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 8 }}>Tipo de mascota *</label>
           <div style={{ display: "flex", gap: 8 }}>
             {["Perro", "Gato", "Otro"].map(t => (
               <button key={t} onClick={() => update("type", t)} style={{
                 flex: 1, padding: 12, borderRadius: 10, fontWeight: 700, fontSize: 20,
                 border: "1px solid", cursor: "pointer",
-                background: form.type === t ? "#4ade8022" : "#181c27",
-                borderColor: form.type === t ? "#4ade80" : "#252a3a",
-                color: form.type === t ? "#4ade80" : "#7a8299",
+                background: form.type === t ? "#2CB8AD22" : "#FFFFFF",
+                borderColor: form.type === t ? "#2CB8AD" : "#E2E8F0",
+                color: form.type === t ? "#2CB8AD" : "#64748B",
               }}>
                 {t === "Perro" ? "🐕" : t === "Gato" ? "🐱" : "🐾"}
                 <div style={{ fontSize: 11, marginTop: 2 }}>{t}</div>
@@ -348,7 +348,7 @@ export default function NuevaMascota() {
 
         {/* Nombre */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Nombre *</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Nombre *</label>
           <input value={form.name} placeholder="Ej: Tango" onChange={e => update("name", e.target.value)} />
         </div>
 
@@ -357,33 +357,33 @@ export default function NuevaMascota() {
 
         {/* Fecha nacimiento */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Fecha de nacimiento</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Fecha de nacimiento</label>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <select value={form.birth_month} onChange={e => update("birth_month", e.target.value)}
-              style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: form.birth_month ? "#f0f4ff" : "#7a8299", width: "100%" }}>
+              style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: form.birth_month ? "#1C3557" : "#64748B", width: "100%" }}>
               <option value="">Mes</option>
               {months.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
             </select>
             <select value={form.birth_year} onChange={e => update("birth_year", e.target.value)}
-              style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 10, padding: "10px 14px", color: form.birth_year ? "#f0f4ff" : "#7a8299", width: "100%" }}>
+              style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: form.birth_year ? "#1C3557" : "#64748B", width: "100%" }}>
               <option value="">Año</option>
               {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
-          {age && <div style={{ marginTop: 6, color: "#4ade80", fontSize: 12, fontWeight: 600 }}>Edad actual: {age}</div>}
+          {age && <div style={{ marginTop: 6, color: "#2CB8AD", fontSize: 12, fontWeight: 600 }}>Edad actual: {age}</div>}
         </div>
 
         {/* Sexo */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Sexo</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Sexo</label>
           <div style={{ display: "flex", gap: 8 }}>
             {["Macho", "Hembra"].map(s => (
               <button key={s} onClick={() => update("sex", s)} style={{
                 flex: 1, padding: 10, borderRadius: 10, fontWeight: 700, fontSize: 14,
                 border: "1px solid", cursor: "pointer",
-                background: form.sex === s ? "#4ade8022" : "#181c27",
-                borderColor: form.sex === s ? "#4ade80" : "#252a3a",
-                color: form.sex === s ? "#4ade80" : "#7a8299",
+                background: form.sex === s ? "#2CB8AD22" : "#FFFFFF",
+                borderColor: form.sex === s ? "#2CB8AD" : "#E2E8F0",
+                color: form.sex === s ? "#2CB8AD" : "#64748B",
               }}>{s}</button>
             ))}
           </div>
@@ -391,15 +391,15 @@ export default function NuevaMascota() {
 
         {/* Castrado */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>¿Está castrad{form.sex === "Hembra" ? "a" : "o"}?</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 8 }}>¿Está castrad{form.sex === "Hembra" ? "a" : "o"}?</label>
           <div style={{ display: "flex", gap: 8 }}>
             {["Sí", "No", "No sé"].map(op => (
               <button key={op} onClick={() => update("castrado", op)} style={{
                 flex: 1, padding: 10, borderRadius: 10, fontWeight: 700, fontSize: 13,
                 border: "1px solid", cursor: "pointer",
-                background: form.castrado === op ? "#4ade8022" : "#181c27",
-                borderColor: form.castrado === op ? "#4ade80" : "#252a3a",
-                color: form.castrado === op ? "#4ade80" : "#7a8299",
+                background: form.castrado === op ? "#2CB8AD22" : "#FFFFFF",
+                borderColor: form.castrado === op ? "#2CB8AD" : "#E2E8F0",
+                color: form.castrado === op ? "#2CB8AD" : "#64748B",
               }}>{op}</button>
             ))}
           </div>
@@ -407,25 +407,25 @@ export default function NuevaMascota() {
 
         {/* Peso */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Peso (kg)</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Peso (kg)</label>
           <input type="number" value={form.weight} placeholder="Ej: 28" onChange={e => update("weight", e.target.value)} />
         </div>
 
         {/* Color */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Color / pelaje</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Color / pelaje</label>
           <input value={form.color} placeholder="Ej: Dorado" onChange={e => update("color", e.target.value)} />
         </div>
 
         {/* Chip */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 4 }}>Número de chip (opcional)</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Número de chip (opcional)</label>
           <input value={form.chip} placeholder="Ej: 985112345678901" onChange={e => update("chip", e.target.value)} />
         </div>
 
         {/* Zona */}
         <div>
-          <label style={{ fontSize: 12, color: "#7a8299", display: "block", marginBottom: 8 }}>Zona donde vive</label>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 8 }}>Zona donde vive</label>
           {sel("Provincia / Ciudad", "zona_tipo", PROVINCIAS_LIST)}
           {form.zona_tipo && (
             <div style={{ marginTop: 10 }}>
@@ -441,10 +441,10 @@ export default function NuevaMascota() {
         )}
 
         <button onClick={handleSave} disabled={loading} style={{
-          background: "linear-gradient(135deg, #4ade80, #22c55e)",
-          color: "#000", border: "none", borderRadius: 12,
+          background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+          color: "#fff", border: "none", borderRadius: 12,
           padding: 14, fontWeight: 800, fontSize: 15, marginTop: 8,
-          opacity: loading ? 0.6 : 1, boxShadow: "0 4px 20px #4ade8030",
+          opacity: loading ? 0.6 : 1, boxShadow: "0 4px 20px #2CB8AD30",
         }}>{loading ? "Guardando..." : "Crear perfil 🐾"}</button>
       </div>
     </main>

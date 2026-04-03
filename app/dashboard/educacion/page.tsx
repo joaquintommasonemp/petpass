@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 type Topico = "comandos" | "comportamiento" | "salud" | "ejercicio";
 
 const TOPICOS: { id: Topico; label: string; icon: string; color: string }[] = [
-  { id: "comandos", label: "Comandos", icon: "🎓", color: "#4ade80" },
+  { id: "comandos", label: "Comandos", icon: "🎓", color: "#2CB8AD" },
   { id: "comportamiento", label: "Comportamiento", icon: "🧠", color: "#60a5fa" },
   { id: "salud", label: "Rutinas de salud", icon: "💊", color: "#f472b6" },
   { id: "ejercicio", label: "Juego y ejercicio", icon: "⚽", color: "#fb923c" },
@@ -167,7 +167,7 @@ const CONTENIDO: Record<Topico, { titulo: string; pasos: string[] }[]> = {
 };
 
 function Card({ children, style = {} }: any) {
-  return <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>{children}</div>;
+  return <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>{children}</div>;
 }
 
 export default function Educacion() {
@@ -226,7 +226,7 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
     <div>
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>🎓 Training & Adiestramiento</h2>
-        <p style={{ color: "#7a8299", fontSize: 13 }}>
+        <p style={{ color: "#64748B", fontSize: 13 }}>
           Guías paso a paso y tips personalizados con IA para {mascota?.name || "tu mascota"}.
         </p>
       </div>
@@ -235,11 +235,11 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
         {TOPICOS.map(t => (
           <button key={t.id} onClick={() => { setTopico(t.id); setTips(null); setExpanded(null); }} style={{
-            background: topico === t.id ? t.color + "22" : "#181c27",
-            border: `1px solid ${topico === t.id ? t.color + "66" : "#252a3a"}`,
+            background: topico === t.id ? t.color + "22" : "#FFFFFF",
+            border: `1px solid ${topico === t.id ? t.color + "66" : "#E2E8F0"}`,
             borderRadius: 12, padding: "10px 12px",
             display: "flex", alignItems: "center", gap: 8, cursor: "pointer",
-            color: topico === t.id ? t.color : "#7a8299",
+            color: topico === t.id ? t.color : "#64748B",
             fontWeight: topico === t.id ? 800 : 600, fontSize: 13, textAlign: "left",
           }}>
             <span style={{ fontSize: 20 }}>{t.icon}</span>
@@ -253,10 +253,10 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tips ? 12 : 0 }}>
           <div>
             <div style={{ fontWeight: 800, fontSize: 14, color: topicoInfo.color }}>🤖 Tips personalizados para {mascota?.name || "tu mascota"}</div>
-            <div style={{ fontSize: 11, color: "#7a8299", marginTop: 2 }}>Generados por IA según su perfil e historial</div>
+            <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>Generados por IA según su perfil e historial</div>
           </div>
           <button onClick={generarTipsIA} disabled={loadingTips || !mascota} style={{
-            background: topicoInfo.color, color: "#000", border: "none",
+            background: topicoInfo.color, color: "#fff", border: "none",
             borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer",
             opacity: loadingTips || !mascota ? 0.6 : 1, flexShrink: 0, marginLeft: 8,
           }}>
@@ -264,24 +264,24 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
           </button>
         </div>
         {tips && (
-          <div style={{ background: "#0f1117", borderRadius: 12, padding: "12px 14px", fontSize: 13, color: "#f0f4ff", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+          <div style={{ background: "#F4F6FB", borderRadius: 12, padding: "12px 14px", fontSize: 13, color: "#1C3557", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
             {tips}
           </div>
         )}
       </Card>
 
       {/* Guías paso a paso */}
-      <div style={{ fontSize: 11, fontWeight: 800, color: "#7a8299", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
         Guías paso a paso · {topicoInfo.label}
       </div>
 
       {contenidoTopico.map((item, i) => (
-        <Card key={i} style={{ padding: 0, overflow: "hidden", border: expanded === i ? `1px solid ${topicoInfo.color}44` : "1px solid #252a3a" }}>
+        <Card key={i} style={{ padding: 0, overflow: "hidden", border: expanded === i ? `1px solid ${topicoInfo.color}44` : "1px solid #E2E8F0" }}>
           <button onClick={() => setExpanded(expanded === i ? null : i)} style={{
             width: "100%", background: "transparent", border: "none", cursor: "pointer",
             padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
           }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: "#f0f4ff" }}>{topicoInfo.icon} {item.titulo}</div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "#1C3557" }}>{topicoInfo.icon} {item.titulo}</div>
             <span style={{ color: topicoInfo.color, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>{expanded === i ? "−" : "+"}</span>
           </button>
           {expanded === i && (
@@ -293,7 +293,7 @@ Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable 
                     color: topicoInfo.color, fontWeight: 800, fontSize: 11,
                     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1,
                   }}>{j + 1}</div>
-                  <div style={{ fontSize: 13, color: "#f0f4ff", lineHeight: 1.5 }}>{paso}</div>
+                  <div style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.5 }}>{paso}</div>
                 </div>
               ))}
             </div>

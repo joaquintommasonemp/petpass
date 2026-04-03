@@ -22,52 +22,67 @@ export default function Login() {
   }
 
   return (
-    <main style={{ maxWidth: 400, margin: "0 auto", padding: "48px 24px" }}>
-
-      {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: 36 }}>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <div style={{ fontSize: 44, marginBottom: 8 }}>🐾</div>
-          <div style={{
-            fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 800,
-            background: "linear-gradient(135deg, #f0f4ff, #4ade80)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>PetPass</div>
-        </Link>
-      </div>
+    <main style={{ minHeight: "100vh", background: "#F4F6FB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
 
       {/* Card */}
-      <div style={{ background: "#181c27", border: "1px solid #252a3a", borderRadius: 20, padding: "28px 24px" }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Bienvenido de vuelta</h2>
-        <p style={{ color: "#7a8299", fontSize: 13, marginBottom: 24 }}>Ingresá para ver a tu mascota</p>
+      <div style={{ width: "100%", maxWidth: 400 }}>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-          <input placeholder="Contraseña" type="password" value={password}
-            onChange={e => setPassword(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleLogin()} />
-
-          {error && (
-            <div style={{ background: "#f8717115", border: "1px solid #f8717133", borderRadius: 10, padding: "10px 14px", color: "#f87171", fontSize: 13 }}>
-              {error}
-            </div>
-          )}
-
-          <button onClick={handleLogin} disabled={loading} style={{
-            background: "linear-gradient(135deg, #4ade80, #22c55e)",
-            color: "#000", border: "none", borderRadius: 12,
-            padding: 14, fontWeight: 800, fontSize: 15, marginTop: 4,
-            opacity: loading ? 0.6 : 1, boxShadow: "0 4px 20px #4ade8030",
-          }}>{loading ? "Ingresando..." : "Entrar →"}</button>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <Link href="/" style={{ textDecoration: "none", display: "inline-block" }}>
+            <img src="/logo.png" alt="PetPass" style={{ height: 60, width: "auto", objectFit: "contain" }} />
+          </Link>
         </div>
-      </div>
 
-      <p style={{ textAlign: "center", marginTop: 20, color: "#7a8299", fontSize: 13 }}>
-        ¿No tenés cuenta?{" "}
-        <Link href="/registro" style={{ color: "#4ade80", textDecoration: "none", fontWeight: 700 }}>
-          Registrate gratis
-        </Link>
-      </p>
+        <div style={{
+          background: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          borderRadius: 20,
+          padding: "32px 28px",
+          boxShadow: "0 4px 24px rgba(28,53,87,0.08)",
+        }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4, color: "#1C3557" }}>Bienvenido de vuelta</h2>
+          <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24 }}>Ingresá para ver a tu mascota</p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <input
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+            <input
+              placeholder="Contraseña"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+            />
+
+            {error && (
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", color: "#EF4444", fontSize: 13 }}>
+                {error}
+              </div>
+            )}
+
+            <button onClick={handleLogin} disabled={loading} style={{
+              background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+              color: "#fff", border: "none", borderRadius: 12,
+              padding: 14, fontWeight: 800, fontSize: 15, marginTop: 4,
+              opacity: loading ? 0.6 : 1,
+              boxShadow: "0 4px 20px rgba(44,184,173,0.3)",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}>{loading ? "Ingresando..." : "Entrar →"}</button>
+          </div>
+        </div>
+
+        <p style={{ textAlign: "center", marginTop: 20, color: "#64748B", fontSize: 13 }}>
+          ¿No tenés cuenta?{" "}
+          <Link href="/registro" style={{ color: "#2CB8AD", textDecoration: "none", fontWeight: 700 }}>
+            Registrate gratis
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }
