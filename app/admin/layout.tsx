@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}>ADMIN</span>
         </div>
         <Link href="/dashboard" style={{
-          background: "#E2E8F0", color: "#64748B", border: "1px solid #353a4a",
+          background: "#E2E8F0", color: "#64748B", border: "1px solid #E2E8F0",
           borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
         }}>← Volver</Link>
       </div>

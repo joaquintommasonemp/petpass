@@ -45,13 +45,8 @@ export default function PanelCuidador() {
         background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)",
         padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", marginBottom: 16 }}>
-          <span style={{ fontSize: 16 }}>🐾</span>
-          <span style={{
-            fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 14,
-            background: "linear-gradient(135deg, #1C3557, #2CB8AD)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>PetPass</span>
+        <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 16 }}>
+          <img src="/logo.png" alt="PetPass" style={{ height: 32, width: "auto", objectFit: "contain" }} />
         </Link>
         <h1 style={{ fontSize: 22, fontWeight: 900 }}>Panel del cuidador</h1>
         <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Todas las sesiones activas que tenés asignadas</p>

@@ -201,8 +201,8 @@ export default function Paseos() {
                 {/* Todas las actualizaciones */}
                 {sessUpdates.length > 1 && (
                   <div style={{ marginBottom: 10 }}>
-                    {sessUpdates.slice(1).map((u: any, i: number) => (
-                      <div key={i} style={{ padding: "8px 0", borderTop: "1px solid #E2E8F0" }}>
+                    {sessUpdates.slice(1).map((u: any) => (
+                      <div key={u.id || u.created_at} style={{ padding: "8px 0", borderTop: "1px solid #E2E8F0" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
                           <span style={{ fontSize: 12, fontWeight: 700 }}>{u.author_name || "Cuidador"}</span>
                           <span style={{ fontSize: 11, color: "#64748B" }}>{timeAgo(u.created_at)}</span>
@@ -220,7 +220,7 @@ export default function Paseos() {
                   <button onClick={() => copyLink(s.id)} style={{
                     flex: 1, background: copiedId === s.id ? "#2CB8AD22" : "#E2E8F0",
                     color: copiedId === s.id ? "#2CB8AD" : "#1C3557",
-                    border: `1px solid ${copiedId === s.id ? "#2CB8AD44" : "#353a4a"}`,
+                    border: `1px solid ${copiedId === s.id ? "#2CB8AD44" : "#E2E8F0"}`,
                     borderRadius: 10, padding: "10px 8px", fontSize: 12, fontWeight: 700, cursor: "pointer",
                   }}>
                     {copiedId === s.id ? "✅ Link copiado" : "🔗 Copiar link del cuidador"}

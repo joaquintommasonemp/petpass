@@ -213,9 +213,13 @@ export default function NuevaMascota() {
 
   function calcAge() {
     if (!form.birth_month || !form.birth_year) return "";
+    const month = parseInt(form.birth_month);
+    const year = parseInt(form.birth_year);
+    if (isNaN(month) || isNaN(year) || month < 1 || month > 12 || year < 2000 || year > new Date().getFullYear()) return "";
     const now = new Date();
-    const birth = new Date(parseInt(form.birth_year), parseInt(form.birth_month) - 1);
+    const birth = new Date(year, month - 1);
     const months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+    if (months < 0) return "";
     if (months < 12) return `${months} mes${months !== 1 ? "es" : ""}`;
     const years = Math.floor(months / 12);
     const rem = months % 12;

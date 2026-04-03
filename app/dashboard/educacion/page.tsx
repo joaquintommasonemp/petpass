@@ -200,27 +200,33 @@ export default function Educacion() {
     if (!mascota || !authToken) return;
     setLoadingTips(true);
     setTips(null);
-    const condiciones = diagnosticos.map(d => d.title).join(", ") || "sin condiciones registradas";
-    const prompt = `Dame 5 tips prácticos y concretos de adiestramiento o rutinas de bienestar para ${mascota.name}, ${mascota.breed || "mascota"} de ${mascota.age || "edad desconocida"}.
+    try {
+      const condiciones = diagnosticos.map(d => d.title).join(", ") || "sin condiciones registradas";
+      const prompt = `Dame 5 tips prácticos y concretos de adiestramiento o rutinas de bienestar para ${mascota.name}, ${mascota.breed || "mascota"} de ${mascota.age || "edad desconocida"}.
 Condiciones conocidas del historial: ${condiciones}.
 Área de enfoque: ${TOPICOS.find(t => t.id === topico)?.label}.
 Formato: lista numerada, cada tip en 1-2 oraciones. Sé específico, accionable y positivo. Evitá consejos genéricos.`;
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
-      body: JSON.stringify({
-        system: "Sos un experto en etología, adiestramiento y bienestar animal. Respondé en español rioplatense, con consejos prácticos y basados en evidencia.",
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    const data = await res.json();
-    setTips(data.reply || "No se pudo generar los tips.");
-    setLoadingTips(false);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+        body: JSON.stringify({
+          system: "Sos un experto en etología, adiestramiento y bienestar animal. Respondé en español rioplatense, con consejos prácticos y basados en evidencia.",
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      if (!res.ok) throw new Error("Error en la respuesta del servidor");
+      const data = await res.json();
+      setTips(data.reply || "No se pudo generar los tips.");
+    } catch {
+      setTips("No se pudo conectar con el servicio de IA. Intentá de nuevo.");
+    } finally {
+      setLoadingTips(false);
+    }
   }
 
   const contenidoTopico = CONTENIDO[topico];
-  const topicoInfo = TOPICOS.find(t => t.id === topico)!;
+  const topicoInfo = TOPICOS.find(t => t.id === topico) ?? TOPICOS[0];
 
   return (
     <div>

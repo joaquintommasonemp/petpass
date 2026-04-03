@@ -14,8 +14,14 @@ export default function Registro() {
   function update(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
   async function handleRegister() {
-    if (!form.first_name || !form.last_name || !form.email || !form.password) {
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email || !form.password) {
       setError("Completá todos los campos obligatorios"); return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Ingresá un email válido"); return;
+    }
+    if (form.password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres"); return;
     }
     setLoading(true);
     setError("");

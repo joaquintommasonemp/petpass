@@ -108,13 +108,8 @@ export default function PaseoPublico() {
         background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)",
         padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", marginBottom: 16 }}>
-          <span style={{ fontSize: 16 }}>🐾</span>
-          <span style={{
-            fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 14,
-            background: "linear-gradient(135deg, #1C3557, #2CB8AD)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>PetPass</span>
+        <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 16 }}>
+          <img src="/logo.png" alt="PetPass" style={{ height: 32, width: "auto", objectFit: "contain" }} />
         </Link>
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
@@ -187,7 +182,7 @@ export default function PaseoPublico() {
 
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => fileRef.current?.click()} style={{
-                background: "#E2E8F0", color: "#64748B", border: "1px solid #353a4a",
+                background: "#E2E8F0", color: "#64748B", border: "1px solid #E2E8F0",
                 borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer",
               }}>📷 Foto</button>
               <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />

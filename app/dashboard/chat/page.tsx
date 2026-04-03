@@ -398,7 +398,7 @@ export default function Chat() {
           disabled={usedCount >= FREE_LIMIT && !isPremium}
           style={{ flex: 1 }} />
         <button onClick={sendMessage} disabled={loading || (!input.trim() && !imageData)} style={{
-          background: "#2CB8AD", color: "#000", border: "none", borderRadius: 12,
+          background: "#2CB8AD", color: "#fff", border: "none", borderRadius: 12,
           padding: "10px 18px", fontWeight: 800, fontSize: 14,
           opacity: loading || (!input.trim() && !imageData) ? 0.5 : 1, cursor: "pointer",
         }}>↑</button>

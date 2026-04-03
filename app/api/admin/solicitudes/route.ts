@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     current.push({ ...datos, active: true });
 
     const bodyBlob = JSON.stringify(current);
-    await fetch(SUPABASE_URL + "/storage/v1/object/comunidad/" + jsonFile, {
+    const putRes = await fetch(SUPABASE_URL + "/storage/v1/object/comunidad/" + jsonFile, {
       method: "PUT",
       headers: {
         Authorization: "Bearer " + SERVICE_KEY,
@@ -63,6 +63,10 @@ export async function POST(req: NextRequest) {
       },
       body: bodyBlob,
     });
+
+    if (!putRes.ok) {
+      return NextResponse.json({ error: "Error al guardar en storage" }, { status: 500 });
+    }
 
     await admin.from("comunidad_mensajes").update({ mascota_name: "aprobado" }).eq("id", id);
     return NextResponse.json({ ok: true });

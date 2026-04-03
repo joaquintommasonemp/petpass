@@ -72,13 +72,8 @@ export default function PerfilPublicoMascota() {
         position: "relative", overflow: "hidden",
       }}>
         <div style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, #2CB8AD20, transparent 70%)", pointerEvents: "none" }} />
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", marginBottom: 20 }}>
-          <span style={{ fontSize: 18 }}>🐾</span>
-          <span style={{
-            fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 16,
-            background: "linear-gradient(135deg, #1C3557, #2CB8AD)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>PetPass</span>
+        <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 20 }}>
+          <img src="/logo.png" alt="PetPass" style={{ height: 36, width: "auto", objectFit: "contain" }} />
         </Link>
 
         {/* Foto + nombre */}

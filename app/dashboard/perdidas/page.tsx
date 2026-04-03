@@ -85,7 +85,8 @@ export default function Perdidas() {
 
   function daysSince(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return days < 0 ? 0 : days;
   }
 
   const fields: [string, string][] = [
@@ -114,7 +115,7 @@ export default function Perdidas() {
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={requestLocation} style={{
-                background: "#3B82F6", color: "#000", border: "none",
+                background: "#3B82F6", color: "#fff", border: "none",
                 borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer",
               }}>Aceptar</button>
               <button onClick={() => setLocationAsked(true)} style={{
@@ -226,11 +227,11 @@ export default function Perdidas() {
         </Card>
       )}
 
-      {perdidas.map((p: any, i: number) => {
+      {perdidas.map((p: any) => {
         const days = daysSince(p.created_at);
         const isGato = p.breed?.toLowerCase().includes("gato") || p.breed?.toLowerCase().includes("cat");
         return (
-          <Card key={i}>
+          <Card key={p.id}>
             {p.photo_url && (
               <img
                 src={p.photo_url}

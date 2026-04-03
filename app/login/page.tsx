@@ -13,9 +13,11 @@ export default function Login() {
   const supabase = createClient();
 
   async function handleLogin() {
+    if (!email.trim() || !password) { setError("Completá email y contraseña"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Ingresá un email válido"); return; }
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) setError("Email o contraseña incorrectos");
     else router.push("/dashboard");
     setLoading(false);

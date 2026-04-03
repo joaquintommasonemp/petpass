@@ -257,6 +257,11 @@ export default function Historial() {
   async function handleFile(e: any) {
     const file = e.target.files && e.target.files[0];
     if (!file || !mascota) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert("El archivo no puede superar los 10 MB");
+      if (e.target) e.target.value = "";
+      return;
+    }
     setUploading(true);
 
     const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
