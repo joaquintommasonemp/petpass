@@ -868,8 +868,19 @@ export default function NuevaMascota() {
             {/* Botón aceptar */}
             <div style={{ padding: "0 24px 20px" }}>
               <button
-                onClick={() => {
+                onClick={async () => {
                   localStorage.setItem("pp_tos_accepted", "1");
+                  // Guardar aceptación en Supabase para registro legal
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                      await fetch("/api/tos/aceptar", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: user.id, version: "1.0" }),
+                      });
+                    }
+                  } catch (_) {}
                   window.location.href = "/dashboard";
                 }}
                 style={{
