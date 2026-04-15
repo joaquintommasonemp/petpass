@@ -150,91 +150,7 @@ export default function Chat() {
     return { fileName, url, nota, ia };
   }
 
-  function buildSystemPrompt() {
-    const vacunas = historial.filter((h: any) => h.name && h.date && !h.title);
-    const consultas = historial.filter((h: any) => h.title && !["Actualizacion de peso","Peso inicial","📅 Cita"].includes(h.title) && !(typeof h.summary === "string" && h.summary.includes("::")));
-    const docItems = historial.filter((h: any) => typeof h.summary === "string" && h.summary.includes("::"));
-    const citas = historial.filter((h: any) => h.title === "📅 Cita");
-    const alim = historial.filter((h: any) => h.marca !== undefined || (h.tipo && !h.title));
-
-    const vacsText = vacunas.length > 0
-      ? vacunas.map((v: any) => {
-          const next = v.next_date ? ", proxima " + v.next_date : "";
-          return "- " + v.name + ": aplicada " + v.date + next + ", estado: " + (v.status || "ok");
-        }).join("\n")
-      : "- Sin vacunas registradas";
-    const consultasText = consultas.length > 0
-      ? consultas.slice(0, 8).map((h: any) => {
-          const sum = h.summary ? " - " + h.summary : "";
-          const vet = h.vet ? " (Vet: " + h.vet + ")" : "";
-          return "- " + (h.date || "sin fecha") + ": " + h.title + sum + vet;
-        }).join("\n")
-      : "- Sin consultas registradas";
-    const alimentText = alim.length > 0
-      ? alim.map((a: any) => {
-          const notas = a.notas ? " (" + a.notas + ")" : "";
-          return "- " + (a.marca || a.tipo || "alimento") + ": " + (a.frecuencia || "") + notas;
-        }).join("\n")
-      : "- No registrada";
-    // Incluye nombre, notas y resumen IA de cada documento
-    const docsText = docItems.length > 0
-      ? docItems.map((d: any) => {
-          const { fileName, nota, ia } = parseDocSummary(d.summary);
-          const lines = [`- ${fileName} (${d.date || "sin fecha"}) — ${d.title || "Documento"}`];
-          if (nota) lines.push(`  Notas del veterinario: ${nota}`);
-          if (ia) lines.push(`  Análisis IA del archivo: ${ia}`);
-          return lines.join("\n");
-        }).join("\n\n")
-      : "- Sin documentos";
-    const citasText = citas.length > 0
-      ? citas.map((c: any) => {
-          const vet = c.vet ? " con " + c.vet : "";
-          return "- " + c.date + ": " + c.summary + vet;
-        }).join("\n")
-      : "- Sin citas agendadas";
-
-    const castrado = mascota?.castrado ? "Castrado/a: " + mascota.castrado : "";
-    if (!mascota) return "Sos VetIA de PetPass. Veterinario digital. Responde en espanol rioplatense, claro y empatico. Analiza fotos y documentos si te los mandan. Siempre indica cuando ir al veterinario.";
-    return [
-      "Sos VetIA, el veterinario digital de PetPass. Tenes acceso al perfil medico COMPLETO de " + mascota.name + " y debes usarlo en cada respuesta.",
-      "",
-      "PERFIL DE " + mascota.name.toUpperCase() + ":",
-      "- Especie/Raza: " + (mascota.breed || "N/A") + " | Edad: " + (mascota.age || "N/A") + " | Peso: " + (mascota.weight || "N/A") + "kg | Sexo: " + (mascota.sex || "N/A"),
-      "- Color: " + (mascota.color || "N/A") + " | Chip: " + (mascota.chip || "N/A") + " | Zona: " + (mascota.location || "N/A") + (castrado ? " | " + castrado : ""),
-      "",
-      "VACUNAS Y DESPARASITACIONES:",
-      vacsText,
-      "",
-      "HISTORIAL CLINICO:",
-      consultasText,
-      "",
-      "ALIMENTACION:",
-      alimentText,
-      "",
-      "ESTUDIOS Y DOCUMENTOS MEDICOS:",
-      "IMPORTANTE: Cuando un estudio tiene 'Análisis IA', ese texto ES el contenido completo del archivo — usalo para responder con precisión. Cuando el campo de análisis está vacío, decile al usuario que ese estudio aún no fue procesado y que puede usar el botón 'Re-analizar' en el tab Estudios para extraer el contenido. NUNCA inventes que el PDF es ilegible, escaneado o protegido — eso no lo podés saber.",
-      docsText,
-      "",
-      "PROXIMAS CITAS:",
-      citasText,
-      "",
-      "INSTRUCCIONES DE RESPUESTA:",
-      "1. Usa SIEMPRE el nombre " + mascota.name + " y los datos del perfil para personalizar cada respuesta.",
-      "2. Estructura tus respuestas con secciones claras cuando sea necesario (que pasa, que hacer, cuando ir al vet).",
-      "3. Si el sintoma puede ser urgente, marcalo claramente con 'ATENCION URGENTE' al principio.",
-      "4. Si la pregunta es vaga o necesitas mas datos, hace UNA pregunta puntual y concisa.",
-      "5. Cuando analices fotos o documentos medicos: describe detalladamente lo que ves, valores importantes y recomendaciones.",
-      "6. Si te mandan imagenes de estudios (radiografia, ecografia, analisis): interpreta los valores, compara con rangos normales para la especie/raza/edad y explica en terminos simples.",
-      "7. Menciona cuando algo puede estar relacionado con su historial, vacunas o alimentacion registrada.",
-      "8. Siempre termina con una linea breve sobre cuando consultar al veterinario presencialmente.",
-      "9. Responde en espanol rioplatense, tono calido y profesional. Maximo 300 palabras salvo que sea un analisis de documento complejo.",
-      "10. Tu orientacion no reemplaza la consulta veterinaria presencial.",
-      "11. Si un estudio no tiene análisis IA, decile al usuario: 'Este estudio todavía no fue procesado. Podés re-analizarlo desde el tab Estudios con el botón Re-analizar.' NUNCA inventes razones técnicas (PDF escaneado, protegido, ilegible) porque no tenés forma de saberlo.",
-    ].join("\n");
-  }
-
   async function callChatAPI(userContent: any[], displayText: string, displayImage?: string) {
-    const systemPrompt = buildSystemPrompt();
     const newMsg: Message = { role: "user", text: displayText, image: displayImage };
     setMessages(prev => [...prev, newMsg]);
     setLoading(true);
@@ -251,7 +167,8 @@ export default function Chat() {
           "Content-Type": "application/json",
           ...(authToken ? { "Authorization": "Bearer " + authToken } : {}),
         },
-        body: JSON.stringify({ system: systemPrompt, messages: apiMessages }),
+        // mascotaId en vez de system: el server construye el prompt desde BD
+        body: JSON.stringify({ mascotaId: mascota?.id, messages: apiMessages }),
       });
       const data = await res.json();
 
