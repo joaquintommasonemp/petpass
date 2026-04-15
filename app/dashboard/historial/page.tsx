@@ -936,13 +936,20 @@ export default function Historial() {
             const vetNote = vetNotePart ? vetNotePart.replace("nota::", "") : null;
             const iaTextPart = parts.find(function(p: string) { return p.startsWith("ia::"); });
             const iaText = iaTextPart ? iaTextPart.replace("ia::", "") : null;
+            const isDeleting = confirmDelete?.id === h.id;
             return (
               <Card key={i} style={{ padding: "12px 16px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{h.title ? h.title.split(" ")[0] : "📄"}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {h.title && h.title !== "📄 Documento" ? h.title : (name || "Documento")}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                        {h.title && h.title !== "📄 Documento" ? h.title : (name || "Documento")}
+                      </div>
+                      <button onClick={() => setConfirmDelete(isDeleting ? null : { type: "estudio", id: h.id })} style={{
+                        background: "none", border: "none", color: "#CBD5E1",
+                        fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0,
+                      }}>🗑</button>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 11, color: "#64748B" }}>{h.date}</span>
@@ -962,6 +969,13 @@ export default function Historial() {
                     )}
                   </div>
                 </div>
+                {isDeleting && (
+                  <div style={{ background: "#FFF0F0", border: "1px solid #FECACA", borderRadius: 8, padding: "8px 12px", margin: "10px 0 4px", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "#EF4444", flex: 1 }}>¿Eliminar este estudio?</span>
+                    <button onClick={() => deleteEntry(h.id)} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Sí</button>
+                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>No</button>
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                   <button onClick={function() { openDoc(pathOrUrl); }} style={{
                     flex: 1, background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
