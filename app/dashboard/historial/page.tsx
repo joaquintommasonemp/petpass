@@ -62,6 +62,7 @@ export default function Historial() {
   const [estudioLinks, setEstudioLinks] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
   const [selectedStudyType, setSelectedStudyType] = useState("Otro");
+  const [reanalyzingId, setReanalyzingId] = useState<string | null>(null);
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
   const [vacForm, setVacForm] = useState({ name: "", date: "", next_date: "", vet: "", notes: "" });
   const [citaForm, setCitaForm] = useState({ date: "", summary: "", vet: "" });
@@ -310,6 +311,42 @@ export default function Historial() {
     await supabase.from("alimentacion").delete().eq("id", id);
     setAlimentacion(prev => prev.filter((a: any) => a.id !== id));
     setConfirmDelete(null);
+  }
+
+  async function reanalizar(h: any) {
+    const parts: string[] = h.summary ? h.summary.split("||") : [];
+    const firstPart = parts[0] || "";
+    const splitFirst = firstPart.split("::");
+    const fileName = splitFirst[0] || "";
+    const pathOrUrl = splitFirst[1] || "";
+    if (!pathOrUrl) return;
+    setReanalyzingId(h.id);
+    const publicUrl = pathOrUrl.startsWith("http") ? pathOrUrl : supabase.storage.from("documentos").getPublicUrl(pathOrUrl).data.publicUrl;
+    const fileType = /\.(jpg|jpeg|png|webp)$/i.test(fileName) ? "image/jpeg" : "application/pdf";
+    try {
+      const res = await fetch("/api/analizar-estudio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ historialId: h.id, publicUrl, fileName, fileType }),
+      });
+      const data = await res.json();
+      if (data.ok && data.aiSummary) {
+        setHistorial(function(prev) {
+          return prev.map(function(item: any) {
+            if (item.id !== h.id) return item;
+            const ps = (item.summary || "").split("||").filter((p: string) => !p.startsWith("ia::"));
+            ps.push("ia::" + data.aiSummary);
+            return { ...item, summary: ps.join("||") };
+          });
+        });
+        showToast("Análisis completado", "success");
+      } else {
+        showToast("No se pudo analizar: " + (data.error || "error desconocido"), "error");
+      }
+    } catch {
+      showToast("Error al analizar el estudio", "error");
+    }
+    setReanalyzingId(null);
   }
 
   async function handleFile(e: any) {
@@ -1002,7 +1039,17 @@ export default function Historial() {
                     <button onClick={() => setConfirmDelete(null)} style={{ background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>No</button>
                   </div>
                 )}
-                <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+                {!iaText && (
+                  <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "6px 10px", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: "#92400E" }}>Sin análisis IA</span>
+                    <button onClick={() => reanalizar(h)} disabled={reanalyzingId === h.id} style={{
+                      background: "#F59E0B", color: "#fff", border: "none",
+                      borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 800,
+                      cursor: "pointer", opacity: reanalyzingId === h.id ? 0.6 : 1,
+                    }}>{reanalyzingId === h.id ? "Analizando..." : "Re-analizar"}</button>
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
                   <button onClick={function() { openDoc(pathOrUrl); }} style={{
                     flex: 1, background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                     borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",

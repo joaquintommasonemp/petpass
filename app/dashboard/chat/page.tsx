@@ -212,7 +212,7 @@ export default function Chat() {
       alimentText,
       "",
       "ESTUDIOS Y DOCUMENTOS MEDICOS:",
-      "IMPORTANTE: El campo 'Analisis IA' de cada estudio ES el contenido real del archivo, extraido automaticamente al momento de su carga. Tratalo como si hubieras leido el archivo vos mismo. No digas que no podes acceder al contenido — ya lo tenes en el analisis.",
+      "IMPORTANTE: Cuando un estudio tiene 'Análisis IA', ese texto ES el contenido completo del archivo — usalo para responder con precisión. Cuando el campo de análisis está vacío, decile al usuario que ese estudio aún no fue procesado y que puede usar el botón 'Re-analizar' en el tab Estudios para extraer el contenido. NUNCA inventes que el PDF es ilegible, escaneado o protegido — eso no lo podés saber.",
       docsText,
       "",
       "PROXIMAS CITAS:",
@@ -229,7 +229,7 @@ export default function Chat() {
       "8. Siempre termina con una linea breve sobre cuando consultar al veterinario presencialmente.",
       "9. Responde en espanol rioplatense, tono calido y profesional. Maximo 300 palabras salvo que sea un analisis de documento complejo.",
       "10. Tu orientacion no reemplaza la consulta veterinaria presencial.",
-      "11. NUNCA digas que no podes abrir, leer o acceder a los archivos. El analisis de cada estudio ya esta incluido arriba y ES el contenido del archivo.",
+      "11. Si un estudio no tiene análisis IA, decile al usuario: 'Este estudio todavía no fue procesado. Podés re-analizarlo desde el tab Estudios con el botón Re-analizar.' NUNCA inventes razones técnicas (PDF escaneado, protegido, ilegible) porque no tenés forma de saberlo.",
     ].join("\n");
   }
 
