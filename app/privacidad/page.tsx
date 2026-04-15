@@ -7,7 +7,7 @@ export default function Privacidad() {
     <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px 80px", background: "#F4F6FB", minHeight: "100vh" }}>
 
       <Link href="/" style={{ display: "inline-block", marginBottom: 32 }}>
-        <img src="/logo.png" alt="PetPass" style={{ height: 40, objectFit: "contain" }} />
+        <img src="/logo-brand-official.png" alt="PetPass" style={{ height: 48, objectFit: "contain" }} />
       </Link>
 
       <div style={{ background: "#FFFFFF", borderRadius: 20, padding: "36px 32px", border: "1px solid #E2E8F0", boxShadow: "0 2px 12px rgba(28,53,87,0.06)" }}>

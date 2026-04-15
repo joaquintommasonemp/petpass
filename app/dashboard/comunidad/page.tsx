@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import Adopciones from "@/components/Adopciones";
 import { timeAgo } from "@/lib/utils";
+import { UiCard } from "@/components/ui";
+import { MUNICIPIOS_POR_PROVINCIA, PROVINCIAS_LIST, buildZona } from "@/lib/locations";
 
-type Tab = "explorar" | "adopciones" | "perdidas" | "profesionales" | "descuentos";
+type Tab = "explorar" | "juntadas" | "adopciones" | "perdidas" | "profesionales" | "descuentos";
 
 const DESCUENTOS = [
   { nombre: "Puppis", descripcion: "En todos los productos de la tienda online", icon: "🛍️" },
@@ -17,31 +19,37 @@ const DESCUENTOS = [
 
 function Card({ children, style = {} }: any) {
   return (
-    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
+    <UiCard className="community-card" style={style}>
       {children}
-    </div>
+    </UiCard>
   );
 }
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "explorar", label: "Explorar", icon: "🐾" },
-    { key: "adopciones", label: "Adopcion", icon: "❤️" },
-    { key: "perdidas", label: "Perdidas", icon: "📍" },
-    { key: "profesionales", label: "Profesionales", icon: "🏥" },
-    { key: "descuentos", label: "Descuentos", icon: "🎁" },
+    { key: "juntadas", label: "Juntadas", icon: "🦮" },
+    { key: "adopciones", label: "Adopción", icon: "❤️" },
+    { key: "perdidas", label: "Pérdidas", icon: "📍" },
+    { key: "profesionales", label: "Cartilla", icon: "🏥" },
+    { key: "descuentos", label: "Beneficios", icon: "🎁" },
   ];
   return (
-    <div style={{ display: "flex", gap: 8, marginBottom: 20, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
+    <div className="community-tabs" style={{ display: "flex", gap: 4, marginBottom: 20, overflowX: "auto", paddingBottom: 2 }}>
       {tabs.map(t => (
-        <button key={t.key} onClick={() => onChange(t.key)} style={{
-          flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
-          background: active === t.key ? "#E2E8F0" : "transparent",
-          color: active === t.key ? "#1C3557" : "#64748B",
-          fontWeight: 700, fontSize: 11, cursor: "pointer",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-        }}>
-          <span style={{ fontSize: 16 }}>{t.icon}</span>
+        <button key={t.key} className={active === t.key ? "community-tab community-tab-active" : "community-tab"} onClick={() => onChange(t.key)} style={{
+          flex: "0 0 auto", borderRadius: 20,
+          padding: "7px 14px",
+          background: active === t.key ? "#1C3557" : "#FFFFFF",
+          color: active === t.key ? "#fff" : "#64748B",
+          fontWeight: 700, fontSize: 12, cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 6,
+          boxShadow: active === t.key ? "0 2px 8px rgba(28,53,87,0.2)" : "0 1px 3px rgba(0,0,0,0.06)",
+          border: active === t.key ? "none" : "1px solid #E2E8F0",
+          whiteSpace: "nowrap",
+          transition: "all 0.15s",
+        } as any}>
+          <span style={{ fontSize: 14 }}>{t.icon}</span>
           {t.label}
         </button>
       ))}
@@ -64,7 +72,17 @@ function TabExplorar() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [msgTag, setMsgTag] = useState<string | null>(null);
   const supabase = createClient();
+
+  const MURAL_TAGS = [
+    { tag: null, label: "General", icon: "💬" },
+    { tag: "🦮 Paseo", label: "Paseo", icon: "🦮" },
+    { tag: "💡 Consejo", label: "Consejo", icon: "💡" },
+    { tag: "📸 Foto", label: "Foto", icon: "📸" },
+    { tag: "🔍 Busco compañero", label: "Busco compañero", icon: "🔍" },
+    { tag: "❓ Pregunta", label: "Pregunta", icon: "❓" },
+  ];
 
   useEffect(() => { load(); }, []);
 
@@ -112,16 +130,18 @@ function TabExplorar() {
       }
     }
 
+    const messageWithTag = msgTag ? `${msgTag} — ${msgText.trim()}` : msgText.trim();
     const entry = {
       user_id: user.id,
       author_name: miMascota?.name ? `Tutor de ${miMascota.name}` : "Tutor",
       mascota_name: miMascota?.name || null,
-      message: msgText.trim(),
+      message: messageWithTag,
       photo_url,
     };
     const { data: saved } = await supabase.from("comunidad_mensajes").insert(entry).select();
     if (saved?.[0]) setMensajes(prev => [saved[0], ...prev]);
     setMsgText("");
+    setMsgTag(null);
     setPhotoFile(null);
     setPhotoPreview(null);
     if (fileRef.current) fileRef.current.value = "";
@@ -138,16 +158,22 @@ function TabExplorar() {
   }
 
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>;
+  if (loading) return (
+    <div style={{ padding: "16px 0" }}>
+      {[1,2,3].map(i => (
+        <div key={i} className="skeleton" style={{ height: 80, borderRadius: 14, marginBottom: 10 }} />
+      ))}
+    </div>
+  );
 
   return (
-    <div>
-      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
-        Mascotas públicas — coordiná paseos, viajes o simplemente conectá con tutores de la misma raza 🐾
+    <div className="community-tab-panel community-tab-explorar">
+      <p className="community-section-copy" style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
+        Mascotas públicas para coordinar paseos, viajes o simplemente conectar con tutores de la misma raza.
       </p>
 
       {/* Buscador y filtro */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div className="community-filter-row" style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <input
           placeholder="🔍 Buscar por nombre, raza o zona..."
           value={search}
@@ -156,7 +182,7 @@ function TabExplorar() {
         />
       </div>
       {razas.length > 0 && (
-        <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+        <div className="community-chip-row" style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
           <button onClick={() => setRaza("")} style={{
             background: !raza ? "#E5F7F6" : "#FFFFFF",
             border: `1px solid ${!raza ? "#2CB8AD" : "#E2E8F0"}`,
@@ -186,12 +212,12 @@ function TabExplorar() {
         </Card>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div className="community-pet-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         {filtered.map((m: any, i: number) => {
           const isGato = m.breed?.toLowerCase().includes("gato");
           const owner = m.profiles;
           return (
-            <div key={i} style={{
+            <div key={i} className="community-pet-card" style={{
               background: "#FFFFFF", border: "1px solid #E2E8F0",
               borderRadius: 16, overflow: "hidden",
             }}>
@@ -219,7 +245,7 @@ function TabExplorar() {
                       display: "block", background: "#E5F7F6", color: "#2CB8AD",
                       border: "1px solid #B2E8E5", borderRadius: 8, padding: "6px 0",
                       fontSize: 11, fontWeight: 700, textDecoration: "none", textAlign: "center",
-                    }}>💬 Contactar</a>
+                    }}>Contactar</a>
                 )}
               </div>
             </div>
@@ -228,15 +254,27 @@ function TabExplorar() {
       </div>
 
       {/* ── Mural de la comunidad ── */}
-      <div style={{ marginTop: 28, marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
+      <div className="community-mural" style={{ marginTop: 28, marginBottom: 8 }}>
+        <div className="community-kicker" style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
           Mural de la comunidad
         </div>
 
         {/* Formulario de publicación */}
-        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 14, marginBottom: 16 }}>
+        <div className="community-compose-card" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 14, marginBottom: 16 }}>
+          {/* Chips de categoría */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 10, overflowX: "auto", paddingBottom: 2 }}>
+            {MURAL_TAGS.map(t => (
+              <button key={t.label} onClick={() => setMsgTag(t.tag === msgTag ? null : t.tag)} style={{
+                background: msgTag === t.tag ? "#E5F7F6" : "#F4F6FB",
+                border: `1px solid ${msgTag === t.tag ? "#2CB8AD" : "#E2E8F0"}`,
+                color: msgTag === t.tag ? "#2CB8AD" : "#64748B",
+                borderRadius: 20, padding: "4px 10px", fontSize: 11, fontWeight: 700,
+                cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+              }}>{t.icon} {t.label}</button>
+            ))}
+          </div>
           <textarea
-            placeholder={miMascota ? `Compartí algo sobre ${miMascota.name}...` : "Compartí algo con la comunidad..."}
+            placeholder={msgTag ? `${msgTag}...` : (miMascota ? `Compartí algo sobre ${miMascota.name}...` : "Compartí algo con la comunidad...")}
             value={msgText}
             onChange={e => setMsgText(e.target.value)}
             rows={3}
@@ -256,7 +294,7 @@ function TabExplorar() {
               }}>×</button>
             </div>
           )}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="community-compose-actions" style={{ display: "flex", gap: 8 }}>
             <button onClick={() => fileRef.current?.click()} style={{
               background: "#E2E8F0", color: "#64748B", border: "1px solid #CBD5E1",
               borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
@@ -274,11 +312,11 @@ function TabExplorar() {
         {/* Feed de mensajes */}
         {mensajes.length === 0 && (
           <div style={{ textAlign: "center", padding: "24px 0", color: "#64748B", fontSize: 13 }}>
-            Sé el primero en publicar algo 🐾
+            Sé el primero en publicar algo.
           </div>
         )}
         {mensajes.map((msg: any, i: number) => (
-          <div key={i} style={{
+          <div key={i} className="community-message-card" style={{
             background: "#FFFFFF", border: "1px solid #E2E8F0",
             borderRadius: 14, padding: 14, marginBottom: 10,
           }}>
@@ -308,6 +346,244 @@ function TabExplorar() {
   );
 }
 
+// ─── Tab: Juntadas ────────────────────────────────────────────────────────────
+type TipoJuntada = "paseo" | "juntada" | "encuentro";
+
+const TIPO_JUNTADA: { key: TipoJuntada; label: string; icon: string; color: string }[] = [
+  { key: "paseo", label: "Paseo grupal", icon: "🦮", color: "#2CB8AD" },
+  { key: "juntada", label: "Juntada", icon: "🎉", color: "#8B5CF6" },
+  { key: "encuentro", label: "Encuentro", icon: "🐾", color: "#F97316" },
+];
+
+function TabJuntadas() {
+  const [juntadas, setJuntadas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filtro, setFiltro] = useState<TipoJuntada | "todos">("todos");
+  const [showForm, setShowForm] = useState(false);
+  const [miMascota, setMiMascota] = useState<any>(null);
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    titulo: "", tipo: "paseo" as TipoJuntada,
+    descripcion: "", fecha: "", hora: "", telefono: "",
+  });
+  const [provincia, setProvincia] = useState("");
+  const [municipio, setMunicipio] = useState("");
+  const supabase = createClient();
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    const { data: { user } } = await supabase.auth.getUser();
+    setMyUserId(user?.id || null);
+    const [{ data: jData }, { data: miMs }] = await Promise.all([
+      supabase.from("juntadas").select("*").eq("active", true).order("fecha", { ascending: true }),
+      user ? supabase.from("mascotas").select("name, breed").eq("user_id", user.id).eq("active", true).limit(1) : { data: null },
+    ]);
+    setJuntadas(jData || []);
+    if (miMs?.[0]) setMiMascota(miMs[0]);
+    setLoading(false);
+  }
+
+  async function handleCreate() {
+    if (!form.titulo.trim() || !form.fecha || !provincia) return;
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); return; }
+    const zona = buildZona(provincia, municipio);
+    const authorName = miMascota?.name ? `Tutor de ${miMascota.name}` : "Tutor";
+    const { data } = await supabase.from("juntadas").insert({
+      user_id: user.id, author_name: authorName,
+      titulo: form.titulo, tipo: form.tipo,
+      descripcion: form.descripcion, fecha: form.fecha,
+      hora: form.hora, zona, provincia, municipio,
+      telefono: form.telefono, asistentes: 1, active: true,
+    }).select();
+    if (data?.[0]) setJuntadas(prev => [...prev, data[0]].sort((a, b) => (a.fecha || "").localeCompare(b.fecha || "")));
+    setForm({ titulo: "", tipo: "paseo", descripcion: "", fecha: "", hora: "", telefono: "" });
+    setProvincia(""); setMunicipio("");
+    setShowForm(false); setSaving(false);
+  }
+
+  async function handleAnotarse(j: any) {
+    const newCount = (j.asistentes || 1) + 1;
+    await supabase.from("juntadas").update({ asistentes: newCount }).eq("id", j.id);
+    setJuntadas(prev => prev.map(x => x.id === j.id ? { ...x, asistentes: newCount } : x));
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+  const listaFiltrada = juntadas
+    .filter(j => !j.fecha || j.fecha >= today)
+    .filter(j => filtro === "todos" || j.tipo === filtro);
+
+  if (loading) return (
+    <div style={{ padding: "16px 0" }}>
+      {[1,2,3].map(i => (
+        <div key={i} className="skeleton" style={{ height: 100, borderRadius: 14, marginBottom: 10 }} />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="community-tab-panel community-tab-juntadas">
+      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
+        Organizá paseos grupales, juntadas en el parque y encuentros con otras mascotas 🦮
+      </p>
+
+      {/* Filtros de tipo */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+        <button onClick={() => setFiltro("todos")} style={{
+          background: filtro === "todos" ? "#1C3557" : "#FFFFFF",
+          color: filtro === "todos" ? "#fff" : "#64748B",
+          border: filtro === "todos" ? "none" : "1px solid #E2E8F0",
+          borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 700,
+          cursor: "pointer", whiteSpace: "nowrap",
+        }}>Todos</button>
+        {TIPO_JUNTADA.map(t => (
+          <button key={t.key} onClick={() => setFiltro(t.key === filtro ? "todos" : t.key)} style={{
+            background: filtro === t.key ? t.color : "#FFFFFF",
+            color: filtro === t.key ? "#fff" : "#64748B",
+            border: filtro === t.key ? "none" : "1px solid #E2E8F0",
+            borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 700,
+            cursor: "pointer", whiteSpace: "nowrap",
+          }}>{t.icon} {t.label}</button>
+        ))}
+      </div>
+
+      {/* Botón crear */}
+      {!showForm && (
+        <button onClick={() => setShowForm(true)} style={{
+          width: "100%", background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+          color: "#000", border: "none", borderRadius: 14, padding: "12px 16px",
+          fontWeight: 800, fontSize: 14, cursor: "pointer", marginBottom: 16,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}>🦮 Organizar una juntada</button>
+      )}
+
+      {/* Formulario crear */}
+      {showForm && (
+        <Card style={{ border: "1px solid #B2E8E5", marginBottom: 16 }}>
+          <div style={{ fontWeight: 800, color: "#1C3557", marginBottom: 14 }}>Nueva juntada</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <input placeholder="Título — ej: Paseo por el parque Centenario *" value={form.titulo} onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))} />
+            <div style={{ display: "flex", gap: 8 }}>
+              {TIPO_JUNTADA.map(t => (
+                <button key={t.key} onClick={() => setForm(f => ({ ...f, tipo: t.key }))} style={{
+                  flex: 1, border: `1px solid ${form.tipo === t.key ? t.color : "#E2E8F0"}`,
+                  background: form.tipo === t.key ? t.color + "20" : "#FFFFFF",
+                  color: form.tipo === t.key ? t.color : "#64748B",
+                  borderRadius: 10, padding: "8px 4px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                }}>{t.icon}<br /><span style={{ fontSize: 10 }}>{t.label}</span></button>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input type="date" value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} style={{ flex: 1 }} />
+              <input type="time" value={form.hora} onChange={e => setForm(f => ({ ...f, hora: e.target.value }))} style={{ flex: 1 }} />
+            </div>
+            <select value={provincia} onChange={e => { setProvincia(e.target.value); setMunicipio(""); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: provincia ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+              <option value="">Provincia *</option>
+              {PROVINCIAS_LIST.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            {provincia && (
+              <select value={municipio} onChange={e => setMunicipio(e.target.value)} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: municipio ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+                <option value="">Ciudad / Barrio</option>
+                {(MUNICIPIOS_POR_PROVINCIA[provincia] || []).map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            )}
+            <textarea placeholder="Descripción del encuentro, punto de reunión..." rows={2} value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
+            <input placeholder="WhatsApp de contacto" value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} />
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={handleCreate} disabled={saving || !form.titulo.trim() || !form.fecha || !provincia} style={{
+                flex: 1, background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+                color: "#000", border: "none", borderRadius: 10, padding: 12,
+                fontWeight: 800, fontSize: 14, cursor: "pointer",
+                opacity: (saving || !form.titulo.trim() || !form.fecha || !provincia) ? 0.6 : 1,
+              }}>{saving ? "Creando..." : "Publicar juntada →"}</button>
+              <button onClick={() => setShowForm(false)} style={{
+                background: "#E2E8F0", color: "#64748B", border: "none",
+                borderRadius: 10, padding: "12px 16px", cursor: "pointer",
+              }}>Cancelar</button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Lista vacía */}
+      {listaFiltrada.length === 0 && (
+        <Card style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 10 }}>🦮</div>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Todavía no hay juntadas</div>
+          <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.5 }}>
+            Sé el primero en organizar un paseo grupal o una juntada en tu zona
+          </p>
+        </Card>
+      )}
+
+      {/* Cards de juntadas */}
+      {listaFiltrada.map((j: any) => {
+        const tipoInfo = TIPO_JUNTADA.find(t => t.key === j.tipo) || TIPO_JUNTADA[0];
+        const fechaStr = j.fecha
+          ? new Date(j.fecha + "T12:00:00").toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" })
+          : null;
+        const isOwner = j.user_id === myUserId;
+        return (
+          <Card key={j.id} style={{ border: `1px solid ${tipoInfo.color}30` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                  <span style={{
+                    background: tipoInfo.color + "20", color: tipoInfo.color,
+                    borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800, flexShrink: 0,
+                  }}>{tipoInfo.icon} {tipoInfo.label}</span>
+                  {(j.asistentes || 0) > 1 && (
+                    <span style={{ color: "#64748B", fontSize: 11 }}>👥 {j.asistentes} van</span>
+                  )}
+                </div>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{j.titulo}</div>
+              </div>
+              {fechaStr && (
+                <div style={{
+                  background: "#F4F6FB", borderRadius: 10, padding: "6px 10px",
+                  textAlign: "center", flexShrink: 0, marginLeft: 10, minWidth: 72,
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: "#1C3557" }}>{fechaStr}</div>
+                  {j.hora && <div style={{ fontSize: 10, color: "#64748B", marginTop: 2 }}>⏰ {j.hora}</div>}
+                </div>
+              )}
+            </div>
+            {j.descripcion && (
+              <p style={{ fontSize: 12, color: "#64748B", lineHeight: 1.5, marginBottom: 8 }}>{j.descripcion}</p>
+            )}
+            {j.zona && <div style={{ fontSize: 12, color: "#3B82F6", marginBottom: 10 }}>📍 {j.zona}</div>}
+            <div style={{ display: "flex", gap: 8 }}>
+              {j.telefono && !isOwner && (
+                <a href={"https://wa.me/" + j.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
+                  flex: 1, background: "#E5F7F6", color: "#2CB8AD",
+                  border: "1px solid #B2E8E5", borderRadius: 8, padding: "7px 0",
+                  fontSize: 12, fontWeight: 700, textDecoration: "none", textAlign: "center",
+                }}>💬 Contactar</a>
+              )}
+              {!isOwner && (
+                <button onClick={() => handleAnotarse(j)} style={{
+                  flex: 1, background: "#F4F6FB", color: "#1C3557",
+                  border: "1px solid #E2E8F0", borderRadius: 8, padding: "7px 0",
+                  fontSize: 12, fontWeight: 700, cursor: "pointer",
+                }}>🐾 Me anoto</button>
+              )}
+              {isOwner && (
+                <div style={{
+                  flex: 1, textAlign: "center", fontSize: 12,
+                  color: "#64748B", padding: "7px 0",
+                }}>Tu juntada ✨</div>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Tab: Descuentos ──────────────────────────────────────────────────────────
 function TabDescuentos() {
   const [showForm, setShowForm] = useState(false);
@@ -318,19 +594,21 @@ function TabDescuentos() {
   async function handleSendBiz() {
     if (!bizForm.nombre || !bizForm.email) return;
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("comunidad_mensajes").insert({
-      author_name: "SOLICITUD:descuento",
-      mascota_name: "pendiente",
-      message: JSON.stringify({ ...bizForm, user_id: user?.id }),
+    await supabase.from("solicitudes_descuento").insert({
+      user_id: user?.id ?? null,
+      nombre: bizForm.nombre,
+      rubro: bizForm.rubro,
+      email: bizForm.email,
+      descuento: bizForm.descuento,
     });
     setSent(true);
     setShowForm(false);
   }
 
   return (
-    <div>
-      <p style={{ color: "#64748B", fontSize: 13, marginBottom: 16 }}>
-        Beneficios exclusivos para miembros PetPass 🐾
+    <div className="community-tab-panel community-tab-descuentos">
+      <p className="community-section-copy" style={{ color: "#64748B", fontSize: 13, marginBottom: 16 }}>
+        Beneficios exclusivos para miembros PetPass.
       </p>
       {DESCUENTOS.map((d, i) => (
         <Card key={i} style={{ display: "flex", gap: 14, alignItems: "center", opacity: 0.6 }}>
@@ -361,7 +639,7 @@ function TabDescuentos() {
           </Card>
         ) : (
           <Card style={{ border: "1px solid #FBCFE8", background: "#FFFFFF" }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showForm ? 14 : 0 }}>
+            <div className="community-cta-row" style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showForm ? 14 : 0 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12, background: "#FDF2F8",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
@@ -377,7 +655,7 @@ function TabDescuentos() {
               }}>Quiero aparecer</button>
             </div>
             {showForm && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="community-form" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <input placeholder="Nombre del negocio *" value={bizForm.nombre} onChange={e => setBizForm(f => ({ ...f, nombre: e.target.value }))} />
                 <input placeholder="Rubro (ej: veterinaria, peluquería)" value={bizForm.rubro} onChange={e => setBizForm(f => ({ ...f, rubro: e.target.value }))} />
                 <input placeholder="Email de contacto *" type="email" value={bizForm.email} onChange={e => setBizForm(f => ({ ...f, email: e.target.value }))} />
@@ -386,7 +664,7 @@ function TabDescuentos() {
                   background: "linear-gradient(135deg, #EC4899, #DB2777)",
                   color: "#fff", border: "none", borderRadius: 10, padding: 12,
                   fontWeight: 800, fontSize: 14, cursor: "pointer",
-                }}>Enviar consulta →</button>
+                }}>Enviar consulta</button>
               </div>
             )}
           </Card>
@@ -412,6 +690,8 @@ function TabPerdidas() {
   });
   const [fotosForm, setFotosForm] = useState<File[]>([]);
   const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
+  const [zonaProvince, setZonaProvince] = useState("");
+  const [zonaMuni, setZonaMuni] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
@@ -458,7 +738,8 @@ function TabPerdidas() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
-    const { data } = await supabase.from("perdidas").insert({ ...form, user_id: user.id, tipo: reportingType }).select();
+    const zone = buildZona(zonaProvince, zonaMuni);
+    const { data } = await supabase.from("perdidas").insert({ ...form, zone, user_id: user.id, tipo: reportingType }).select();
     if (data?.[0]) {
       const id = data[0].id;
       const urls: string[] = [];
@@ -477,6 +758,8 @@ function TabPerdidas() {
       setPerdidas(prev => [data[0], ...prev]);
     }
     setForm({ pet_name: "", breed: "", color: "", zone: "", phone: "", description: "", lat: form.lat, lng: form.lng });
+    setZonaProvince("");
+    setZonaMuni("");
     setFotosForm([]);
     setFotoPreviews([]);
     if (fileRef.current) fileRef.current.value = "";
@@ -488,11 +771,12 @@ function TabPerdidas() {
     return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  const fields: [string, string][] = [
+  const fieldsTop: [string, string][] = [
     ["Nombre de la mascota", "pet_name"],
     ["Raza", "breed"],
     ["Color / descripción física", "color"],
-    ["Zona donde se perdió", "zone"],
+  ];
+  const fieldsBottom: [string, string][] = [
     ["Teléfono de contacto", "phone"],
   ];
 
@@ -501,10 +785,10 @@ function TabPerdidas() {
   );
 
   return (
-    <div>
+    <div className="community-tab-panel community-tab-perdidas">
       {/* Sub-tabs Perdidas / Encontradas */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
-        {([["perdidas", "📍 Perdidas", "#EF4444"], ["encontradas", "✅ Encontradas", "#2CB8AD"]] as const).map(([key, label, color]) => (
+      <div className="community-segmented" style={{ display: "flex", gap: 8, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
+        {([["perdidas", "Perdidas", "#EF4444"], ["encontradas", "Encontradas", "#2CB8AD"]] as const).map(([key, label, color]) => (
           <button key={key} onClick={() => setSubTab(key)} style={{
             flex: 1, border: "none", borderRadius: 10, padding: "8px 4px",
             background: subTab === key ? "#E2E8F0" : "transparent",
@@ -515,30 +799,52 @@ function TabPerdidas() {
       </div>
 
       {/* Botones de reporte */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div className="community-action-row" style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <button onClick={() => { setReportingType("perdida"); setReporting(!reporting || reportingType !== "perdida"); }} style={{
           flex: 1, background: "#FFF0F0", color: "#EF4444",
           border: "1px solid #FECACA", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
-          📍 Reportar perdida
+          Reportar pérdida
         </button>
         <button onClick={() => { setReportingType("encontrada"); setReporting(!reporting || reportingType !== "encontrada"); }} style={{
           flex: 1, background: "#E5F7F6", color: "#2CB8AD",
           border: "1px solid #B2E8E5", borderRadius: 12, padding: 12,
           fontWeight: 700, fontSize: 13, cursor: "pointer",
         }}>
-          ✅ Encontré una
+          Encontré una
         </button>
       </div>
 
       {reporting && (
         <Card style={{ border: `1px solid ${reportingType === "perdida" ? "#FECACA" : "#B2E8E5"}` }}>
           <div style={{ fontWeight: 700, color: reportingType === "perdida" ? "#EF4444" : "#2CB8AD", marginBottom: 12 }}>
-            {reportingType === "perdida" ? "📍 Nueva alerta de mascota perdida" : "✅ Reportar mascota encontrada"}
+            {reportingType === "perdida" ? "Nueva alerta de mascota perdida" : "Reportar mascota encontrada"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {fields.map(([label, key]) => (
+            {fieldsTop.map(([label, key]) => (
+              <input key={key} placeholder={label} value={(form as any)[key]}
+                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} />
+            ))}
+            <select
+              value={zonaProvince}
+              onChange={e => { setZonaProvince(e.target.value); setZonaMuni(""); }}
+              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: zonaProvince ? "#1C3557" : "#94a3b8", fontSize: 13 }}
+            >
+              <option value="">Provincia donde se perdió</option>
+              {PROVINCIAS_LIST.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            {zonaProvince && (
+              <select
+                value={zonaMuni}
+                onChange={e => setZonaMuni(e.target.value)}
+                style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: zonaMuni ? "#1C3557" : "#94a3b8", fontSize: 13 }}
+              >
+                <option value="">Ciudad / Localidad</option>
+                {(MUNICIPIOS_POR_PROVINCIA[zonaProvince] || []).map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            )}
+            {fieldsBottom.map(([label, key]) => (
               <input key={key} placeholder={label} value={(form as any)[key]}
                 onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} />
             ))}
@@ -662,7 +968,7 @@ function TabPerdidas() {
                     display: "inline-block", background: "#E5F7F6", color: "#2CB8AD",
                     border: "1px solid #B2E8E5", borderRadius: 8, padding: "6px 14px",
                     fontSize: 12, fontWeight: 700, textDecoration: "none",
-                  }}>💬 Contactar por WhatsApp</a>
+                  }}>Contactar por WhatsApp</a>
                 )}
               </div>
             </div>
@@ -674,177 +980,435 @@ function TabPerdidas() {
 }
 
 // ─── Tab: Profesionales ───────────────────────────────────────────────────────
-const ESPECIALIDADES = ["Todos", "Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"];
+const ESPECIALIDADES_GENERALES = ["Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"];
+
+const ESPECIALIDADES_MEDICAS = [
+  "Dermatología", "Oncología", "Gastroenterología", "Cardiología",
+  "Etología", "Endocrinología", "Oftalmología", "Neurología",
+  "Traumatología", "Odontología", "Nefrología", "Reproducción", "Exóticos",
+];
+
+const iconEsp: Record<string, string> = {
+  // Generales
+  Veterinario: "🏥", Peluquero: "✂️", Adestrador: "🎓",
+  Guarderia: "🏠", Nutricionista: "🥗", Otro: "🐾",
+  // Especialistas
+  "Dermatología": "🔬", "Oncología": "🩺", "Gastroenterología": "💊",
+  "Cardiología": "❤️", "Etología": "🧠", "Endocrinología": "⚗️",
+  "Oftalmología": "👁️", "Neurología": "🧬", "Traumatología": "🦴",
+  "Odontología": "🦷", "Nefrología": "💧", "Reproducción": "🐣",
+  "Exóticos": "🦜",
+};
+
+const FORM_EMPTY = { nombre: "", especialidad: "Veterinario", descripcion: "", direccion: "", telefono: "", instagram: "", email: "" };
+
+function ProfCard({ p }: { p: any }) {
+  const isEspecialista = ESPECIALIDADES_MEDICAS.includes(p.especialidad);
+  return (
+    <div style={{
+      background: "#fff",
+      border: isEspecialista ? "1px solid #E9D5FF" : "1px solid #E2E8F0",
+      borderRadius: 14,
+      padding: "14px 16px",
+      marginBottom: 10,
+      display: "flex",
+      gap: 12,
+      alignItems: "flex-start",
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        background: isEspecialista ? "#F5F3FF" : "#F0FDF4",
+        border: isEspecialista ? "1px solid #E9D5FF" : "1px solid #BBF7D0",
+        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+      }}>
+        {iconEsp[p.especialidad] || "🐾"}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontWeight: 800, fontSize: 14, color: "#1C3557" }}>{p.nombre}</span>
+          {p.verified && <span style={{ fontSize: 10, background: "#D1FAE5", color: "#065F46", borderRadius: 20, padding: "1px 7px", fontWeight: 700 }}>✓ Verificado</span>}
+        </div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: isEspecialista ? "#8B5CF6" : "#3B82F6", marginTop: 2 }}>
+          {p.especialidad}
+        </div>
+        {p.descripcion && <div style={{ color: "#64748B", fontSize: 12, marginTop: 4, lineHeight: 1.4 }}>{p.descripcion}</div>}
+        {p.zona && <div style={{ color: "#94A3B8", fontSize: 11, marginTop: 4 }}>📍 {p.zona}</div>}
+        <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+          {p.telefono && (
+            <a href={`https://wa.me/${p.telefono.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" style={{
+              background: "#25D366", color: "#fff", borderRadius: 8, padding: "4px 10px",
+              fontSize: 11, fontWeight: 700, textDecoration: "none",
+            }}>WhatsApp</a>
+          )}
+          {p.instagram && (
+            <a href={`https://instagram.com/${p.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" style={{
+              background: "#F1F5F9", color: "#64748B", borderRadius: 8, padding: "4px 10px",
+              fontSize: 11, fontWeight: 700, textDecoration: "none",
+            }}>Instagram</a>
+          )}
+          {p.email && (
+            <a href={`mailto:${p.email}`} style={{
+              background: "#F1F5F9", color: "#64748B", borderRadius: 8, padding: "4px 10px",
+              fontSize: 11, fontWeight: 700, textDecoration: "none",
+            }}>Email</a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function TabProfesionales() {
   const [profesionales, setProfesionales] = useState<any[]>([]);
   const [filtro, setFiltro] = useState("Todos");
+  const [subfiltro, setSubfiltro] = useState("Todos");
   const [loading, setLoading] = useState(true);
-  const [showSolicitud, setShowSolicitud] = useState(false);
-  const [solicitudForm, setSolicitudForm] = useState({ nombre: "", especialidad: "Veterinario", descripcion: "", zona: "", telefono: "", instagram: "", email: "" });
-  const [enviando, setEnviando] = useState(false);
-  const [enviado, setEnviado] = useState(false);
+  const [miPerfil, setMiPerfil] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [form, setForm] = useState<typeof FORM_EMPTY>(FORM_EMPTY);
+  const [provincia, setProvincia] = useState("");
+  const [municipio, setMunicipio] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [confirmBaja, setConfirmBaja] = useState(false);
   const supabase = createClient();
 
-  useEffect(function() {
-    const url = "https://amyosmkbldgdxuqepxqu.supabase.co/storage/v1/object/public/comunidad/profesionales.json";
-    fetch(url)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        setProfesionales(Array.isArray(data) ? data.filter(function(p: any) { return p.active !== false; }) : []);
-        setLoading(false);
-      })
-      .catch(function() { setLoading(false); });
-  }, []);
+  useEffect(function() { load(); }, []);
 
-  async function handleSolicitudPro() {
-    if (!solicitudForm.nombre) return;
-    setEnviando(true);
+  async function load() {
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("comunidad_mensajes").insert({
-      author_name: "SOLICITUD:profesional",
-      mascota_name: "pendiente",
-      message: JSON.stringify({ ...solicitudForm, user_id: user?.id }),
-    });
-    setEnviado(true);
-    setEnviando(false);
-    setShowSolicitud(false);
+    setCurrentUserId(user?.id || null);
+    const { data } = await supabase
+      .from("profesionales")
+      .select("*")
+      .eq("active", true)
+      .order("verified", { ascending: false })
+      .order("created_at", { ascending: false });
+    const lista = data || [];
+    setProfesionales(lista);
+    if (user) {
+      const mio = lista.find((p: any) => p.user_id === user.id);
+      if (mio) setMiPerfil(mio);
+    }
+    setLoading(false);
   }
 
-  const lista = filtro === "Todos" ? profesionales : profesionales.filter(function(p) { return p.especialidad === filtro; });
+  function openCreate() {
+    setForm(FORM_EMPTY);
+    setProvincia("");
+    setMunicipio("");
+    setEditMode(false);
+    setShowForm(true);
+  }
 
-  const iconEsp: Record<string, string> = {
-    Veterinario: "🏥", Peluquero: "✂️", Adestrador: "🎓",
-    Guarderia: "🏠", Nutricionista: "🥗", Otro: "🐾",
-  };
+  function openEdit() {
+    if (!miPerfil) return;
+    setForm({
+      nombre: miPerfil.nombre || "",
+      especialidad: miPerfil.especialidad || "Veterinario",
+      descripcion: miPerfil.descripcion || "",
+      direccion: miPerfil.direccion || "",
+      telefono: miPerfil.telefono || "",
+      instagram: miPerfil.instagram || "",
+      email: miPerfil.email || "",
+    });
+    setProvincia(miPerfil.provincia || "");
+    setMunicipio(miPerfil.municipio || "");
+    setEditMode(true);
+    setShowForm(true);
+  }
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>;
+  async function handleSave() {
+    if (!form.nombre.trim()) return;
+    setSaving(true);
+    const zona = buildZona(provincia, municipio);
+    const payload = { ...form, zona, provincia, municipio, updated_at: new Date().toISOString() };
+    if (editMode && miPerfil) {
+      const { data } = await supabase.from("profesionales").update(payload).eq("id", miPerfil.id).select().single();
+      if (data) {
+        setMiPerfil(data);
+        setProfesionales(prev => prev.map(p => p.id === data.id ? data : p));
+      }
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.from("profesionales").insert({ ...payload, user_id: user!.id, active: true }).select().single();
+      if (data) {
+        setMiPerfil(data);
+        setProfesionales(prev => [data, ...prev]);
+      }
+    }
+    setSaving(false);
+    setShowForm(false);
+  }
+
+  async function handleBaja() {
+    if (!miPerfil) return;
+    await supabase.from("profesionales").update({ active: false }).eq("id", miPerfil.id);
+    setProfesionales(prev => prev.filter(p => p.id !== miPerfil.id));
+    setMiPerfil(null);
+    setConfirmBaja(false);
+  }
+
+  const lista = (() => {
+    if (filtro === "Todos") return profesionales;
+    if (filtro === "Especialistas") {
+      const base = profesionales.filter(p => ESPECIALIDADES_MEDICAS.includes(p.especialidad));
+      return subfiltro === "Todos" ? base : base.filter(p => p.especialidad === subfiltro);
+    }
+    return profesionales.filter(p => p.especialidad === filtro);
+  })();
+
+  const especialistas = profesionales.filter(p => ESPECIALIDADES_MEDICAS.includes(p.especialidad));
+  const generales = profesionales.filter(p => !ESPECIALIDADES_MEDICAS.includes(p.especialidad));
+
+  if (loading) return (
+    <div style={{ padding: "16px 0" }}>
+      {[1,2,3].map(i => (
+        <div key={i} className="skeleton" style={{ height: 80, borderRadius: 14, marginBottom: 10 }} />
+      ))}
+    </div>
+  );
 
   return (
-    <div>
+    <div className="community-tab-panel community-tab-profesionales">
       <p style={{ color: "#64748B", fontSize: 13, marginBottom: 14 }}>
-        Veterinarios, peluqueros y especialistas recomendados por la comunidad.
+        Cartilla de veterinarios, peluqueros y especialistas de la comunidad.
       </p>
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
-        {ESPECIALIDADES.map(function(e) {
-          return (
-            <button key={e} onClick={function() { setFiltro(e); }} style={{
-              background: filtro === e ? "#EFF6FF" : "#FFFFFF",
-              border: "1px solid " + (filtro === e ? "#3B82F6" : "#E2E8F0"),
-              color: filtro === e ? "#3B82F6" : "#64748B",
-              borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
-              cursor: "pointer", whiteSpace: "nowrap",
-            }}>{e}</button>
-          );
-        })}
+      {/* Mi perfil activo */}
+      {miPerfil && (
+        <Card style={{ border: "1px solid #BFDBFE", background: "linear-gradient(135deg,#EFF6FF,#fff)", marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#3B82F6", letterSpacing: 1, textTransform: "uppercase" }}>
+              {miPerfil.verified ? "✅ Perfil verificado" : "Tu perfil en la cartilla"}
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={openEdit} style={{
+                background: "#EFF6FF", color: "#3B82F6", border: "1px solid #BFDBFE",
+                borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+              }}>Editar</button>
+              <button onClick={() => setConfirmBaja(true)} style={{
+                background: "#FFF0F0", color: "#EF4444", border: "1px solid #FECACA",
+                borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+              }}>Dar de baja</button>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+              background: "#EFF6FF", border: "1px solid #BFDBFE",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, overflow: "hidden",
+            }}>
+              {iconEsp[miPerfil.especialidad] || "🐾"}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>{miPerfil.nombre}</div>
+              <div style={{ color: "#3B82F6", fontSize: 11, marginTop: 2 }}>{miPerfil.especialidad}</div>
+              {miPerfil.zona && <div style={{ color: "#64748B", fontSize: 11, marginTop: 2 }}>📍 {miPerfil.zona}</div>}
+              {miPerfil.direccion && <div style={{ color: "#64748B", fontSize: 11, marginTop: 1 }}>🏠 {miPerfil.direccion}</div>}
+            </div>
+          </div>
+          {confirmBaja && (
+            <div style={{ marginTop: 12, background: "#FFF0F0", borderRadius: 10, padding: "10px 14px" }}>
+              <div style={{ fontSize: 13, color: "#EF4444", fontWeight: 700, marginBottom: 8 }}>
+                ¿Dar de baja tu perfil de la cartilla?
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={handleBaja} style={{
+                  background: "#EF4444", color: "#fff", border: "none",
+                  borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer",
+                }}>Confirmar</button>
+                <button onClick={() => setConfirmBaja(false)} style={{
+                  background: "#E2E8F0", color: "#64748B", border: "none",
+                  borderRadius: 8, padding: "6px 14px", fontSize: 12, cursor: "pointer",
+                }}>Cancelar</button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Filtros principales */}
+      <div className="community-chip-row" style={{ display: "flex", gap: 6, marginBottom: 8, overflowX: "auto", paddingBottom: 4 }}>
+        {["Todos", ...ESPECIALIDADES_GENERALES, "Especialistas"].map(e => (
+          <button key={e} onClick={() => { setFiltro(e); setSubfiltro("Todos"); }} style={{
+            background: filtro === e ? (e === "Especialistas" ? "#F5F3FF" : "#EFF6FF") : "#FFFFFF",
+            border: "1px solid " + (filtro === e ? (e === "Especialistas" ? "#8B5CF6" : "#3B82F6") : "#E2E8F0"),
+            color: filtro === e ? (e === "Especialistas" ? "#8B5CF6" : "#3B82F6") : "#64748B",
+            borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 700,
+            cursor: "pointer", whiteSpace: "nowrap",
+          }}>
+            {e === "Especialistas" ? "🔬 Especialistas" : e}
+          </button>
+        ))}
       </div>
 
+      {/* Sub-filtros de especialidades médicas */}
+      {filtro === "Especialistas" && (
+        <div className="community-chip-row" style={{ display: "flex", gap: 5, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>
+          {["Todos", ...ESPECIALIDADES_MEDICAS].map(s => (
+            <button key={s} onClick={() => setSubfiltro(s)} style={{
+              background: subfiltro === s ? "#F5F3FF" : "#FAFAFA",
+              border: "1px solid " + (subfiltro === s ? "#8B5CF6" : "#E2E8F0"),
+              color: subfiltro === s ? "#8B5CF6" : "#94A3B8",
+              borderRadius: 20, padding: "4px 10px", fontSize: 10, fontWeight: 700,
+              cursor: "pointer", whiteSpace: "nowrap",
+            }}>
+              {s !== "Todos" && (iconEsp[s] + " ")}{s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Vista "Todos": sección especial de especialistas + generales */}
+      {filtro === "Todos" && especialistas.length > 0 && (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 10px" }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#8B5CF6" }}>🔬 Especialistas</span>
+            <div style={{ flex: 1, height: 1, background: "#E9D5FF" }} />
+          </div>
+          {especialistas.map((p: any) => <ProfCard key={p.id} p={p} />)}
+          {generales.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "14px 0 10px" }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "#3B82F6" }}>🏥 Generales</span>
+              <div style={{ flex: 1, height: 1, background: "#BFDBFE" }} />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Lista filtrada */}
       {lista.length === 0 && (
         <Card style={{ textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🏥</div>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Sin profesionales todavia</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>La cartilla está vacía por ahora</div>
           <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6 }}>
-            Pronto vamos a listar veterinarios, peluqueros y especialistas de tu zona.
+            Sé el primero en aparecer en la cartilla de tu zona.
           </p>
         </Card>
       )}
 
-      {lista.map(function(p: any, i: number) {
-        return (
-          <Card key={i} style={{ border: "1px solid #EFF6FF" }}>
-            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-              <div style={{
-                width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-                background: "#EFF6FF", border: "1px solid #BFDBFE",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 26, overflow: "hidden",
-              }}>
-                {p.foto_url
-                  ? <img src={p.foto_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : iconEsp[p.especialidad] || "🐾"}
+      {filtro === "Todos"
+        ? generales.map((p: any) => <ProfCard key={p.id} p={p} />)
+        : lista.map((p: any) => <ProfCard key={p.id} p={p} />)
+      }
+
+      {/* CTA unirse a la cartilla */}
+      {!miPerfil && (
+        <Card style={{ border: "1px solid #BFDBFE", background: "linear-gradient(135deg,#EFF6FF,#fff)", marginTop: 8 }}>
+          {showForm ? (
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#1C3557", marginBottom: 14 }}>
+                Registrar mi perfil profesional
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ fontWeight: 800, fontSize: 15 }}>{p.nombre}</div>
-                  <span style={{ background: "#EFF6FF", color: "#3B82F6", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800, flexShrink: 0, marginLeft: 8 }}>
-                    {p.especialidad}
-                  </span>
-                </div>
-                {p.descripcion && <div style={{ color: "#64748B", fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{p.descripcion}</div>}
-                {p.zona && <div style={{ color: "#3B82F6", fontSize: 12, marginTop: 4 }}>📍 {p.zona}</div>}
-                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                  {p.telefono && (
-                    <a href={"https://wa.me/" + p.telefono.replace(/\D/g, "")} target="_blank" rel="noreferrer" style={{
-                      background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
-                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
-                    }}>WhatsApp</a>
-                  )}
-                  {p.instagram && (
-                    <a href={"https://instagram.com/" + p.instagram.replace("@", "")} target="_blank" rel="noreferrer" style={{
-                      background: "#FDF2F8", color: "#EC4899", border: "1px solid #FBCFE8",
-                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
-                    }}>Instagram</a>
-                  )}
-                  {p.email && (
-                    <a href={"mailto:" + p.email} style={{
-                      background: "#F5F3FF", color: "#8B5CF6", border: "1px solid #DDD6FE",
-                      borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none",
-                    }}>Email</a>
-                  )}
+              <div className="community-form" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input placeholder="Nombre / Nombre del negocio *" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
+                <select value={form.especialidad} onChange={e => setForm(f => ({ ...f, especialidad: e.target.value }))} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13 }}>
+                  <optgroup label="Generales">
+                    {ESPECIALIDADES_GENERALES.map(esp => <option key={esp} value={esp}>{esp}</option>)}
+                  </optgroup>
+                  <optgroup label="Especialistas médicos">
+                    {ESPECIALIDADES_MEDICAS.map(esp => <option key={esp} value={esp}>{iconEsp[esp]} {esp}</option>)}
+                  </optgroup>
+                </select>
+                <input placeholder="Descripción breve de tus servicios" value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
+                <select value={provincia} onChange={e => { setProvincia(e.target.value); setMunicipio(""); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: provincia ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+                  <option value="">Provincia</option>
+                  {PROVINCIAS_LIST.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+                {provincia && (
+                  <select value={municipio} onChange={e => setMunicipio(e.target.value)} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: municipio ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+                    <option value="">Ciudad / Barrio</option>
+                    {(MUNICIPIOS_POR_PROVINCIA[provincia] || []).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                )}
+                <input placeholder="Dirección (ej: Av. Corrientes 1234)" value={form.direccion} onChange={e => setForm(f => ({ ...f, direccion: e.target.value }))} />
+                <input placeholder="WhatsApp (con código de área)" value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} />
+                <input placeholder="Instagram (@usuario)" value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} />
+                <input placeholder="Email de contacto" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={handleSave} disabled={saving || !form.nombre.trim()} style={{
+                    flex: 1, background: "linear-gradient(135deg,#3B82F6,#2563EB)",
+                    color: "#fff", border: "none", borderRadius: 10, padding: 12,
+                    fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: (saving || !form.nombre.trim()) ? 0.6 : 1,
+                  }}>{saving ? "Guardando..." : "Publicar perfil"}</button>
+                  <button onClick={() => setShowForm(false)} style={{
+                    background: "#E2E8F0", color: "#64748B", border: "none",
+                    borderRadius: 10, padding: "12px 16px", cursor: "pointer",
+                  }}>Cancelar</button>
                 </div>
               </div>
             </div>
-          </Card>
-        );
-      })}
-
-      {/* CTA para profesionales */}
-      <div style={{ marginTop: 8 }}>
-        {enviado ? (
-          <Card style={{ textAlign: "center", border: "1px solid #BFDBFE" }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
-            <div style={{ fontWeight: 800, marginBottom: 4 }}>Solicitud enviada</div>
-            <div style={{ color: "#64748B", fontSize: 13 }}>Revisamos tu perfil y te confirmamos por email.</div>
-          </Card>
-        ) : (
-          <Card style={{ border: "1px solid #BFDBFE", background: "linear-gradient(135deg, #EFF6FF, #FFFFFF)" }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: showSolicitud ? 14 : 0 }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: 12, background: "#EFF6FF",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
-              }}>🏥</div>
+          ) : (
+            <div className="community-cta-row" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>🏥</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>Sos profesional del mundo animal?</div>
-                <div style={{ color: "#64748B", fontSize: 12 }}>Postulate para aparecer en el directorio</div>
+                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>¿Sos profesional del mundo animal?</div>
+                <div style={{ color: "#64748B", fontSize: 12 }}>Registrá tu perfil y aparecé en la cartilla al instante</div>
               </div>
-              <button onClick={function() { setShowSolicitud(!showSolicitud); }} style={{
-                background: "linear-gradient(135deg, #3B82F6, #3b82f6)",
+              <button onClick={openCreate} style={{
+                background: "linear-gradient(135deg,#3B82F6,#2563EB)",
                 color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px",
                 fontSize: 12, fontWeight: 800, cursor: "pointer", flexShrink: 0,
-              }}>Solicitar</button>
+              }}>Unirme</button>
             </div>
-            {showSolicitud && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <input placeholder="Nombre / Nombre del negocio *" value={solicitudForm.nombre} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, nombre: e.target.value }; }); }} />
-                <select value={solicitudForm.especialidad} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, especialidad: e.target.value }; }); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13 }}>
-                  {["Veterinario", "Peluquero", "Adestrador", "Guarderia", "Nutricionista", "Otro"].map(function(esp) { return <option key={esp} value={esp}>{esp}</option>; })}
+          )}
+        </Card>
+      )}
+
+      {/* Modal edición */}
+      {showForm && editMode && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000, padding: 20,
+        }} onClick={() => setShowForm(false)}>
+          <div style={{
+            background: "#fff", borderRadius: 20, padding: "24px 20px",
+            width: "100%", maxWidth: 420, maxHeight: "85vh", overflowY: "auto",
+            boxShadow: "0 8px 48px rgba(28,53,87,0.18)",
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontWeight: 900, fontSize: 16, color: "#1C3557", marginBottom: 16 }}>Editar mi perfil</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <input placeholder="Nombre *" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
+              <select value={form.especialidad} onChange={e => setForm(f => ({ ...f, especialidad: e.target.value }))} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13 }}>
+                <optgroup label="Generales">
+                  {ESPECIALIDADES_GENERALES.map(esp => <option key={esp} value={esp}>{esp}</option>)}
+                </optgroup>
+                <optgroup label="Especialistas médicos">
+                  {ESPECIALIDADES_MEDICAS.map(esp => <option key={esp} value={esp}>{iconEsp[esp]} {esp}</option>)}
+                </optgroup>
+              </select>
+              <input placeholder="Descripción" value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
+              <select value={provincia} onChange={e => { setProvincia(e.target.value); setMunicipio(""); }} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: provincia ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+                <option value="">Provincia</option>
+                {PROVINCIAS_LIST.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+              {provincia && (
+                <select value={municipio} onChange={e => setMunicipio(e.target.value)} style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: municipio ? "#1C3557" : "#94a3b8", fontSize: 13 }}>
+                  <option value="">Ciudad / Barrio</option>
+                  {(MUNICIPIOS_POR_PROVINCIA[provincia] || []).map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <input placeholder="Descripcion breve" value={solicitudForm.descripcion} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, descripcion: e.target.value }; }); }} />
-                <input placeholder="Zona / Barrio" value={solicitudForm.zona} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, zona: e.target.value }; }); }} />
-                <input placeholder="WhatsApp (con codigo de area)" value={solicitudForm.telefono} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, telefono: e.target.value }; }); }} />
-                <input placeholder="Instagram (@usuario)" value={solicitudForm.instagram} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, instagram: e.target.value }; }); }} />
-                <input placeholder="Email de contacto" type="email" value={solicitudForm.email} onChange={function(e) { setSolicitudForm(function(f) { return { ...f, email: e.target.value }; }); }} />
-                <button onClick={handleSolicitudPro} disabled={enviando} style={{
-                  background: "linear-gradient(135deg, #3B82F6, #3b82f6)",
+              )}
+              <input placeholder="WhatsApp" value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} />
+              <input placeholder="Instagram (@usuario)" value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} />
+              <input placeholder="Email" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <button onClick={handleSave} disabled={saving} style={{
+                  flex: 1, background: "linear-gradient(135deg,#3B82F6,#2563EB)",
                   color: "#fff", border: "none", borderRadius: 10, padding: 12,
-                  fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: enviando ? 0.6 : 1,
-                }}>{enviando ? "Enviando..." : "Enviar solicitud"}</button>
+                  fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: saving ? 0.6 : 1,
+                }}>{saving ? "Guardando..." : "Guardar cambios"}</button>
+                <button onClick={() => setShowForm(false)} style={{
+                  background: "#E2E8F0", color: "#64748B", border: "none",
+                  borderRadius: 10, padding: "12px 16px", cursor: "pointer",
+                }}>Cancelar</button>
               </div>
-            )}
-          </Card>
-        )}
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -854,13 +1418,16 @@ export default function Comunidad() {
   const [tab, setTab] = useState<Tab>("adopciones");
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
-      <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Explora mascotas, adopciones, profesionales y descuentos</p>
+    <div className="community-page">
+      <div className="community-hero">
+        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Comunidad 👥</h2>
+        <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Tu espacio para conocer tutores, organizar juntadas y compartir experiencias</p>
+      </div>
 
       <TabBar active={tab} onChange={setTab} />
 
       {tab === "explorar" && <TabExplorar />}
+      {tab === "juntadas" && <TabJuntadas />}
       {tab === "adopciones" && <Adopciones />}
       {tab === "perdidas" && <TabPerdidas />}
       {tab === "profesionales" && <TabProfesionales />}

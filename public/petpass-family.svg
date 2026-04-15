@@ -1,0 +1,38 @@
+<svg width="960" height="720" viewBox="0 0 960 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PetPass pet family illustration</title>
+  <desc id="desc">A warm illustration of a pet tutor sitting with a dog and a cat.</desc>
+  <rect width="960" height="720" rx="56" fill="url(#bg)"/>
+  <circle cx="750" cy="160" r="130" fill="#B2E8E5" opacity="0.42"/>
+  <circle cx="175" cy="548" r="180" fill="#3B82F6" opacity="0.10"/>
+  <path d="M126 512C226 392 334 354 450 397C555 436 620 390 706 302C778 228 862 292 845 393C824 520 681 615 495 626C326 636 191 601 126 512Z" fill="#FFFFFF" opacity="0.72"/>
+  <path d="M307 485C275 431 285 364 336 329C387 294 462 305 500 356C539 408 529 481 477 516C426 550 339 539 307 485Z" fill="#F7C6A3"/>
+  <path d="M348 314C377 273 439 265 481 303C513 332 524 370 517 405C486 385 455 379 423 386C388 394 363 419 347 450C320 411 319 354 348 314Z" fill="#1C3557"/>
+  <path d="M307 621C313 542 345 485 403 465C472 441 546 483 566 565L579 621H307Z" fill="#2CB8AD"/>
+  <path d="M396 468C403 507 426 531 462 531C491 531 512 513 524 481C490 459 442 452 396 468Z" fill="#F7C6A3"/>
+  <path d="M336 621C350 557 381 522 429 515C492 506 536 545 551 621H336Z" fill="#229E94"/>
+  <path d="M566 622C557 551 594 498 660 492C719 487 765 530 777 592C779 602 779 612 778 622H566Z" fill="#E5F7F6" stroke="#2CB8AD" stroke-width="10"/>
+  <path d="M625 495C623 453 650 417 689 414C725 411 753 438 757 479L719 496L679 477L625 495Z" fill="#E5F7F6" stroke="#2CB8AD" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M633 431L607 385L670 408L633 431Z" fill="#E5F7F6" stroke="#2CB8AD" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M740 420L765 374L779 441L740 420Z" fill="#E5F7F6" stroke="#2CB8AD" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="669" cy="459" r="8" fill="#1C3557"/>
+  <circle cx="727" cy="459" r="8" fill="#1C3557"/>
+  <path d="M693 482C704 491 716 491 727 482" stroke="#1C3557" stroke-width="8" stroke-linecap="round"/>
+  <path d="M218 622C217 554 255 509 314 509C372 509 412 554 414 622H218Z" fill="#FFF7ED" stroke="#F97316" stroke-width="10"/>
+  <path d="M253 513C250 475 273 443 308 440C342 437 371 465 373 505L335 521L298 502L253 513Z" fill="#FFF7ED" stroke="#F97316" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="293" cy="480" r="7" fill="#1C3557"/>
+  <circle cx="344" cy="480" r="7" fill="#1C3557"/>
+  <path d="M313 501C324 510 337 510 348 501" stroke="#1C3557" stroke-width="7" stroke-linecap="round"/>
+  <path d="M224 545C188 528 174 490 190 457C205 427 236 415 267 426" stroke="#F97316" stroke-width="12" stroke-linecap="round"/>
+  <rect x="574" y="210" width="170" height="86" rx="28" fill="#FFFFFF" stroke="#D8E1EE" stroke-width="4"/>
+  <circle cx="620" cy="253" r="20" fill="#E5F7F6"/>
+  <path d="M610 254L620 264L636 241" stroke="#2CB8AD" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="654" y="232" width="58" height="10" rx="5" fill="#1C3557" opacity="0.82"/>
+  <rect x="654" y="254" width="42" height="10" rx="5" fill="#94A3B8"/>
+  <defs>
+    <linearGradient id="bg" x1="122" y1="88" x2="830" y2="657" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0FAFA"/>
+      <stop offset="0.48" stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EEF2FF"/>
+    </linearGradient>
+  </defs>
+</svg>

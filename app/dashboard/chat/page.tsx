@@ -32,6 +32,7 @@ function renderMsg(text: string) {
 const FREE_LIMIT = 5;
 
 export default function Chat() {
+  const [mascotas, setMascotas] = useState<any[]>([]);
   const [mascota, setMascota] = useState<any>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,44 +45,74 @@ export default function Chat() {
   const [isPremium, setIsPremium] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [chatKey, setChatKey] = useState<string | null>(null);
+  const [solicitandoPremium, setSolicitandoPremium] = useState(false);
+  const [loadingInit, setLoadingInit] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
+  async function loadMascota(m: any, userId: string) {
+    setMascota(m);
+    setHistorial([]);
+    const [{ data: hist }, { data: vacs }, { data: alim }] = await Promise.all([
+      supabase.from("historial").select("*").eq("mascota_id", m.id).order("created_at", { ascending: false }),
+      supabase.from("vacunas").select("*").eq("mascota_id", m.id),
+      supabase.from("alimentacion").select("*").eq("mascota_id", m.id),
+    ]);
+    setHistorial([...(hist || []), ...(vacs || []), ...(alim || [])]);
+    const welcome: Message = {
+      role: "assistant",
+      text: `Hola! Soy el veterinario IA de ${m.name}. Tengo acceso a su historial, vacunas, alimentación y documentos. ¿En qué te ayudo?`,
+    };
+    const key = `pp_chat_${userId}_${m.id}`;
+    setChatKey(key);
+    try {
+      const saved = localStorage.getItem(key);
+      const parsed: Message[] = saved ? JSON.parse(saved) : [];
+      setMessages(parsed.length > 0 ? parsed : [welcome]);
+    } catch {
+      setMessages([welcome]);
+    }
+  }
+
   useEffect(() => {
     async function load() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      setAuthToken(session.access_token);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        setAuthToken(session.access_token);
 
-      const user = session.user;
-      const { data: mascotas } = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true).limit(1);
-      if (mascotas?.[0]) {
-        setMascota(mascotas[0]);
-        const [{ data: hist }, { data: vacs }, { data: alim }] = await Promise.all([
-          supabase.from("historial").select("*").eq("mascota_id", mascotas[0].id).order("created_at", { ascending: false }),
-          supabase.from("vacunas").select("*").eq("mascota_id", mascotas[0].id),
-          supabase.from("alimentacion").select("*").eq("mascota_id", mascotas[0].id),
+        const user = session.user;
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const [{ data: allMascotas }, { data: profile }] = await Promise.all([
+          supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true),
+          supabase.from("profiles").select("ia_uses_count, ia_uses_month, is_premium").eq("id", user.id).single(),
         ]);
-        setHistorial([...(hist || []), ...(vacs || []), ...(alim || [])]);
-        setMessages([{
-          role: "assistant",
-          text: `Hola! Soy el veterinario IA de ${mascotas[0].name}. Tengo acceso a su historial, vacunas, alimentación y documentos. ¿En qué te ayudo?`,
-        }]);
+        setIsPremium(profile?.is_premium === true);
+        const sameMonth = profile?.ia_uses_month === currentMonth;
+        setUsedCount(sameMonth ? (profile?.ia_uses_count || 0) : 0);
+        if (allMascotas && allMascotas.length > 0) {
+          setMascotas(allMascotas);
+          await loadMascota(allMascotas[0], user.id);
+        }
+      } finally {
+        setLoadingInit(false);
       }
-
-      // Cargar uso actual
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const { data: profile } = await supabase
-        .from("profiles").select("ia_uses_count, ia_uses_month, is_premium").eq("id", user.id).single();
-      setIsPremium(profile?.is_premium === true);
-      const sameMonth = profile?.ia_uses_month === currentMonth;
-      setUsedCount(sameMonth ? (profile?.ia_uses_count || 0) : 0);
     }
     load();
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // Persistir mensajes (sin imágenes, últimos 30) en cada actualización
+  useEffect(() => {
+    if (!chatKey || messages.length <= 1) return;
+    try {
+      const toSave = messages.filter(m => !m.image).slice(-30);
+      localStorage.setItem(chatKey, JSON.stringify(toSave));
+    } catch {}
+  }, [messages, chatKey]);
 
   function handleImageFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -99,6 +130,24 @@ export default function Chat() {
     setImageData(null);
     setImagePreview(null);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  // Parsea el formato "archivo.pdf::url||nota::texto||ia::resumen"
+  function parseDocSummary(raw: string): { fileName: string; url: string; nota: string; ia: string } {
+    const segments = raw.split("||");
+    const firstSep = segments[0].indexOf("::");
+    const fileName = firstSep >= 0 ? segments[0].slice(0, firstSep) : segments[0];
+    const url = firstSep >= 0 ? segments[0].slice(firstSep + 2) : "";
+    let nota = "", ia = "";
+    for (let i = 1; i < segments.length; i++) {
+      const sep = segments[i].indexOf("::");
+      if (sep < 0) continue;
+      const key = segments[i].slice(0, sep);
+      const val = segments[i].slice(sep + 2);
+      if (key === "nota") nota = val;
+      if (key === "ia") ia = val;
+    }
+    return { fileName, url, nota, ia };
   }
 
   function buildSystemPrompt() {
@@ -127,8 +176,15 @@ export default function Chat() {
           return "- " + (a.marca || a.tipo || "alimento") + ": " + (a.frecuencia || "") + notas;
         }).join("\n")
       : "- No registrada";
+    // Incluye nombre, notas y resumen IA de cada documento
     const docsText = docItems.length > 0
-      ? docItems.map((d: any) => "- " + (d.summary.split("::")[0] || "documento") + " (" + (d.date || "sin fecha") + ") tipo: " + (d.title || "Documento")).join("\n")
+      ? docItems.map((d: any) => {
+          const { fileName, nota, ia } = parseDocSummary(d.summary);
+          const lines = [`- ${fileName} (${d.date || "sin fecha"}) — ${d.title || "Documento"}`];
+          if (nota) lines.push(`  Notas del veterinario: ${nota}`);
+          if (ia) lines.push(`  Análisis IA del archivo: ${ia}`);
+          return lines.join("\n");
+        }).join("\n\n")
       : "- Sin documentos";
     const citasText = citas.length > 0
       ? citas.map((c: any) => {
@@ -202,7 +258,7 @@ export default function Chat() {
         setLoading(false);
         return;
       }
-      if (data.used) setUsedCount(data.used);
+      if (data.used !== undefined) setUsedCount(data.used);
       setMessages(prev => [...prev, { role: "assistant", text: data.reply }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", text: "Error de conexion. Intentá de nuevo." }]);
@@ -241,17 +297,14 @@ export default function Chat() {
 
     for (let i = 0; i < Math.min(docItems.length, 5); i++) {
       const doc = docItems[i];
-      const parts = doc.summary.split("::");
-      const fileName = parts[0] || "documento";
-      const path = parts[1] || "";
+      const { fileName, url } = parseDocSummary(doc.summary);
+      if (!url) continue;
       const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
       const isPdf = /\.pdf$/i.test(fileName);
       if (!isImage && !isPdf) continue;
 
       try {
-        const { data: signedData } = await supabase.storage.from("documentos").createSignedUrl(path, 300);
-        if (!signedData?.signedUrl) continue;
-        const res = await fetch(signedData.signedUrl);
+        const res = await fetch(url);
         if (!res.ok) continue;
         const blob = await res.blob();
         const b64 = await blobToBase64(blob);
@@ -275,21 +328,64 @@ export default function Chat() {
     await callChatAPI(userContent, "Analizá mis estudios y documentos médicos");
   }
 
+  function resetChat() {
+    if (chatKey) localStorage.removeItem(chatKey);
+    setMessages([{
+      role: "assistant",
+      text: mascota
+        ? `Hola! Soy el veterinario IA de ${mascota.name}. Tengo acceso a su historial, vacunas, alimentación y documentos. ¿En qué te ayudo?`
+        : "Hola! Soy VetIA de PetPass. ¿En qué te ayudo?",
+    }]);
+  }
+
   const remaining = Math.max(0, FREE_LIMIT - usedCount);
   const SUGGESTIONS = mascota
     ? [`Cuándo vacunar a ${mascota.name}?`, "Se rasca mucho", "Cuánto debería pesar?"]
     : ["Cómo sé si mi perro está enfermo?"];
 
+  if (loadingInit) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 0" }}>
+      <div className="skeleton" style={{ height: 36, borderRadius: 10 }} />
+      <div className="skeleton" style={{ height: 36, borderRadius: 10 }} />
+      <div className="skeleton" style={{ height: 80, borderRadius: 12 }} />
+      <div className="skeleton" style={{ height: 200, borderRadius: 12 }} />
+    </div>
+  );
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 160px)" }}>
+    <div className="vet-chat-page" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 160px)" }}>
+
+      {/* Selector de mascota */}
+      {mascotas.length > 1 && (
+        <div style={{ display: "flex", gap: 8, marginBottom: 10, overflowX: "auto", paddingBottom: 2 }}>
+          {mascotas.map(m => {
+            const selected = mascota?.id === m.id;
+            return (
+              <button key={m.id} onClick={async () => {
+                if (selected) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) await loadMascota(m, session.user.id);
+              }} style={{
+                flexShrink: 0, border: `1px solid ${selected ? "#2CB8AD" : "#E2E8F0"}`,
+                background: selected ? "#E5F7F6" : "#FFFFFF",
+                borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 700,
+                color: selected ? "#2CB8AD" : "#64748B", cursor: "pointer",
+              }}>
+                {m.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Banner info / uso */}
       {isPremium ? (
-        <div style={{ background: "#FDF2F8", border: "1px solid #FBCFE8", borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12, color: "#EC4899", display: "flex", alignItems: "center", gap: 6 }}>
-          ✨ <strong>Premium</strong> · Consultas ilimitadas activas
+        <div className="vet-chat-banner vet-chat-banner-premium" style={{ background: "#FDF2F8", border: "1px solid #FBCFE8", borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12, color: "#EC4899", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>✨ <strong>Premium</strong> · Consultas ilimitadas activas</span>
+          <button onClick={resetChat} style={{ background: "none", border: "none", color: "#EC4899", fontSize: 11, fontWeight: 700, cursor: "pointer", padding: "2px 8px" }}>+ Nueva</button>
         </div>
       ) : (
-        <div style={{
+        <div className="vet-chat-banner" style={{
           background: usedCount >= FREE_LIMIT ? "#FFF0F0" : "#E5F7F6",
           border: `1px solid ${usedCount >= FREE_LIMIT ? "#FECACA" : "#B2E8E5"}`,
           borderRadius: 10, padding: "8px 14px", marginBottom: 10, fontSize: 12,
@@ -297,17 +393,26 @@ export default function Chat() {
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <span>🤖 {usedCount >= FREE_LIMIT ? "Límite mensual alcanzado" : `${remaining} consulta${remaining !== 1 ? "s" : ""} gratis restante${remaining !== 1 ? "s" : ""} este mes`}</span>
-          {usedCount >= FREE_LIMIT && (
-            <button onClick={() => setShowUpgrade(true)} style={{
-              background: "#EF4444", color: "#fff", border: "none",
-              borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer",
-            }}>Ver Premium</button>
-          )}
+          <div style={{ display: "flex", gap: 6 }}>
+            {messages.length > 1 && (
+              <button onClick={resetChat} style={{
+                background: "none", border: "none",
+                color: usedCount >= FREE_LIMIT ? "#EF4444" : "#2CB8AD",
+                fontSize: 11, fontWeight: 700, cursor: "pointer", padding: "2px 8px",
+              }}>+ Nueva</button>
+            )}
+            {usedCount >= FREE_LIMIT && (
+              <button onClick={() => setShowUpgrade(true)} style={{
+                background: "#EF4444", color: "#fff", border: "none",
+                borderRadius: 8, padding: "3px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer",
+              }}>Ver Premium</button>
+            )}
+          </div>
         </div>
       )}
 
       {/* Aviso médico legal */}
-      <div style={{
+      <div className="vet-chat-disclaimer" style={{
         background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10,
         padding: "8px 14px", marginBottom: 10,
         fontSize: 11, color: "#92400E", lineHeight: 1.5,
@@ -317,12 +422,12 @@ export default function Chat() {
         <span>
           <strong>Aviso:</strong> Vet IA brinda orientación informativa y{" "}
           <strong>no reemplaza la consulta con un veterinario matriculado.</strong>{" "}
-          Ante urgencias, consultá un profesional de inmediato.
+          No constituye diagnóstico ni prescripción veterinaria. Ante cualquier emergencia, llevá a tu mascota al veterinario de inmediato.
         </span>
       </div>
 
       {/* Botones de análisis */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div className="vet-chat-tools" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <button
           onClick={() => fileRef.current?.click()}
           style={{
@@ -362,16 +467,18 @@ export default function Chat() {
       </div>
 
       {/* Mensajes */}
-      <div style={{ flex: 1, overflowY: "auto", paddingRight: 4 }}>
+      <div className="vet-chat-messages" style={{ flex: 1, overflowY: "auto", paddingRight: 4 }}>
         {messages.map((m, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
+          <div key={i} className={m.role === "user" ? "msg-enter-right" : "msg-enter-left"}
+            style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
             <div style={{
               maxWidth: "82%",
-              background: m.role === "user" ? "#2CB8AD" : "#F4F6FB",
-              color: m.role === "user" ? "#000" : "#1C3557",
+              background: m.role === "user" ? "linear-gradient(135deg, #2CB8AD, #229E94)" : "#F4F6FB",
+              color: m.role === "user" ? "#fff" : "#1C3557",
               borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
               padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
               border: m.role === "assistant" ? "1px solid #E2E8F0" : "none",
+              boxShadow: m.role === "user" ? "0 2px 8px rgba(44,184,173,0.25)" : "none",
             }}>
               {m.image && <img src={m.image} style={{ width: "100%", borderRadius: 8, marginBottom: 6, maxHeight: 200, objectFit: "cover" }} />}
               {m.role === "assistant" ? renderMsg(m.text) : m.text}
@@ -401,7 +508,7 @@ export default function Chat() {
       )}
 
       {/* Input */}
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+      <div className="vet-chat-composer" style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <button onClick={() => fileRef.current?.click()} style={{
           background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 12,
           padding: "10px 12px", fontSize: 18, cursor: "pointer",
@@ -419,7 +526,7 @@ export default function Chat() {
         }}>↑</button>
       </div>
 
-      <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+      <div className="vet-chat-suggestions" style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
         {SUGGESTIONS.map(q => (
           <button key={q} onClick={() => setInput(q)} style={{
             background: "transparent", border: "1px solid #E2E8F0", borderRadius: 20,
@@ -446,7 +553,7 @@ export default function Chat() {
             </p>
 
             <div style={{ background: "#F4F6FB", borderRadius: 14, padding: 16, marginBottom: 20, textAlign: "left" }}>
-              <div style={{ fontWeight: 800, color: "#EC4899", marginBottom: 10, textAlign: "center" }}>✨ Premium · $X/mes</div>
+              <div style={{ fontWeight: 800, color: "#EC4899", marginBottom: 10, textAlign: "center" }}>✨ Premium · $3.000/mes</div>
               {["Consultas IA ilimitadas", "Análisis de fotos ilimitado", "Historial clínico completo", "Soporte prioritario"].map(f => (
                 <div key={f} style={{ fontSize: 13, color: "#1C3557", padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
                   <span style={{ color: "#2CB8AD" }}>✓</span> {f}
@@ -454,15 +561,31 @@ export default function Chat() {
               ))}
             </div>
 
-            <a
-              href="https://wa.me/5491100000000?text=Hola!%20Quiero%20activar%20PetPass%20Premium"
-              target="_blank" rel="noreferrer"
-              style={{
-                display: "block", background: "linear-gradient(135deg, #EC4899, #DB2777)",
-                color: "#fff", borderRadius: 12, padding: "13px 20px",
-                fontWeight: 900, fontSize: 15, textDecoration: "none", marginBottom: 10,
+            <button
+              onClick={async () => {
+                setSolicitandoPremium(true);
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) return;
+                  const res = await fetch("/api/suscripcion/crear", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${session.access_token}` },
+                  });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } finally {
+                  setSolicitandoPremium(false);
+                }
               }}
-            >Activar Premium →</a>
+              disabled={solicitandoPremium}
+              style={{
+                display: "block", width: "100%",
+                background: "linear-gradient(135deg, #EC4899, #DB2777)",
+                color: "#fff", border: "none", borderRadius: 12, padding: "13px 20px",
+                fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 10,
+                opacity: solicitandoPremium ? 0.6 : 1,
+              }}
+            >{solicitandoPremium ? "Redirigiendo..." : "✨ Activar Premium · $3.000/mes →"}</button>
 
             <button onClick={() => setShowUpgrade(false)} style={{
               background: "transparent", border: "1px solid #E2E8F0",

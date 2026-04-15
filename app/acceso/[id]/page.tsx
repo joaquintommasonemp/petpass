@@ -41,11 +41,11 @@ export default function AccesoFamiliar() {
   const isGato = mascota?.breed?.toLowerCase().includes("gato");
 
   return (
-    <div style={{
+    <div className="family-access-page" style={{
       minHeight: "100vh", background: "#F4F6FB", display: "flex",
       alignItems: "center", justifyContent: "center", padding: 24,
     }}>
-      <div style={{
+      <div className="family-access-card" style={{
         background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 20,
         padding: 32, maxWidth: 360, width: "100%", textAlign: "center",
       }}>
@@ -64,7 +64,7 @@ export default function AccesoFamiliar() {
               Para unirte como familia, primero iniciá sesión en PetPass.
             </p>
             <button
-              onClick={() => router.push(`/login?redirect=/acceso/${mascotaId}`)}
+              onClick={() => router.push(`/login?next=/acceso/${mascotaId}`)}
               style={{
                 width: "100%", background: "linear-gradient(135deg, #2CB8AD, #229E94)",
                 color: "#fff", border: "none", borderRadius: 12, padding: 14,

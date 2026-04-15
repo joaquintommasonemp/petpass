@@ -1,23 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import Toast, { ToastType } from "@/components/Toast";
+import { PetAvatar, UiBadge, UiCard } from "@/components/ui";
 
-function Card({ children, style = {} }: any) {
+function Card({ children, style = {}, className = "" }: any) {
   return (
-    <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 16, marginBottom: 12, ...style }}>
+    <UiCard className={`history-card${className ? ` ${className}` : ""}`} style={style}>
       {children}
-    </div>
+    </UiCard>
   );
 }
 
 function Badge({ children, color = "#3B82F6" }: any) {
-  const border = "1px solid " + color + "44";
-  const bg = color + "22";
-  return (
-    <span style={{ background: bg, color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border }}>
-      {children}
-    </span>
-  );
+  return <UiBadge color={color}>{children}</UiBadge>;
 }
 
 function isDoc(h: any) {
@@ -36,14 +32,26 @@ function detectStudyType(fileName: string) {
   return "Documento";
 }
 
-const HIST_TABS = ["consultas", "vacunas", "turnos", "alimentacion", "documentos"];
+const HIST_TABS = ["consultas", "estudios", "vacunas", "turnos", "alimentacion"];
 const HIST_TAB_LABELS: Record<string, string> = {
   consultas: "Clinica",
+  estudios: "Estudios",
   vacunas: "Vacunas",
   turnos: "Turnos",
   alimentacion: "Alimento",
-  documentos: "Docs",
 };
+
+const STUDY_TYPES = [
+  "Radiografia",
+  "Ecografia",
+  "Laboratorio",
+  "Tomografia",
+  "Resonancia",
+  "Electrocardiograma",
+  "Biopsia",
+  "Receta",
+  "Otro",
+];
 
 export default function Historial() {
   const [mascotas, setMascotas] = useState<any[]>([]);
@@ -53,6 +61,7 @@ export default function Historial() {
   const [alimentacion, setAlimentacion] = useState<any[]>([]);
   const [estudioLinks, setEstudioLinks] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedStudyType, setSelectedStudyType] = useState("Otro");
   const [form, setForm] = useState({ date: "", vet: "", title: "", summary: "" });
   const [vacForm, setVacForm] = useState({ name: "", date: "", next_date: "", vet: "", notes: "" });
   const [citaForm, setCitaForm] = useState({ date: "", summary: "", vet: "" });
@@ -68,7 +77,17 @@ export default function Historial() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [recetas, setRecetas] = useState<string | null>(null);
   const [loadingRecetas, setLoadingRecetas] = useState(false);
+  const [searchConsultas, setSearchConsultas] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [shareDays, setShareDays] = useState(7);
+  const [shareLabel, setShareLabel] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string } | null>(null);
   const supabase = createClient();
+  const showToast = (message: string, type: ToastType = "success") => setToast({ message, type });
 
   useEffect(() => {
     async function load() {
@@ -175,7 +194,7 @@ export default function Historial() {
 
   async function addAlimentacion() {
     if (!mascota || (!alimentForm.marca && !alimentForm.tipo)) {
-      alert("Completa al menos la marca o el tipo de alimento");
+      showToast("Completá al menos la marca o el tipo de alimento", "error");
       return;
     }
     const authResult = await supabase.auth.getUser();
@@ -243,6 +262,27 @@ export default function Historial() {
     setLoadingRecetas(false);
   }
 
+  async function generarLinkCompartido() {
+    if (!mascota) return;
+    setShareLoading(true);
+    const sessionResult = await supabase.auth.getSession();
+    const token = sessionResult.data.session?.access_token;
+    const res = await fetch("/api/historial-compartido", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ mascota_id: mascota.id, days: shareDays, label: shareLabel || undefined }),
+    });
+    const data = await res.json();
+    if (data.id) {
+      const url = window.location.origin + "/historial/" + data.id;
+      setShareLink(url);
+      navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 3000);
+    }
+    setShareLoading(false);
+  }
+
   async function addEntry() {
     if (!form.title.trim() || !mascota) return;
     const insertResult = await supabase.from("historial").insert({ ...form, mascota_id: mascota.id }).select();
@@ -254,11 +294,29 @@ export default function Historial() {
     setAdding(false);
   }
 
+  async function deleteEntry(id: string) {
+    await supabase.from("historial").delete().eq("id", id);
+    setHistorial(prev => prev.filter((h: any) => h.id !== id));
+    setConfirmDelete(null);
+  }
+
+  async function deleteVacunaEntry(id: string) {
+    await supabase.from("vacunas").delete().eq("id", id);
+    setVacunas(prev => prev.filter((v: any) => v.id !== id));
+    setConfirmDelete(null);
+  }
+
+  async function deleteAlimentEntry(id: string) {
+    await supabase.from("alimentacion").delete().eq("id", id);
+    setAlimentacion(prev => prev.filter((a: any) => a.id !== id));
+    setConfirmDelete(null);
+  }
+
   async function handleFile(e: any) {
     const file = e.target.files && e.target.files[0];
     if (!file || !mascota) return;
     if (file.size > 10 * 1024 * 1024) {
-      alert("El archivo no puede superar los 10 MB");
+      showToast("El archivo no puede superar los 10 MB", "error");
       if (e.target) e.target.value = "";
       return;
     }
@@ -276,7 +334,7 @@ export default function Historial() {
     if (!error) {
       const entry = {
         mascota_id: mascota.id,
-        title: detectStudyType(file.name),
+        title: selectedStudyType,
         summary: file.name + "::" + path,
         date: new Date().toLocaleDateString("es-AR"),
         vet: "",
@@ -285,18 +343,19 @@ export default function Historial() {
       if (saved.data) {
         const d = saved.data;
         setHistorial(function(prev) { return [d[0], ...prev]; });
+        showToast("Documento subido correctamente", "success");
       } else {
         console.error("Insert error:", saved.error && saved.error.message);
-        alert("Archivo subido pero no se pudo registrar en el historial.");
+        showToast("Archivo subido pero no se pudo registrar en el historial", "warning");
       }
     } else {
       console.error("Upload error:", error.message);
       if (error.message.includes("Bucket not found")) {
-        alert("El bucket documentos no existe. Crealo en Supabase -> Storage.");
+        showToast("El bucket 'documentos' no existe en Supabase Storage", "error");
       } else if (error.message.includes("row-level security") || error.message.includes("policy")) {
-        alert("Sin permisos. Revisa las politicas del bucket documentos en Supabase -> Storage -> Policies.");
+        showToast("Sin permisos de subida. Revisá las políticas del bucket en Supabase", "error");
       } else {
-        alert("Error al subir: " + error.message);
+        showToast("Error al subir: " + error.message, "error");
       }
     }
     if (e.target) e.target.value = "";
@@ -317,42 +376,47 @@ export default function Historial() {
   function shareDoc(pathOrUrl: string, fileName: string) {
     const url = getPublicUrl(pathOrUrl);
     navigator.clipboard.writeText(url);
-    alert("Link de " + fileName + " copiado al portapapeles.");
+    showToast(`Link de "${fileName}" copiado`, "info");
   }
 
+  if (!mascota && mascotas.length === 0) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 0" }}>
+      <div className="skeleton" style={{ height: 80, borderRadius: 16 }} />
+      <div style={{ display: "flex", gap: 4 }}>
+        {[1,2,3,4,5].map(i => <div key={i} className="skeleton" style={{ flex: 1, height: 36, borderRadius: 10 }} />)}
+      </div>
+      {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 80, borderRadius: 16 }} />)}
+    </div>
+  );
+
   return (
-    <div>
+    <div className="history-page">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       {mascota && (
-        <div style={{
+        <div className="history-pet-card" style={{
           background: "#FFFFFF", border: "1px solid #B2E8E5", borderRadius: 16,
           padding: "14px 16px", marginBottom: mascotas.length > 1 ? 12 : 20,
           display: "flex", alignItems: "center", gap: 14,
         }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
-            background: "#E2E8F0", border: "2px solid #B2E8E5",
-            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
-          }}>
-            {mascota.photo_url
-              ? <img src={mascota.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : <span style={{ fontSize: 26 }}>{mascota.breed && mascota.breed.toLowerCase().includes("gato") ? "🐱" : "🐕"}</span>
-            }
-          </div>
+          <PetAvatar src={mascota.photo_url} breed={mascota.breed} size={52} fallbackFontSize={26} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 17, fontFamily: "Georgia, serif" }}>{mascota.name}</div>
             <div style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>
               {mascota.breed} | {mascota.age} | {mascota.sex}
             </div>
           </div>
-          <span style={{
+          <button onClick={() => { setShowShareModal(true); setShareLink(null); setShareLabel(""); setShareDays(7); }} style={{
             background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
-            borderRadius: 20, padding: "3px 10px", fontSize: 10, fontWeight: 800,
-          }}>Historia clinica</span>
+            borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 800,
+            cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
+          }}>
+            Compartir
+          </button>
         </div>
       )}
 
       {mascotas.length > 1 && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
+        <div className="history-pet-switcher" style={{ display: "flex", gap: 8, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
           {mascotas.map(function(m) {
             const isSelected = mascota && mascota.id === m.id;
             return (
@@ -364,10 +428,7 @@ export default function Historial() {
                 fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 6,
               }}>
-                {m.photo_url
-                  ? <img src={m.photo_url} style={{ width: 18, height: 18, borderRadius: "50%", objectFit: "cover" }} />
-                  : <span>{m.breed && m.breed.toLowerCase().includes("gato") ? "🐱" : "🐕"}</span>
-                }
+                <PetAvatar src={m.photo_url} breed={m.breed} size={18} fallbackFontSize={13} style={{ border: "none" }} />
                 {m.name}
               </button>
             );
@@ -375,26 +436,52 @@ export default function Historial() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4 }}>
+      <div className="history-tabs" style={{ display: "flex", gap: 4, marginBottom: 16, background: "#F4F6FB", borderRadius: 12, padding: 4, overflowX: "auto" }}>
         {HIST_TABS.map(function(key) {
+          const counts: Record<string, number> = {
+            consultas: historial.filter(function(h: any) { return !isDoc(h) && h.title !== "📅 Cita"; }).length,
+            estudios: historial.filter(function(h: any) { return isDoc(h); }).length,
+            vacunas: vacunas.length,
+            turnos: historial.filter(function(h: any) { return h.title === "📅 Cita"; }).length,
+            alimentacion: alimentacion.length,
+          };
+          const count = counts[key] || 0;
           return (
             <button key={key} onClick={function() { setHistTab(key); }} style={{
-              flex: 1, border: "none", borderRadius: 10, padding: "7px 4px",
+              flex: "0 0 auto", border: "none", borderRadius: 10, padding: "7px 10px",
               background: histTab === key ? "#E2E8F0" : "transparent",
               color: histTab === key ? "#1C3557" : "#64748B",
               fontWeight: 700, fontSize: 11, cursor: "pointer",
-            }}>{HIST_TAB_LABELS[key]}</button>
+              display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap",
+            }}>
+              {HIST_TAB_LABELS[key]}
+              {count > 0 && (
+                <span style={{
+                  background: histTab === key ? "#2CB8AD" : "#CBD5E1",
+                  color: "#fff", borderRadius: 20, padding: "1px 5px",
+                  fontSize: 10, fontWeight: 800, lineHeight: 1.4,
+                }}>{count}</span>
+              )}
+            </button>
           );
         })}
       </div>
 
       {histTab === "consultas" && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800 }}>Consultas</h2>
-          <button onClick={function() { setAdding(!adding); }} style={{
-            background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
-            borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
-          }}>+ Agregar</button>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800 }}>Consultas</h2>
+            <button onClick={function() { setAdding(!adding); }} style={{
+              background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
+              borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}>+ Agregar</button>
+          </div>
+          <input
+            placeholder="Buscar por título, veterinario o descripción..."
+            value={searchConsultas}
+            onChange={e => setSearchConsultas(e.target.value)}
+            style={{ width: "100%", fontSize: 13 }}
+          />
         </div>
       )}
 
@@ -409,26 +496,68 @@ export default function Historial() {
               onChange={function(e) { setForm(function(f) { return { ...f, summary: e.target.value }; }); }}
               style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
             <button onClick={addEntry} style={{
-              background: "#2CB8AD", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800,
+              background: "#2CB8AD", color: "#fff", border: "none", borderRadius: 10, padding: 12, fontWeight: 800,
             }}>Guardar</button>
           </div>
         </Card>
       )}
 
-      {histTab === "consultas" && historial.filter(function(h: any) { return !isDoc(h) && h.title !== "📅 Cita"; }).length === 0 && !adding && (
-        <Card style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🏥</div>
-          <p style={{ color: "#64748B", fontSize: 13 }}>Todavia no hay consultas registradas. Agrega la primera.</p>
-        </Card>
-      )}
+      {histTab === "consultas" && (() => {
+        const q = searchConsultas.toLowerCase();
+        const consultasFiltradas = historial.filter(function(h: any) {
+          if (isDoc(h) || h.title === "📅 Cita") return false;
+          if (!q) return true;
+          return (
+            h.title?.toLowerCase().includes(q) ||
+            h.vet?.toLowerCase().includes(q) ||
+            h.summary?.toLowerCase().includes(q) ||
+            h.date?.toLowerCase().includes(q)
+          );
+        });
+        if (consultasFiltradas.length === 0 && !adding) return (
+          <Card style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🏥</div>
+            <p style={{ color: "#64748B", fontSize: 13 }}>
+              {q ? `Sin resultados para "${searchConsultas}".` : "Todavía no hay consultas registradas. Agregá la primera."}
+            </p>
+          </Card>
+        );
+        return null;
+      })()}
 
-      {histTab === "consultas" && historial.filter(function(h: any) { return !isDoc(h) && h.title !== "📅 Cita"; }).map(function(h: any, i: number) {
+      {histTab === "consultas" && historial.filter(function(h: any) {
+        if (isDoc(h) || h.title === "📅 Cita") return false;
+        const q = searchConsultas.toLowerCase();
+        if (!q) return true;
+        return (
+          h.title?.toLowerCase().includes(q) ||
+          h.vet?.toLowerCase().includes(q) ||
+          h.summary?.toLowerCase().includes(q) ||
+          h.date?.toLowerCase().includes(q)
+        );
+      }).map(function(h: any, i: number) {
+        const isDeleting = confirmDelete?.id === h.id;
         return (
           <Card key={i}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontWeight: 700, fontSize: 14 }}>{h.title}</span>
-              {h.date && <Badge>{h.date}</Badge>}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>{h.title}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                {h.date && <Badge>{h.date}</Badge>}
+                <button onClick={() => setConfirmDelete(isDeleting ? null : { type: "consulta", id: h.id })} style={{
+                  background: "none", border: "none", color: "#CBD5E1",
+                  fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                }}>🗑</button>
+              </div>
             </div>
+            {isDeleting && (
+              <div style={{ background: "#FFF0F0", border: "1px solid #FECACA", borderRadius: 8, padding: "8px 12px", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "#EF4444", flex: 1 }}>¿Eliminar esta consulta?</span>
+                <button onClick={() => deleteEntry(h.id)} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Sí</button>
+                <button onClick={() => setConfirmDelete(null)} style={{ background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>No</button>
+              </div>
+            )}
             {h.vet && <div style={{ color: "#64748B", fontSize: 12, marginBottom: 4 }}>{h.vet}</div>}
             {h.summary && <div style={{ fontSize: 13, lineHeight: 1.5 }}>{h.summary}</div>}
           </Card>
@@ -470,7 +599,7 @@ export default function Historial() {
                 <input placeholder="Notas (lote, marca, reaccion...)" value={vacForm.notes}
                   onChange={function(e) { setVacForm(function(f) { return { ...f, notes: e.target.value }; }); }} />
                 <button onClick={addVacuna} style={{
-                  background: "#3B82F6", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                  background: "#3B82F6", color: "#fff", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
                 }}>Guardar</button>
               </div>
             </Card>
@@ -479,7 +608,7 @@ export default function Historial() {
           {vacunas.length === 0 && !addingVac && (
             <Card style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>💉</div>
-              <p style={{ color: "#64748B", fontSize: 13 }}>No hay vacunas registradas. Agrega la primera.</p>
+              <p style={{ color: "#64748B", fontSize: 13 }}>No hay vacunas registradas. Agregá la primera.</p>
             </Card>
           )}
 
@@ -487,17 +616,31 @@ export default function Historial() {
             const today = new Date().toISOString().slice(0, 10);
             const vencida = v.next_date && v.next_date < today;
             const proxima = v.next_date && !vencida;
+            const isDeletingVac = confirmDelete?.id === v.id;
             return (
               <Card key={i} style={{ border: "1px solid #EFF6FF" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                   <div style={{ fontWeight: 800, fontSize: 14 }}>💉 {v.name}</div>
-                  {vencida
-                    ? <span style={{ background: "#FFF0F0", color: "#EF4444", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>VENCIDA</span>
-                    : proxima
-                    ? <span style={{ background: "#E5F7F6", color: "#2CB8AD", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>Al dia</span>
-                    : null
-                  }
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {vencida
+                      ? <span style={{ background: "#FFF0F0", color: "#EF4444", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>VENCIDA</span>
+                      : proxima
+                      ? <span style={{ background: "#E5F7F6", color: "#2CB8AD", borderRadius: 20, padding: "2px 10px", fontSize: 10, fontWeight: 800 }}>Al dia</span>
+                      : null
+                    }
+                    <button onClick={() => setConfirmDelete(isDeletingVac ? null : { type: "vacuna", id: v.id })} style={{
+                      background: "none", border: "none", color: "#CBD5E1",
+                      fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                    }}>🗑</button>
+                  </div>
                 </div>
+                {isDeletingVac && (
+                  <div style={{ background: "#FFF0F0", border: "1px solid #FECACA", borderRadius: 8, padding: "8px 12px", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "#EF4444", flex: 1 }}>¿Eliminar esta vacuna?</span>
+                    <button onClick={() => deleteVacunaEntry(v.id)} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Sí</button>
+                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>No</button>
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
                   {v.date && (
                     <span style={{ background: "#EFF6FF", color: "#3B82F6", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
@@ -543,7 +686,7 @@ export default function Historial() {
                 <input placeholder="Veterinario / Clinica" value={citaForm.vet}
                   onChange={function(e) { setCitaForm(function(f) { return { ...f, vet: e.target.value }; }); }} />
                 <button onClick={addCita} style={{
-                  background: "#8B5CF6", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                  background: "#8B5CF6", color: "#fff", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
                 }}>Guardar turno</button>
               </div>
             </Card>
@@ -601,7 +744,7 @@ export default function Historial() {
                   onChange={function(e) { setAlimentForm(function(f) { return { ...f, notas: e.target.value }; }); }}
                   style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", resize: "none" }} />
                 <button onClick={addAlimentacion} style={{
-                  background: "#F97316", color: "#000", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
+                  background: "#F97316", color: "#fff", border: "none", borderRadius: 10, padding: 12, fontWeight: 800, cursor: "pointer",
                 }}>Guardar</button>
               </div>
             </Card>
@@ -615,6 +758,7 @@ export default function Historial() {
           )}
 
           {alimentacion.map(function(a: any, i: number) {
+            const isDeletingAlim = confirmDelete?.id === a.id;
             return (
               <Card key={i} style={{ border: "1px solid #FFF7ED" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -622,8 +766,21 @@ export default function Historial() {
                     <div style={{ fontWeight: 800, fontSize: 15 }}>{a.marca || "Sin marca"}</div>
                     <div style={{ color: "#F97316", fontSize: 12, fontWeight: 700, marginTop: 2 }}>{a.tipo}</div>
                   </div>
-                  <span style={{ fontSize: 11, color: "#64748B" }}>{a.fecha}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 11, color: "#64748B" }}>{a.fecha}</span>
+                    <button onClick={() => setConfirmDelete(isDeletingAlim ? null : { type: "aliment", id: a.id })} style={{
+                      background: "none", border: "none", color: "#CBD5E1",
+                      fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                    }}>🗑</button>
+                  </div>
                 </div>
+                {isDeletingAlim && (
+                  <div style={{ background: "#FFF0F0", border: "1px solid #FECACA", borderRadius: 8, padding: "8px 12px", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "#EF4444", flex: 1 }}>¿Eliminar este registro?</span>
+                    <button onClick={() => deleteAlimentEntry(a.id)} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Sí</button>
+                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#E2E8F0", color: "#64748B", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>No</button>
+                  </div>
+                )}
                 {a.cantidad && (
                   <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
                     <span style={{ background: "#FFF7ED", color: "#F97316", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
@@ -669,15 +826,25 @@ export default function Historial() {
         </div>
       )}
 
-      {histTab === "documentos" && (
+      {histTab === "estudios" && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>
-            Subir desde tu dispositivo
+            Subir estudio
           </div>
-          <Card style={{ textAlign: "center", border: "2px dashed #E2E8F0" }}>
-            <label style={{ cursor: "pointer", display: "block" }}>
+          <Card style={{ border: "2px dashed #E2E8F0" }}>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 6 }}>Tipo de estudio</label>
+              <select
+                value={selectedStudyType}
+                onChange={function(e) { setSelectedStudyType(e.target.value); }}
+                style={{ width: "100%", background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13, fontWeight: 700 }}
+              >
+                {STUDY_TYPES.map(function(t) { return <option key={t} value={t}>{t}</option>; })}
+              </select>
+            </div>
+            <label style={{ cursor: "pointer", display: "block", textAlign: "center" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>📎</div>
-              <div style={{ color: "#64748B", fontSize: 13, marginBottom: 10 }}>Analisis, radiografias, recetas, ecografias</div>
+              <div style={{ color: "#64748B", fontSize: 13, marginBottom: 10 }}>PDF, imagen o documento (max 10 MB)</div>
               <div style={{
                 background: "#E5F7F6", color: "#2CB8AD", border: "1px solid #B2E8E5",
                 borderRadius: 10, padding: "8px 20px", fontSize: 13, fontWeight: 700, display: "inline-block",
@@ -722,7 +889,7 @@ export default function Historial() {
               style={{ marginBottom: 10 }}
             />
             <button onClick={crearEstudioLink} disabled={creatingLink} style={{
-              width: "100%", background: "#3B82F6", color: "#000", border: "none",
+              width: "100%", background: "#3B82F6", color: "#fff", border: "none",
               borderRadius: 10, padding: 12, fontWeight: 800, fontSize: 14, cursor: "pointer",
               opacity: creatingLink ? 0.6 : 1,
             }}>{creatingLink ? "Generando..." : "Generar link y copiar"}</button>
@@ -756,7 +923,7 @@ export default function Historial() {
 
           {historial.filter(function(h: any) { return isDoc(h); }).length > 0 && (
             <div style={{ fontSize: 11, fontWeight: 800, color: "#64748B", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10, marginTop: 8 }}>
-              Documentos guardados
+              Estudios guardados
             </div>
           )}
           {historial.filter(function(h: any) { return isDoc(h); }).map(function(h: any, i: number) {
@@ -808,6 +975,98 @@ export default function Historial() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal: Compartir con veterinario */}
+      {showShareModal && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000, padding: 20,
+        }} onClick={() => setShowShareModal(false)}>
+          <div style={{
+            background: "#fff", borderRadius: 20, padding: "28px 24px",
+            width: "100%", maxWidth: 400,
+            boxShadow: "0 8px 48px rgba(28,53,87,0.18)",
+          }} onClick={e => e.stopPropagation()}>
+            {shareLink ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 44, marginBottom: 12 }}>🔗</div>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#1C3557", marginBottom: 8 }}>
+                  Link generado
+                </h3>
+                <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
+                  Válido por {shareDays} día{shareDays > 1 ? "s" : ""}. Compartilo con tu veterinario.
+                </p>
+                <div style={{
+                  background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10,
+                  padding: "10px 14px", fontSize: 12, color: "#1C3557",
+                  wordBreak: "break-all", marginBottom: 14, textAlign: "left",
+                }}>
+                  {shareLink}
+                </div>
+                <button onClick={() => { navigator.clipboard.writeText(shareLink); setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); }} style={{
+                  width: "100%", background: shareCopied ? "#E5F7F6" : "linear-gradient(135deg,#2CB8AD,#229E94)",
+                  color: shareCopied ? "#2CB8AD" : "#fff", border: shareCopied ? "1px solid #B2E8E5" : "none",
+                  borderRadius: 12, padding: "12px 20px", fontWeight: 900, fontSize: 14, cursor: "pointer", marginBottom: 10,
+                }}>
+                  {shareCopied ? "✅ Link copiado" : "Copiar link"}
+                </button>
+                <button onClick={() => setShowShareModal(false)} style={{
+                  width: "100%", background: "none", border: "none",
+                  color: "#94A3B8", fontSize: 13, cursor: "pointer",
+                }}>Cerrar</button>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#1C3557", marginBottom: 6 }}>
+                  Compartir historial con el veterinario
+                </h3>
+                <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
+                  Generás un link de solo lectura con el historial completo de <strong>{mascota?.name}</strong>.
+                  El veterinario lo puede abrir sin crear cuenta.
+                </p>
+
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#64748B", marginBottom: 8 }}>Duración del link</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[1, 7, 30].map(d => (
+                      <button key={d} onClick={() => setShareDays(d)} style={{
+                        flex: 1, background: shareDays === d ? "#E5F7F6" : "#F4F6FB",
+                        border: `1px solid ${shareDays === d ? "#2CB8AD" : "#E2E8F0"}`,
+                        borderRadius: 10, padding: "8px 4px", fontSize: 12,
+                        fontWeight: 800, color: shareDays === d ? "#2CB8AD" : "#64748B",
+                        cursor: "pointer",
+                      }}>
+                        {d === 1 ? "1 día" : d === 7 ? "7 días" : "30 días"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <input
+                  placeholder="Nota para el veterinario (opcional)"
+                  value={shareLabel}
+                  onChange={e => setShareLabel(e.target.value)}
+                  style={{ marginBottom: 16 }}
+                />
+
+                <button onClick={generarLinkCompartido} disabled={shareLoading} style={{
+                  width: "100%", background: shareLoading ? "#E2E8F0" : "linear-gradient(135deg,#2CB8AD,#229E94)",
+                  color: shareLoading ? "#64748B" : "#fff", border: "none",
+                  borderRadius: 12, padding: "13px 20px", fontWeight: 900, fontSize: 14,
+                  cursor: shareLoading ? "not-allowed" : "pointer", marginBottom: 10,
+                }}>
+                  {shareLoading ? "Generando..." : "Generar link"}
+                </button>
+                <button onClick={() => setShowShareModal(false)} style={{
+                  width: "100%", background: "none", border: "none",
+                  color: "#94A3B8", fontSize: 13, cursor: "pointer",
+                }}>Cancelar</button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

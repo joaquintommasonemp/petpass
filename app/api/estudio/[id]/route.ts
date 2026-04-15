@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const admin = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  (process.env.SUPABASE_SERVICE_ROLE_KEY || "").replace(/\s+/g, ""),
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: link } = await db.from("estudio_links").select("*").eq("id", params.id).single();
   if (!link || !link.active) return NextResponse.json({ error: "Link inválido" }, { status: 404 });
 
-  const { vetName, note, fileBase64, fileName, fileType } = await req.json();
+  const { vetName, note, fileBase64, fileName, fileType, studyType } = await req.json();
   if (!fileBase64 || !fileName) return NextResponse.json({ error: "Falta el archivo" }, { status: 400 });
 
   // Limit: ~10 MB base64
@@ -105,8 +105,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
   }
 
-  // Detectar tipo de estudio
-  const studyType = detectStudyType(fileName, aiSummary);
+  // Usar tipo elegido por el vet, o auto-detectar como fallback
+  const resolvedStudyType = studyType && studyType !== "Otro" ? studyType : detectStudyType(fileName, aiSummary);
 
   // Guardar en historial (service role bypasa RLS)
   const summaryParts = [`${fileName}::${publicUrl}`];
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   await db.from("historial").insert({
     mascota_id: link.mascota_id,
-    title: studyType,
+    title: resolvedStudyType,
     summary: summaryParts.join("||"),
     date: new Date().toLocaleDateString("es-AR"),
     vet: vetName || "Veterinaria",

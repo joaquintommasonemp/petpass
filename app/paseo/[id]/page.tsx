@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { timeAgo } from "@/lib/utils";
 
 export default function PaseoPublico() {
@@ -85,8 +86,23 @@ export default function PaseoPublico() {
   }
 
   if (loading) return (
-    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
-      <div style={{ color: "#64748B" }}>Cargando...</div>
+    <div style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
+      <div style={{ background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)", padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0" }}>
+        <div className="skeleton" style={{ width: 90, height: 44, borderRadius: 8, marginBottom: 16 }} />
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <div className="skeleton" style={{ width: 72, height: 72, borderRadius: "50%", flexShrink: 0 }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="skeleton" style={{ height: 26, width: "50%" }} />
+            <div className="skeleton" style={{ height: 13, width: "65%" }} />
+            <div className="skeleton" style={{ height: 20, width: 90, borderRadius: 20 }} />
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "20px 20px 60px" }}>
+        <div className="skeleton" style={{ height: 200, borderRadius: 16, marginBottom: 20 }} />
+        <div className="skeleton" style={{ height: 100, borderRadius: 14, marginBottom: 10 }} />
+        <div className="skeleton" style={{ height: 100, borderRadius: 14 }} />
+      </div>
     </div>
   );
 
@@ -101,15 +117,15 @@ export default function PaseoPublico() {
   const isGato = mascota?.breed?.toLowerCase().includes("gato");
 
   return (
-    <main style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
+    <main className="caregiver-public-page" style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
 
       {/* Header */}
-      <div style={{
+      <div className="caregiver-public-hero" style={{
         background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)",
         padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
         <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 16 }}>
-          <img src="/logo.png" alt="PetPass" style={{ height: 32, width: "auto", objectFit: "contain" }} />
+          <Image src="/logo-brand-official.png" alt="PetPass" width={160} height={44} priority style={{ height: 44, width: "auto", objectFit: "contain" }} />
         </Link>
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
@@ -142,10 +158,10 @@ export default function PaseoPublico() {
         )}
       </div>
 
-      <div style={{ padding: "20px 20px 60px" }}>
+      <div className="caregiver-public-content" style={{ padding: "20px 20px 60px" }}>
 
         {/* Formulario de actualización */}
-        <div style={{ background: "#FFFFFF", border: "1px solid #2CB8AD44", borderRadius: 16, padding: 16, marginBottom: 20 }}>
+        <div className="caregiver-public-form" style={{ background: "#FFFFFF", border: "1px solid #2CB8AD44", borderRadius: 16, padding: 16, marginBottom: 20 }}>
           <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: "#2CB8AD" }}>
             📢 Enviá una novedad al dueño
           </div>
@@ -203,7 +219,7 @@ export default function PaseoPublico() {
               Novedades ({updates.length})
             </div>
             {updates.map((u: any, i: number) => (
-              <div key={i} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
+              <div className="caregiver-public-update" key={i} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <span style={{ fontWeight: 700, fontSize: 13 }}>👤 {u.author_name || "Cuidador"}</span>
                   <span style={{ fontSize: 11, color: "#64748B" }}>{timeAgo(u.created_at)}</span>

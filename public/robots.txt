@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /carnet/
+Allow: /perdida/
+Allow: /paseo/
+Allow: /estudio/
+Allow: /historial/
+
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /mascota/editar/
+Disallow: /mascota/nueva
+Disallow: /onboarding
+Disallow: /perfil
+Disallow: /premium/
+Disallow: /login
+Disallow: /registro
+Disallow: /reset-password
+
+Sitemap: https://mipetpass.com/sitemap.xml

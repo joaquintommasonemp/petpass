@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SERVICE_ROLE_KEY || "").replace(/\s+/g, ""),
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
@@ -20,55 +20,34 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { id, accion, tipo } = body;
 
-  if (!id || !accion) return NextResponse.json({ error: "Parametros invalidos" }, { status: 400 });
+  if (!id || !accion || !tipo) return NextResponse.json({ error: "Parametros invalidos" }, { status: 400 });
+
+  const tabla = tipo === "premium" ? "solicitudes_premium" : "solicitudes_descuento";
+  const now = new Date().toISOString();
 
   if (accion === "rechazar") {
-    await admin.from("comunidad_mensajes").update({ mascota_name: "rechazado" }).eq("id", id);
+    await admin.from(tabla).update({ estado: "rechazado", updated_at: now }).eq("id", id);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (accion === "revocar") {
+    if (tipo === "premium") {
+      const { data: sol } = await admin.from("solicitudes_premium").select("user_id").eq("id", id).single();
+      if (sol?.user_id) {
+        await admin.from("profiles").update({ is_premium: false }).eq("id", sol.user_id);
+      }
+    }
+    await admin.from(tabla).update({ estado: "rechazado", updated_at: now }).eq("id", id);
     return NextResponse.json({ ok: true });
   }
 
   if (accion === "aprobar") {
-    const { data: sol } = await admin.from("comunidad_mensajes").select("*").eq("id", id).single();
-    if (!sol) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
-
-    let datos: any;
-    try {
-      datos = JSON.parse(sol.message);
-    } catch {
-      return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
+    if (tipo === "premium") {
+      const { data: sol } = await admin.from("solicitudes_premium").select("user_id").eq("id", id).single();
+      if (!sol) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+      await admin.from("profiles").update({ is_premium: true }).eq("id", sol.user_id);
     }
-
-    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const tipoSol = tipo || (sol.author_name === "SOLICITUD:profesional" ? "profesional" : "descuento");
-    const jsonFile = tipoSol === "profesional" ? "profesionales.json" : "descuentos.json";
-    const storageUrl = SUPABASE_URL + "/storage/v1/object/public/comunidad/" + jsonFile;
-
-    let current: any[] = [];
-    try {
-      const res = await fetch(storageUrl);
-      if (res.ok) current = await res.json();
-    } catch {}
-
-    if (!Array.isArray(current)) current = [];
-    current.push({ ...datos, active: true });
-
-    const bodyBlob = JSON.stringify(current);
-    const putRes = await fetch(SUPABASE_URL + "/storage/v1/object/comunidad/" + jsonFile, {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + SERVICE_KEY,
-        "Content-Type": "application/json",
-        "x-upsert": "true",
-      },
-      body: bodyBlob,
-    });
-
-    if (!putRes.ok) {
-      return NextResponse.json({ error: "Error al guardar en storage" }, { status: 500 });
-    }
-
-    await admin.from("comunidad_mensajes").update({ mascota_name: "aprobado" }).eq("id", id);
+    await admin.from(tabla).update({ estado: "aprobado", updated_at: now }).eq("id", id);
     return NextResponse.json({ ok: true });
   }
 

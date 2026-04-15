@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function EstudioPublico() {
   const params = useParams();
@@ -12,11 +13,13 @@ export default function EstudioPublico() {
     typeof window !== "undefined" ? localStorage.getItem("petpass_vet_nombre") || "" : ""
   );
   const [note, setNote] = useState("");
+  const [studyType, setStudyType] = useState("Otro");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,14 +56,14 @@ export default function EstudioPublico() {
       const res = await fetch(`/api/estudio/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vetName, note, fileBase64: base64, fileName: file.name, fileType: file.type }),
+        body: JSON.stringify({ vetName, note, fileBase64: base64, fileName: file.name, fileType: file.type, studyType }),
       });
       const data = await res.json();
       if (data.ok) {
         setSent(true);
         setAiSummary(data.aiSummary || null);
       } else {
-        alert("Error al subir: " + data.error);
+        setUploadError(data.error || "Error al subir el archivo. Intentá de nuevo.");
       }
       setSending(false);
     };
@@ -68,8 +71,20 @@ export default function EstudioPublico() {
   }
 
   if (!info && !notFound) return (
-    <div style={{ maxWidth: 440, margin: "0 auto", padding: "60px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
-      <div style={{ color: "#64748B" }}>Cargando...</div>
+    <div style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
+      <div style={{ background: "linear-gradient(160deg, #EEF2FF 0%, #F4F6FB 70%)", padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0" }}>
+        <div className="skeleton" style={{ width: 90, height: 44, borderRadius: 8, marginBottom: 16 }} />
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <div className="skeleton" style={{ width: 64, height: 64, borderRadius: "50%", flexShrink: 0 }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="skeleton" style={{ height: 24, width: "55%" }} />
+            <div className="skeleton" style={{ height: 14, width: "70%" }} />
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "20px" }}>
+        <div className="skeleton" style={{ height: 280, borderRadius: 16 }} />
+      </div>
     </div>
   );
 
@@ -85,7 +100,7 @@ export default function EstudioPublico() {
   const isGato = mascota?.breed?.toLowerCase().includes("gato");
 
   if (sent) return (
-    <div style={{ maxWidth: 440, margin: "0 auto", padding: "40px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
+    <div className="study-public-page study-public-success-page" style={{ maxWidth: 440, margin: "0 auto", padding: "40px 24px", textAlign: "center", background: "#F4F6FB", minHeight: "100vh" }}>
       <div style={{ fontSize: 56, marginBottom: 16 }}>✅</div>
       <h2 style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>¡Estudio enviado!</h2>
       <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>
@@ -108,15 +123,15 @@ export default function EstudioPublico() {
   );
 
   return (
-    <main style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
+    <main className="study-public-page" style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
 
       {/* Header */}
-      <div style={{
+      <div className="study-public-hero" style={{
         background: "linear-gradient(160deg, #EEF2FF 0%, #F4F6FB 70%)",
         padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
         <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 16 }}>
-          <img src="/logo.png" alt="PetPass" style={{ height: 32, width: "auto", objectFit: "contain" }} />
+          <Image src="/logo-brand-official.png" alt="PetPass" width={160} height={44} priority style={{ height: 44, width: "auto", objectFit: "contain" }} />
         </Link>
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
@@ -146,9 +161,9 @@ export default function EstudioPublico() {
         )}
       </div>
 
-      <div style={{ padding: "20px 20px 60px" }}>
+      <div className="study-public-content" style={{ padding: "20px 20px 60px" }}>
 
-        <div style={{ background: "#FFFFFF", border: "1px solid #60a5fa44", borderRadius: 16, padding: 16 }}>
+        <div className="study-public-form" style={{ background: "#FFFFFF", border: "1px solid #60a5fa44", borderRadius: 16, padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 15, color: "#60a5fa", marginBottom: 16 }}>
             📤 Subir estudio o resultado
           </div>
@@ -159,6 +174,15 @@ export default function EstudioPublico() {
               value={vetName}
               onChange={e => setVetName(e.target.value)}
             />
+            <select
+              value={studyType}
+              onChange={e => setStudyType(e.target.value)}
+              style={{ background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: "#1C3557", fontSize: 13, fontWeight: 700 }}
+            >
+              {["Radiografia","Ecografia","Laboratorio","Tomografia","Resonancia","Electrocardiograma","Biopsia","Receta","Otro"].map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
             <textarea
               placeholder="Notas o indicaciones del estudio (ej: Resultados dentro de los valores normales, repetir en 6 meses...)"
               value={note}
@@ -198,8 +222,13 @@ export default function EstudioPublico() {
             )}
             <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: "none" }} onChange={handleFile} />
 
+            {uploadError && (
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", color: "#EF4444", fontSize: 12 }}>
+                ❌ {uploadError}
+              </div>
+            )}
             {file && (
-              <button onClick={handleSend} disabled={sending} style={{
+              <button onClick={() => { setUploadError(null); handleSend(); }} disabled={sending} style={{
                 background: "linear-gradient(135deg, #60a5fa, #3b82f6)",
                 color: "#fff", border: "none", borderRadius: 12, padding: 14,
                 fontWeight: 900, fontSize: 15, cursor: "pointer",

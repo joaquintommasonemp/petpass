@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import Link from "next/link";
 import { timeAgo } from "@/lib/utils";
+import { EmptyState, LoadingState, PetAvatar, UiBadge, UiMiniButton } from "@/components/ui";
 
 export default function PanelCuidador() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -38,34 +39,34 @@ export default function PanelCuidador() {
   const inactive = sessions.filter(s => !s.active);
 
   return (
-    <main style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
-
-      {/* Header */}
-      <div style={{
+    <main className="caregiver-panel-page" style={{ maxWidth: 440, margin: "0 auto", background: "#F4F6FB", minHeight: "100vh" }}>
+      <div className="caregiver-panel-hero" style={{
         background: "linear-gradient(160deg, #E5F7F6 0%, #F4F6FB 70%)",
         padding: "24px 20px 20px", borderBottom: "1px solid #E2E8F0",
       }}>
         <Link href="/" style={{ display: "inline-block", textDecoration: "none", marginBottom: 16 }}>
-          <img src="/logo.png" alt="PetPass" style={{ height: 32, width: "auto", objectFit: "contain" }} />
+          <img src="/logo-brand-official.png" alt="PetPass" style={{ height: 44, width: "auto", objectFit: "contain" }} />
         </Link>
         <h1 style={{ fontSize: 22, fontWeight: 900 }}>Panel del cuidador</h1>
-        <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Todas las sesiones activas que tenés asignadas</p>
+        <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Todas las sesiones activas que ten&eacute;s asignadas</p>
       </div>
 
-      <div style={{ padding: "20px 20px 60px" }}>
-
+      <div className="caregiver-panel-content" style={{ padding: "20px 20px 60px" }}>
         {loading && (
-          <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Cargando...</div>
+          <LoadingState
+            title="Cargando sesiones"
+            description="Estamos preparando tus sesiones activas y recientes."
+            style={{ padding: "36px 18px" }}
+          />
         )}
 
         {!loading && sessions.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🐕</div>
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Sin sesiones registradas</div>
-            <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6 }}>
-              Cuando el dueño te comparta un link de paseo,<br />va a aparecer acá automáticamente.
-            </p>
-          </div>
+          <EmptyState
+            icon={<span aria-hidden="true">&#128062;</span>}
+            title="Sin sesiones registradas"
+            description={<>Cuando el due&ntilde;o te comparta un link de paseo,<br />va a aparecer ac&aacute; autom&aacute;ticamente.</>}
+            style={{ padding: "40px 0" }}
+          />
         )}
 
         {active.length > 0 && (
@@ -75,35 +76,27 @@ export default function PanelCuidador() {
             </div>
             {active.map(s => (
               <Link key={s.id} href={`/paseo/${s.id}`} style={{ textDecoration: "none" }}>
-                <div style={{ background: "#FFFFFF", border: "1px solid #2CB8AD33", borderRadius: 16, padding: 16, marginBottom: 10 }}>
+                <div className="caregiver-panel-card" style={{ background: "#FFFFFF", border: "1px solid #2CB8AD33", borderRadius: 16, padding: 16, marginBottom: 10 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: s.lastUpdate ? 10 : 0 }}>
-                    <div style={{
-                      width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
-                      background: "#E2E8F0", border: "2px solid #2CB8AD44",
-                      display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
-                    }}>
-                      {s.mascota?.photo_url
-                        ? <img src={s.mascota.photo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        : <span style={{ fontSize: 26 }}>{s.mascota?.breed?.toLowerCase().includes("gato") ? "🐱" : "🐕"}</span>}
-                    </div>
+                    <PetAvatar src={s.mascota?.photo_url} breed={s.mascota?.breed} size={52} style={{ border: "2px solid #2CB8AD44" }} fallbackFontSize={26} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557" }}>{s.mascota?.name || "Mascota"}</div>
                       <div style={{ color: "#64748B", fontSize: 12 }}>{s.mascota?.breed}</div>
                     </div>
-                    <span style={{ background: "#2CB8AD22", color: "#2CB8AD", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700, border: "1px solid #2CB8AD44" }}>Activa</span>
+                    <UiBadge color="#2CB8AD">Activa</UiBadge>
                   </div>
                   {s.notes && (
                     <div style={{ background: "#F4F6FB", borderRadius: 10, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#64748B" }}>
-                      📋 {s.notes}
+                      Nota: {s.notes}
                     </div>
                   )}
                   {s.lastUpdate && (
                     <div style={{ background: "#E5F7F6", borderRadius: 10, padding: "8px 12px", border: "1px solid #2CB8AD22" }}>
-                      <div style={{ fontSize: 11, color: "#2CB8AD", fontWeight: 700, marginBottom: 2 }}>Última novedad · {timeAgo(s.lastUpdate.created_at)}</div>
+                      <div style={{ fontSize: 11, color: "#2CB8AD", fontWeight: 700, marginBottom: 2 }}>&Uacute;ltima novedad &middot; {timeAgo(s.lastUpdate.created_at)}</div>
                       <div style={{ fontSize: 12, color: "#1C3557" }}>{s.lastUpdate.message}</div>
                     </div>
                   )}
-                  <div style={{ marginTop: 10, fontSize: 12, color: "#2CB8AD", fontWeight: 700 }}>Enviá una novedad →</div>
+                  <div style={{ marginTop: 10, fontSize: 12, color: "#2CB8AD", fontWeight: 700 }}>Envi&aacute; una novedad &rarr;</div>
                 </div>
               </Link>
             ))}
@@ -116,22 +109,23 @@ export default function PanelCuidador() {
               Sesiones finalizadas
             </div>
             {inactive.map(s => (
-              <div key={s.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "12px 16px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="caregiver-panel-card caregiver-panel-card-inactive" key={s.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "12px 16px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 14, color: "#1C3557" }}>{s.mascota?.name || "Mascota"}</div>
                   <div style={{ color: "#64748B", fontSize: 12 }}>{new Date(s.created_at).toLocaleDateString("es-AR")}</div>
                 </div>
-                <span style={{ background: "#25282c", color: "#64748B", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>Finalizada</span>
+                <UiBadge color="#64748B">Finalizada</UiBadge>
               </div>
             ))}
           </>
         )}
 
         {sessions.length > 0 && (
-          <button onClick={clearHistory} style={{
-            width: "100%", background: "transparent", border: "1px solid #E2E8F0",
-            borderRadius: 10, padding: 10, color: "#64748B", fontSize: 12, marginTop: 16, cursor: "pointer",
-          }}>Limpiar historial de sesiones</button>
+          <UiMiniButton onClick={clearHistory} color="#64748B" tone="ghost" style={{
+            width: "100%", minHeight: 40, marginTop: 16,
+          }}>
+            Limpiar historial de sesiones
+          </UiMiniButton>
         )}
       </div>
     </main>
