@@ -172,7 +172,23 @@ export default function CarnetDigital() {
               {ultimaVacuna && (
                 <InfoCell icon="💉" label="Última vacuna" value={ultimaVacuna.name} />
               )}
+              {mascota.obra_social && (
+                <InfoCell icon="🏥" label="Obra social" value={mascota.obra_social} />
+              )}
+              {mascota.os_numero && (
+                <InfoCell icon="🪪" label="N° socio/póliza" value={mascota.os_numero} />
+              )}
             </div>
+            {mascota.obra_social && mascota.os_plan && (
+              <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "8px 12px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 16 }}>🏥</span>
+                <div>
+                  <div style={{ fontSize: 10, color: "#3B82F6", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5 }}>Cobertura veterinaria</div>
+                  <div style={{ fontSize: 12, color: "#1C3557", fontWeight: 700 }}>{mascota.obra_social} — {mascota.os_plan}</div>
+                  {mascota.os_numero && <div style={{ fontSize: 11, color: "#64748B" }}>Socio/Póliza: {mascota.os_numero}</div>}
+                </div>
+              </div>
+            )}
 
             {/* Vacunas */}
             {vacunas.length > 0 && (

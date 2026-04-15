@@ -348,10 +348,16 @@ const MUNICIPIOS_POR_PROVINCIA: Record<string, string[]> = {
 const PROVINCIAS_LIST = Object.keys(MUNICIPIOS_POR_PROVINCIA);
 
 export default function NuevaMascota() {
+  const OBRAS_SOCIALES = [
+    "OSDE Mascotas", "Zurich Pet", "La Segunda", "Mapfre", "San Cristóbal",
+    "Prudencia", "Galeno", "Swiss Medical", "Federada Salud", "Medifé", "Otra",
+  ];
+
   const [form, setForm] = useState({
     name: "", type: "", breed: "", birth_month: "", birth_year: "",
     weight: "", sex: "Macho", color: "", chip: "",
     zona_tipo: "", zona_valor: "", cp: "", castrado: "",
+    tiene_os: "", obra_social: "", os_plan: "", os_numero: "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -447,6 +453,9 @@ export default function NuevaMascota() {
       name: form.name, breed: form.breed, age, weight: form.weight ? `${form.weight} kg` : "",
       sex: form.sex, color: form.color, chip: form.chip, location,
       castrado: form.castrado || null,
+      obra_social: form.tiene_os === "Sí" ? (form.obra_social || null) : null,
+      os_plan: form.tiene_os === "Sí" ? (form.os_plan || null) : null,
+      os_numero: form.tiene_os === "Sí" ? (form.os_numero || null) : null,
       photo_url: "", user_id: user.id,
     }).select();
 
@@ -706,6 +715,53 @@ export default function NuevaMascota() {
         <div>
           <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Número de chip (opcional)</label>
           <input value={form.chip} placeholder="Ej: 985112345678901" onChange={e => update("chip", e.target.value)} />
+        </div>
+
+        {/* Obra social / seguro */}
+        <div>
+          <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 8 }}>¿Tiene obra social o seguro veterinario?</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {["Sí", "No"].map(op => (
+              <button key={op} onClick={() => update("tiene_os", op)} style={{
+                flex: 1, padding: 10, borderRadius: 10, fontWeight: 700, fontSize: 13,
+                border: "1px solid", cursor: "pointer",
+                background: form.tiene_os === op ? "#2CB8AD22" : "#FFFFFF",
+                borderColor: form.tiene_os === op ? "#2CB8AD" : "#E2E8F0",
+                color: form.tiene_os === op ? "#2CB8AD" : "#64748B",
+              }}>{op}</button>
+            ))}
+          </div>
+          {form.tiene_os === "Sí" && (
+            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10, background: "#F4F6FB", borderRadius: 12, padding: 14, border: "1px solid #E2E8F0" }}>
+              <div>
+                <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Obra social / aseguradora</label>
+                <select
+                  value={form.obra_social}
+                  onChange={e => update("obra_social", e.target.value)}
+                  style={{ width: "100%", background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 10, padding: "10px 14px", color: form.obra_social ? "#1C3557" : "#94A3B8", fontSize: 13 }}
+                >
+                  <option value="">Seleccioná una opción</option>
+                  {OBRAS_SOCIALES.map(os => <option key={os} value={os}>{os}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Plan</label>
+                <input
+                  value={form.os_plan}
+                  placeholder="Ej: Plan Básico, Plan Completo..."
+                  onChange={e => update("os_plan", e.target.value)}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "#64748B", display: "block", marginBottom: 4 }}>Número de socio / póliza</label>
+                <input
+                  value={form.os_numero}
+                  placeholder="Ej: 123456789"
+                  onChange={e => update("os_numero", e.target.value)}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Zona */}
