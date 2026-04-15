@@ -349,8 +349,14 @@ const PROVINCIAS_LIST = Object.keys(MUNICIPIOS_POR_PROVINCIA);
 
 export default function NuevaMascota() {
   const OBRAS_SOCIALES = [
-    "OSDE Mascotas", "Zurich Pet", "La Segunda", "Mapfre", "San Cristóbal",
-    "Prudencia", "Galeno", "Swiss Medical", "Federada Salud", "Medifé", "Otra",
+    // Planes de salud especializados en mascotas
+    "OSPAN", "Vetify", "Iké Mascotas", "Companion", "HolaVet",
+    "Puppis One", "Total Pet", "PetPlus", "Medipet", "AVSIM", "Sosmask",
+    "Mascota y Salud",
+    // Seguros de aseguradoras y bancos
+    "MAPFRE Mascotas", "BBVA Seguros Mascotas", "Banco Macro Mascotas",
+    "Banco Hipotecario Mascotas", "Naranja X Mascotas", "Sancor Seguros",
+    "Otra",
   ];
 
   const [form, setForm] = useState({
