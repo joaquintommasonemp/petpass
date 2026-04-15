@@ -88,6 +88,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           "Content-Type": "application/json",
           "x-api-key": process.env.ANTHROPIC_API_KEY,
           "anthropic-version": "2024-11-01",
+          ...(isPdfFile ? { "anthropic-beta": "pdfs-2024-09-25" } : {}),
         },
         body: JSON.stringify({
           model: "claude-opus-4-6",
