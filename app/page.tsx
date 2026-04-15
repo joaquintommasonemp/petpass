@@ -432,6 +432,29 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Disclaimer Vet IA */}
+      <div style={{
+        background: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)",
+        borderTop: "2px solid #FCD34D",
+        borderBottom: "2px solid #FCD34D",
+        padding: "20px 24px",
+      }}>
+        <div style={{
+          maxWidth: 720, margin: "0 auto",
+          display: "flex", gap: 14, alignItems: "flex-start",
+        }}>
+          <span style={{ fontSize: 24, flexShrink: 0 }}>⚕️</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#92400E", marginBottom: 4 }}>
+              Aviso importante sobre Vet IA
+            </div>
+            <p style={{ fontSize: 12, color: "#78350F", lineHeight: 1.7, margin: 0 }}>
+              <strong>Vet IA es una herramienta de orientaci&oacute;n inform&aacute;tica y no reemplaza la consulta con un veterinario matriculado.</strong> Las respuestas generadas por inteligencia artificial tienen car&aacute;cter informativo y no constituyen diagn&oacute;stico, prescripci&oacute;n ni tratamiento m&eacute;dico veterinario. Ante cualquier problema de salud de tu mascota, consult&aacute; siempre con un profesional habilitado. PetPass no se responsabiliza por decisiones tomadas en base a la informaci&oacute;n provista por Vet IA.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <footer className="landing-footer" style={{
         borderTop: "1px solid #E2E8F0",
         background: "#FFFFFF",
@@ -447,8 +470,8 @@ export default function Home() {
             <a href="mailto:petpass.app@gmail.com" className="landing-footer-link" style={{ fontSize: 13, color: "#64748B", textDecoration: "none" }}>Contacto</a>
           </div>
           <div style={{ fontSize: 12, color: "#94A3B8" }}>&copy; 2025 PetPass &middot; Salud animal digital &middot; Argentina</div>
-          <div style={{ fontSize: 11, color: "#CBD5E1", maxWidth: 520, textAlign: "center", lineHeight: 1.6 }}>
-            Vet IA es una herramienta de orientaci&oacute;n y no reemplaza la consulta veterinaria profesional.
+          <div style={{ fontSize: 11, color: "#94A3B8", maxWidth: 520, textAlign: "center", lineHeight: 1.6 }}>
+            Vet IA es una herramienta de orientaci&oacute;n inform&aacute;tica. No reemplaza la consulta con un veterinario matriculado.
           </div>
         </div>
       </footer>

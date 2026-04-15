@@ -373,6 +373,7 @@ export default function NuevaMascota() {
   const [checkingLimit, setCheckingLimit] = useState(true);
   const [solicitandoPremium, setSolicitandoPremium] = useState(false);
   const [premiumSolicitado, setPremiumSolicitado] = useState(false);
+  const [showTosModal, setShowTosModal] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -492,8 +493,14 @@ export default function NuevaMascota() {
       });
     }
 
-    window.location.href = "/dashboard";
     setLoading(false);
+
+    // Mostrar T&C solo si aún no los aceptó
+    if (!localStorage.getItem("pp_tos_accepted")) {
+      setShowTosModal(true);
+    } else {
+      window.location.href = "/dashboard";
+    }
   }
 
   const sel = (label: string, key: string, opts: string[]) => (
@@ -794,6 +801,94 @@ export default function NuevaMascota() {
           opacity: loading ? 0.6 : 1, boxShadow: "0 4px 20px #2CB8AD30",
         }}>{loading ? "Guardando..." : "Crear perfil 🐾"}</button>
       </div>
+
+      {/* Modal Términos y Condiciones */}
+      {showTosModal && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 999,
+          background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "20px 16px",
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: 20,
+            maxWidth: 440, width: "100%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+            overflow: "hidden",
+          }}>
+            {/* Header modal */}
+            <div style={{
+              background: "linear-gradient(135deg, #2CB8AD, #1C3557)",
+              padding: "20px 24px",
+            }}>
+              <div style={{ fontSize: 28, marginBottom: 6 }}>🐾</div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: "#fff", lineHeight: 1.2 }}>
+                ¡Mascota registrada!
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 4 }}>
+                Antes de continuar, leé nuestros términos.
+              </div>
+            </div>
+
+            {/* Contenido */}
+            <div style={{ padding: "20px 24px", maxHeight: 340, overflowY: "auto" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#1C3557", marginBottom: 10 }}>
+                Términos de uso y responsabilidad
+              </div>
+
+              <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.75, display: "flex", flexDirection: "column", gap: 10 }}>
+                <p style={{ margin: 0 }}>
+                  <strong style={{ color: "#1C3557" }}>1. Vet IA — Solo orientación informativa.</strong> El asistente de inteligencia artificial de PetPass tiene carácter exclusivamente informativo. Sus respuestas <strong>no constituyen diagnóstico, prescripción ni tratamiento veterinario</strong>. Ante cualquier problema de salud de tu mascota, consultá siempre con un veterinario matriculado.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong style={{ color: "#1C3557" }}>2. Responsabilidad del usuario.</strong> PetPass no se responsabiliza por decisiones tomadas en base a la información provista por Vet IA ni por errores u omisiones en el historial clínico cargado por el usuario.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong style={{ color: "#1C3557" }}>3. Exactitud de la información.</strong> El usuario es responsable de la veracidad y actualización de los datos de su mascota. PetPass no verifica la información ingresada.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong style={{ color: "#1C3557" }}>4. Privacidad.</strong> Tus datos y los de tu mascota son tratados según nuestra{" "}
+                  <a href="/privacidad" target="_blank" style={{ color: "#2CB8AD" }}>Política de Privacidad</a>.
+                  No compartimos información personal con terceros sin tu consentimiento.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong style={{ color: "#1C3557" }}>5. Emergencias.</strong> En caso de emergencia veterinaria, contactá de inmediato a tu veterinario o clínica veterinaria más cercana. PetPass no provee atención de urgencias.
+                </p>
+              </div>
+
+              <div style={{
+                background: "#FFFBEB", border: "1px solid #FCD34D",
+                borderRadius: 10, padding: "10px 14px", marginTop: 14,
+                fontSize: 11, color: "#78350F", lineHeight: 1.6,
+              }}>
+                ⚕️ <strong>Vet IA no reemplaza la consulta con un veterinario matriculado.</strong> Usala como guía, no como diagnóstico definitivo.
+              </div>
+            </div>
+
+            {/* Botón aceptar */}
+            <div style={{ padding: "0 24px 20px" }}>
+              <button
+                onClick={() => {
+                  localStorage.setItem("pp_tos_accepted", "1");
+                  window.location.href = "/dashboard";
+                }}
+                style={{
+                  width: "100%",
+                  background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+                  color: "#fff", border: "none", borderRadius: 12,
+                  padding: "14px 20px", fontWeight: 900, fontSize: 14,
+                  cursor: "pointer", boxShadow: "0 4px 20px rgba(44,184,173,0.35)",
+                }}
+              >
+                Acepto los términos y condiciones →
+              </button>
+              <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: "#94A3B8" }}>
+                Al aceptar, confirmás que leíste y entendiste los términos anteriores.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
