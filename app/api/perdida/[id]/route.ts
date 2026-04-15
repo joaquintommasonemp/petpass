@@ -9,21 +9,27 @@ function adminClient() {
   );
 }
 
-// Rate limiting en memoria (por IP, se resetea en cold starts)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5;      // máx 5 avistamientos
-const RATE_WINDOW = 60_000; // por minuto
+const RATE_LIMIT = 5;       // máx avistamientos por perdida por minuto
+const RATE_WINDOW_MS = 60_000;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+// Rate limiting persistente: cuenta avistamientos recientes en DB para esta perdida.
+// Resiste cold starts de Vercel (a diferencia de un Map en memoria).
+async function isRateLimited(perdidaId: string): Promise<boolean> {
+  try {
+    const admin = adminClient();
+    const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString();
+    const { count } = await admin
+      .from("comunidad_mensajes")
+      .select("id", { count: "exact", head: true })
+      .eq("author_name", "AVISTAMIENTO")
+      .eq("mascota_name", perdidaId)
+      .gte("created_at", since);
+
+    return (count ?? 0) >= RATE_LIMIT;
+  } catch {
+    // Si falla la consulta, dejamos pasar (no bloquear por error interno)
     return false;
   }
-  if (entry.count >= RATE_LIMIT) return true;
-  entry.count++;
-  return false;
 }
 
 // GET — datos públicos de la perdida (sin exponer teléfono)
@@ -42,14 +48,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
 // POST — avistamiento anónimo
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  // Rate limiting por IP
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    || req.headers.get("x-real-ip")
-    || "unknown";
-
-  if (isRateLimited(ip)) {
+  if (await isRateLimited(params.id)) {
     return NextResponse.json(
-      { error: "Demasiados intentos. Esperá un minuto." },
+      { error: "Demasiados avistamientos recientes. Esperá un minuto." },
       { status: 429 }
     );
   }
@@ -59,7 +60,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   if (!mensaje?.trim()) return NextResponse.json({ error: "El mensaje es obligatorio" }, { status: 400 });
 
-  // Limitar longitud para evitar spam
   if (mensaje.trim().length > 500) {
     return NextResponse.json({ error: "El mensaje es demasiado largo" }, { status: 400 });
   }

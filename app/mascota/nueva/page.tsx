@@ -872,12 +872,15 @@ export default function NuevaMascota() {
                   localStorage.setItem("pp_tos_accepted", "1");
                   // Guardar aceptación en Supabase para registro legal
                   try {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.access_token) {
                       await fetch("/api/tos/aceptar", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId: user.id, version: "1.0" }),
+                        headers: {
+                          "Content-Type": "application/json",
+                          "Authorization": "Bearer " + session.access_token,
+                        },
+                        body: JSON.stringify({ version: "1.0" }),
                       });
                     }
                   } catch (_) {}

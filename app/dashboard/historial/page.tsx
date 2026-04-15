@@ -87,6 +87,7 @@ export default function Historial() {
   const [shareDays, setShareDays] = useState(7);
   const [shareLabel, setShareLabel] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string } | null>(null);
+  const [authToken, setAuthToken] = useState("");
   const supabase = createClient();
   const showToast = (message: string, type: ToastType = "success") => setToast({ message, type });
 
@@ -95,6 +96,8 @@ export default function Historial() {
       const authResult = await supabase.auth.getUser();
       const user = authResult.data.user;
       if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) setAuthToken(session.access_token);
       const mascoResult = await supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true);
       const ms = mascoResult.data;
       if (ms && ms.length > 0) {
@@ -326,7 +329,7 @@ export default function Historial() {
     try {
       const res = await fetch("/api/analizar-estudio", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(authToken ? { "Authorization": "Bearer " + authToken } : {}) },
         body: JSON.stringify({ historialId: h.id, publicUrl, fileName, fileType }),
       });
       const data = await res.json();
@@ -387,7 +390,7 @@ export default function Historial() {
         // Analizar con IA en background
         fetch("/api/analizar-estudio", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...(authToken ? { "Authorization": "Bearer " + authToken } : {}) },
           body: JSON.stringify({ historialId, publicUrl, fileName: file.name, fileType: file.type }),
         }).then(async (res) => {
           const data = await res.json();

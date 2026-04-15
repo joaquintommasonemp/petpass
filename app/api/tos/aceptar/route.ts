@@ -9,15 +9,20 @@ const admin = () => createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, version } = await req.json();
-    if (!userId) return NextResponse.json({ error: "userId requerido" }, { status: 400 });
+    // Extraer usuario del JWT — nunca confiar en userId del body
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
+    const db = admin();
+    const { data: { user }, error: authError } = await db.auth.getUser(token);
+    if (authError || !user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
+    const { version } = await req.json().catch(() => ({}));
 
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "desconocida";
-
-    const db = admin();
 
     const { error } = await db
       .from("profiles")
@@ -26,7 +31,7 @@ export async function POST(req: NextRequest) {
         tos_ip: ip,
         tos_version: version || "1.0",
       })
-      .eq("id", userId);
+      .eq("id", user.id);
 
     if (error) {
       console.error("[tos/aceptar] error:", error);

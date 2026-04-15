@@ -8,9 +8,28 @@ const admin = () => createClient(
 );
 
 export async function POST(req: NextRequest) {
+  // Verificar autenticación
+  const token = req.headers.get("authorization")?.replace("Bearer ", "");
+  if (!token) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
+  const db = admin();
+  const { data: { user }, error: authError } = await db.auth.getUser(token);
+  if (authError || !user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
   const { historialId, publicUrl, fileName, fileType } = await req.json();
   if (!historialId || !publicUrl || !fileName) {
     return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+  }
+
+  // Verificar que el historialId pertenece al usuario autenticado
+  const { data: histEntry } = await db
+    .from("historial")
+    .select("id, mascota_id, mascotas!inner(user_id)")
+    .eq("id", historialId)
+    .single();
+
+  if (!histEntry || (histEntry.mascotas as any)?.user_id !== user.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -23,6 +42,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, reason: "Tipo no analizable" });
   }
 
+  // Validar que publicUrl apunte al storage de Supabase (evitar SSRF)
+  const supabaseHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
+  try {
+    const parsedUrl = new URL(publicUrl);
+    if (parsedUrl.hostname !== supabaseHost) {
+      return NextResponse.json({ error: "URL no permitida" }, { status: 400 });
+    }
+  } catch {
+    return NextResponse.json({ error: "URL inválida" }, { status: 400 });
+  }
+
   // Descargar archivo desde Supabase Storage
   let fileBase64: string;
   let detectedType: string;
@@ -32,7 +62,7 @@ export async function POST(req: NextRequest) {
     const buffer = await res.arrayBuffer();
     fileBase64 = Buffer.from(buffer).toString("base64");
     detectedType = isPdf ? "application/pdf" : (fileType || "image/jpeg");
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Error descargando archivo" }, { status: 500 });
   }
 
@@ -80,7 +110,6 @@ export async function POST(req: NextRequest) {
   }
 
   // Actualizar el registro de historial agregando ia:: al summary
-  const db = admin();
   const { data: entry } = await db.from("historial").select("summary").eq("id", historialId).single();
   if (!entry) return NextResponse.json({ error: "Registro no encontrado" }, { status: 404 });
 
