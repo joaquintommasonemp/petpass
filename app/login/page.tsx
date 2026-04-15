@@ -66,7 +66,9 @@ function LoginInner() {
           setError("No pudimos iniciar sesi\u00f3n. Revis\u00e1 tu email y tu contrase\u00f1a.");
         }
       } else {
-        window.location.href = searchParams.get("next") || "/dashboard";
+        const next = searchParams.get("next") || "/dashboard";
+        const safeDest = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+        window.location.href = safeDest;
       }
     } catch {
       setError("Error de conexi\u00f3n. Revis\u00e1 tu internet e intent\u00e1 de nuevo.");
