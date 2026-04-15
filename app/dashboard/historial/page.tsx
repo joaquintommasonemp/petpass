@@ -332,6 +332,8 @@ export default function Historial() {
     const error = uploadResult.error;
 
     if (!error) {
+      const urlResult = supabase.storage.from("documentos").getPublicUrl(path);
+      const publicUrl = urlResult.data.publicUrl;
       const entry = {
         mascota_id: mascota.id,
         title: selectedStudyType,
@@ -342,8 +344,32 @@ export default function Historial() {
       const saved = await supabase.from("historial").insert(entry).select();
       if (saved.data) {
         const d = saved.data;
+        const historialId = d[0].id;
         setHistorial(function(prev) { return [d[0], ...prev]; });
-        showToast("Documento subido correctamente", "success");
+        showToast("Subiendo y analizando estudio...", "info");
+        // Analizar con IA en background
+        fetch("/api/analizar-estudio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ historialId, publicUrl, fileName: file.name, fileType: file.type }),
+        }).then(async (res) => {
+          const data = await res.json();
+          if (data.ok && data.aiSummary) {
+            setHistorial(function(prev) {
+              return prev.map(function(h: any) {
+                if (h.id !== historialId) return h;
+                const parts = (h.summary || "").split("||").filter((p: string) => !p.startsWith("ia::"));
+                parts.push("ia::" + data.aiSummary);
+                return { ...h, summary: parts.join("||") };
+              });
+            });
+            showToast("Estudio analizado correctamente", "success");
+          } else {
+            showToast("Estudio subido. El análisis IA no estuvo disponible.", "warning");
+          }
+        }).catch(function() {
+          showToast("Estudio subido correctamente", "success");
+        });
       } else {
         console.error("Insert error:", saved.error && saved.error.message);
         showToast("Archivo subido pero no se pudo registrar en el historial", "warning");
