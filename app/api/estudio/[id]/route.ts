@@ -87,7 +87,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         headers: {
           "Content-Type": "application/json",
           "x-api-key": process.env.ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
+          "anthropic-version": "2024-11-01",
         },
         body: JSON.stringify({
           model: "claude-opus-4-6",
@@ -103,7 +103,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         }),
       });
       const data = await res.json();
-      if (!data.error) aiSummary = data.content?.[0]?.text || "";
+      if (data.error) {
+        console.error("[estudio] AI analysis API error:", JSON.stringify(data.error));
+      } else {
+        aiSummary = data.content?.[0]?.text || "";
+      }
     } catch (e) {
       console.error("[estudio] AI analysis failed:", e);
     }
