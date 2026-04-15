@@ -73,11 +73,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: urlData } = db.storage.from("comunidad").getPublicUrl(path);
   const publicUrl = urlData.publicUrl;
 
-  // Analizar con IA si es imagen
+  // Analizar con IA si es imagen o PDF
   let aiSummary = "";
   const isImage = fileType?.startsWith("image/");
-  if (isImage && process.env.ANTHROPIC_API_KEY) {
+  const isPdfFile = fileType === "application/pdf";
+  if ((isImage || isPdfFile) && process.env.ANTHROPIC_API_KEY) {
     try {
+      const contentBlock = isImage
+        ? { type: "image", source: { type: "base64", media_type: fileType, data: fileBase64 } }
+        : { type: "document", source: { type: "base64", media_type: "application/pdf", data: fileBase64 } };
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -87,13 +91,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         },
         body: JSON.stringify({
           model: "claude-opus-4-6",
-          max_tokens: 600,
-          system: "Sos un veterinario experto analizando estudios médicos de mascotas. Extraé los datos más relevantes del estudio: tipo de estudio, hallazgos principales, valores alterados (si los hay), y cualquier indicación o diagnóstico. Sé conciso y estructurado. Respondé en español.",
+          max_tokens: 800,
+          system: "Sos un veterinario experto analizando estudios médicos de mascotas. Extraé los datos más relevantes del estudio: tipo de estudio, hallazgos principales, valores con sus números (normales y alterados si los hay), diagnóstico o conclusión del veterinario, y cualquier indicación de seguimiento. Sé completo pero conciso. Respondé en español.",
           messages: [{
             role: "user",
             content: [
-              { type: "image", source: { type: "base64", media_type: fileType, data: fileBase64 } },
-              { type: "text", text: "Analizá este estudio médico veterinario y extraé los datos más relevantes." },
+              contentBlock,
+              { type: "text", text: "Analizá este estudio médico veterinario y extraé todos los datos relevantes incluyendo valores numéricos." },
             ],
           }],
         }),
