@@ -45,47 +45,9 @@ function safeRedirect(next: string | null): string {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  // Dejar pasar rutas públicas sin verificar sesión
-  if (isPublic(pathname)) return NextResponse.next();
-
-  // Para rutas protegidas, verificar sesión con Supabase
-  if (!isProtected(pathname)) return NextResponse.next();
-
-  let res = NextResponse.next({ request: req });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          res = NextResponse.next({ request: req });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // getSession() lee la cookie local sin roundtrip de red a Supabase.
-  // Evita redirect loops en login. La validación real del JWT se hace
-  // en cada API route con admin.auth.getUser(token).
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  return res;
+  // La autenticación de rutas protegidas se maneja client-side en cada layout.
+  // El middleware solo pasa requests — la validación real ocurre en cada API route.
+  return NextResponse.next();
 }
 
 export const config = {
