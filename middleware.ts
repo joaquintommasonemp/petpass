@@ -74,10 +74,12 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  // getUser() valida el JWT contra Supabase (no confía solo en la cookie)
-  const { data: { user } } = await supabase.auth.getUser();
+  // getSession() lee la cookie local sin roundtrip de red a Supabase.
+  // Evita redirect loops en login. La validación real del JWT se hace
+  // en cada API route con admin.auth.getUser(token).
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
