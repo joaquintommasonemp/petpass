@@ -206,40 +206,23 @@ export default function Dashboard() {
     if (!selected || !authToken) return;
     setLoadingReporte(true);
     setReporte(null);
-    const vacs = vacunas.map(v => {
-      const next = v.next_date ? " -> proxima: " + v.next_date : "";
-      return v.name + " (" + v.date + next + ")";
-    }).join(", ") || "Sin registros";
-    const diags = diagnosticos.map(d => {
-      const sum = d.summary ? " - " + d.summary : "";
-      return d.date + ": " + d.title + sum;
-    }).join("\n") || "Sin consultas";
-    const citasProx = citas.filter(c => c.date >= new Date().toISOString().slice(0, 10)).map(c => c.date + ": " + c.summary).join(", ") || "Sin citas";
-    const promptLines = [
-      "Genera un reporte de salud completo y estructurado para " + selected.name + ".",
-      "",
-      "DATOS: Raza: " + (selected.breed || "N/A") + " | Edad: " + (selected.age || "N/A") + " | Peso: " + (selected.weight || "N/A") + " | Sexo: " + (selected.sex || "N/A"),
-      "VACUNAS: " + vacs,
-      "HISTORIAL RECIENTE:",
-      diags,
-      "CITAS PROXIMAS: " + citasProx,
-      "",
-      "El reporte debe tener estas secciones:",
+
+    const prompt = [
+      "Generá un reporte de salud completo y estructurado con estas secciones:",
       "1. **Resumen general** (estado de salud en 2-3 frases)",
-      "2. **Vacunacion** (estado y recomendaciones)",
-      "3. **Historial clinico reciente** (analisis breve)",
-      "4. **Alertas o puntos de atencion** (si hay algo que revisar)",
-      "5. **Recomendaciones para los proximos 30 dias**",
+      "2. **Vacunación** (estado actual y recomendaciones)",
+      "3. **Historial clínico reciente** (análisis breve de las últimas consultas)",
+      "4. **Alertas o puntos de atención** (si hay algo que revisar)",
+      "5. **Recomendaciones para los próximos 30 días**",
       "",
-      "Se concreto y profesional. Responde en espanol.",
-    ];
-    const prompt = promptLines.join("\n");
+      "Sé concreto y profesional. Usá los datos del perfil médico completo que tenés disponible.",
+    ].join("\n");
 
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
       body: JSON.stringify({
-        system: "Sos un veterinario experto redactando reportes de salud animal. Usa markdown con **negritas** para los titulos de seccion.",
+        mascotaId: selected.id,
         messages: [{ role: "user", content: prompt }],
       }),
     });
