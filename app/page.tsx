@@ -455,6 +455,50 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Próximamente: app nativa */}
+      <div style={{
+        background: "linear-gradient(135deg, #1C3557, #2CB8AD)",
+        padding: "48px 24px",
+        textAlign: "center",
+      }}>
+        <div style={{ maxWidth: 520, margin: "0 auto" }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>📱</div>
+          <div style={{
+            display: "inline-block",
+            background: "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.25)",
+            borderRadius: 20, padding: "4px 14px",
+            fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.9)",
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            marginBottom: 16,
+          }}>Próximamente</div>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", marginBottom: 10, letterSpacing: "-0.5px" }}>
+            PetPass en tu celular
+          </h2>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.7, marginBottom: 24 }}>
+            La app nativa para iOS y Android está en camino.<br />
+            Todo lo que ya usás, con notificaciones y acceso sin internet.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            {[
+              { label: "App Store", icon: "" },
+              { label: "Google Play", icon: "" },
+            ].map(({ label, icon }) => (
+              <div key={label} style={{
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 12, padding: "10px 22px",
+                color: "rgba(255,255,255,0.6)",
+                fontSize: 13, fontWeight: 700,
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <span style={{ fontSize: 16 }}>{icon}</span> {label} — pronto
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <footer className="landing-footer" style={{
         borderTop: "1px solid #E2E8F0",
         background: "#FFFFFF",
