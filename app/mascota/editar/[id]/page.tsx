@@ -25,6 +25,14 @@ const RAZAS_COMUNES = [
   "Canario", "Tortuga de tierra", "Iguana Verde", "Dragón Barbudo", "Otro",
 ];
 
+const OBRAS_SOCIALES = [
+  "OSPAN", "Vetify", "Iké Mascotas", "Companion", "HolaVet",
+  "Puppis One", "Total Pet", "PetPlus", "Medipet", "AVSIM", "Sosmask",
+  "Mascota y Salud", "MAPFRE Mascotas", "BBVA Seguros Mascotas",
+  "Banco Macro Mascotas", "Banco Hipotecario Mascotas", "Naranja X Mascotas",
+  "Sancor Seguros", "Otra",
+];
+
 export default function EditarMascota() {
   const params = useParams();
   const id = params?.id as string;
@@ -51,6 +59,10 @@ export default function EditarMascota() {
     chip: "",
     color: "",
     location: "",
+    tiene_os: "",
+    obra_social: "",
+    os_plan: "",
+    os_numero: "",
   });
 
   useEffect(() => {
@@ -87,6 +99,10 @@ export default function EditarMascota() {
       chip: mascota.chip || "",
       color: mascota.color || "",
       location: mascota.location || "",
+      tiene_os: mascota.obra_social ? "Sí" : "",
+      obra_social: mascota.obra_social || "",
+      os_plan: mascota.os_plan || "",
+      os_numero: mascota.os_numero || "",
     });
 
     setLoading(false);
@@ -146,6 +162,9 @@ export default function EditarMascota() {
       chip: form.chip.trim(),
       color: form.color.trim(),
       location: form.location.trim(),
+      obra_social: form.tiene_os === "Sí" ? (form.obra_social || null) : null,
+      os_plan: form.tiene_os === "Sí" ? (form.os_plan || null) : null,
+      os_numero: form.tiene_os === "Sí" ? (form.os_numero || null) : null,
     };
 
     if (photoUrl !== undefined) {
@@ -431,6 +450,75 @@ export default function EditarMascota() {
               />
             </div>
 
+          </div>
+        </div>
+
+        {/* Obra social / seguro */}
+        <div style={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 16, padding: "20px 24px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#94A3B8", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 18 }}>
+            🏥 Cobertura veterinaria
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* ¿Tiene cobertura? */}
+            <div>
+              <label style={labelStyle}>¿Tiene obra social o seguro veterinario?</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {["Sí", "No"].map(opt => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => update("tiene_os", opt)}
+                    style={{
+                      flex: 1, padding: "10px 0", borderRadius: 10, fontWeight: 700, fontSize: 14,
+                      border: "1px solid",
+                      cursor: "pointer",
+                      background: form.tiene_os === opt ? "#2CB8AD22" : "#FFFFFF",
+                      borderColor: form.tiene_os === opt ? "#2CB8AD" : "#E2E8F0",
+                      color: form.tiene_os === opt ? "#2CB8AD" : "#64748B",
+                    }}
+                  >{opt}</button>
+                ))}
+              </div>
+            </div>
+
+            {form.tiene_os === "Sí" && (
+              <>
+                <div>
+                  <label style={labelStyle}>Prestadora / Aseguradora</label>
+                  <select
+                    value={form.obra_social}
+                    onChange={e => update("obra_social", e.target.value)}
+                    style={{ ...inputStyle, color: form.obra_social ? "#1C3557" : "#64748B" }}
+                  >
+                    <option value="">Seleccioná...</option>
+                    {OBRAS_SOCIALES.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Plan</label>
+                  <input
+                    type="text"
+                    value={form.os_plan}
+                    onChange={e => update("os_plan", e.target.value)}
+                    placeholder="Ej: Plan Básico, Plan Familiar..."
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>N° de socio / póliza</label>
+                  <input
+                    type="text"
+                    value={form.os_numero}
+                    onChange={e => update("os_numero", e.target.value)}
+                    placeholder="Número de afiliado o póliza"
+                    style={inputStyle}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
