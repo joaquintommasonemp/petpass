@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -113,7 +113,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       router.push("/?cuenta=eliminada");
     } catch {
-      setErrorEliminar("No pudimos eliminar la cuenta. Intent&aacute; de nuevo.");
+      setErrorEliminar("No pudimos eliminar la cuenta. Intentá de nuevo.");
       setEliminando(false);
     }
   }
@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             color: "#64748B", borderRadius: 12, padding: "8px 16px",
             fontWeight: 600, fontSize: 12, textDecoration: "none",
           }}>
-            👤 Mi perfil
+            Mi perfil
           </Link>
           <UiMiniButton onClick={() => { setShowSugerencia(true); setSugEnviada(false); setSugerenciaText(""); }} style={{
             minHeight: 38,
@@ -264,10 +264,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             color: "#94A3B8", borderRadius: 12, padding: "7px 16px",
             fontWeight: 600, fontSize: 11, cursor: "pointer",
           }}>
-            &larr; Cerrar sesi&oacute;n
+            ← Cerrar sesión
           </button>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, paddingTop: 4 }}>
-            <Link href="/terminos" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>T&eacute;rminos</Link>
+            <Link href="/terminos" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Términos</Link>
             <Link href="/privacidad" style={{ fontSize: 10, color: "#CBD5E1", textDecoration: "none" }}>Privacidad</Link>
             <button
               onClick={() => { setShowEliminar(true); setConfirmText(""); setErrorEliminar(""); }}
@@ -283,7 +283,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12, color: "#EF4444", fontWeight: 900 }}>!</div>
             <h3 style={{ fontSize: 18, fontWeight: 900, color: "#1C3557", marginBottom: 8, textAlign: "center" }}>Eliminar cuenta</h3>
             <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 8 }}>
-              Esta acci&oacute;n es <strong style={{ color: "#EF4444" }}>permanente e irreversible</strong>. Se borrar&aacute;n:
+              Esta acción es <strong style={{ color: "#EF4444" }}>permanente e irreversible</strong>. Se borrarán:
             </p>
             <ul style={{ fontSize: 12, color: "#64748B", paddingLeft: 18, marginBottom: 16, lineHeight: 1.8 }}>
               <li>Tu cuenta y perfil</li>
@@ -295,7 +295,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <li>Archivos y fotos subidas</li>
             </ul>
             <p style={{ fontSize: 13, color: "#1C3557", fontWeight: 700, marginBottom: 8 }}>
-              Escrib&iacute; <span style={{ color: "#EF4444", fontFamily: "monospace" }}>ELIMINAR</span> para confirmar:
+              Escribí <span style={{ color: "#EF4444", fontFamily: "monospace" }}>ELIMINAR</span> para confirmar:
             </p>
             <input
               value={confirmText}
@@ -328,17 +328,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div style={{ background: "#FFFFFF", borderRadius: 20, padding: 28, maxWidth: 380, width: "100%", boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}>
             {sugEnviada ? (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>✓</div>
                 <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557", marginBottom: 8 }}>Gracias por contarnos</div>
                 <p style={{ color: "#64748B", fontSize: 13, marginBottom: 20 }}>Ya recibimos tu sugerencia y la vamos a revisar para seguir mejorando PetPass.</p>
                 <button onClick={() => setShowSugerencia(false)} style={{ background: "linear-gradient(135deg, #2CB8AD, #229E94)", color: "#fff", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Cerrar</button>
               </div>
             ) : (
               <>
-                <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557", marginBottom: 4 }}>Contanos qu&eacute; mejorar&iacute;as</div>
-                <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Tu opini&oacute;n nos ayuda a hacer PetPass m&aacute;s claro y &uacute;til.</p>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#1C3557", marginBottom: 4 }}>Contanos qué mejorarías</div>
+                <p style={{ color: "#64748B", fontSize: 12, marginBottom: 16 }}>Tu opinión nos ayuda a hacer PetPass más claro y útil.</p>
                 <textarea
-                  placeholder="Contanos qu&eacute; te gustar&iacute;a mejorar o qu&eacute; te est&aacute; faltando."
+                  placeholder="Contanos qué te gustaría mejorar o qué te está faltando."
                   value={sugerenciaText}
                   onChange={e => setSugerenciaText(e.target.value)}
                   rows={4}
@@ -406,9 +406,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="dashboard-content-pad">
           {!emailVerified && (
             <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 12, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 12, fontWeight: 900, color: "#92400E" }}>Mail</span>
+              <span style={{ fontSize: 12, fontWeight: 900, color: "#92400E" }}>Email</span>
               <span style={{ fontSize: 12, color: "#92400E", flex: 1 }}>
-                <strong>Verific&aacute; tu email</strong> &mdash; Revis&aacute; tu bandeja de entrada para activar tu cuenta y usar todo el producto.
+                <strong>Verificá tu email</strong> — Revisá tu bandeja de entrada para activar tu cuenta y usar todo el producto.
               </span>
               {resentVerification ? (
                 <span style={{ fontSize: 11, color: "#2CB8AD", fontWeight: 700 }}>Enviado</span>
@@ -453,3 +453,4 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+

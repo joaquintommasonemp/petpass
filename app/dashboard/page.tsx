@@ -565,7 +565,7 @@ export default function Dashboard() {
                 background: isPublic ? "#2CB8AD" : "#64748B",
                 display: "inline-block", transition: "background 0.2s",
               }} />
-              {isPublic ? "Visible en Explorar" : "Perfil privado"}
+              {isPublic ? "Visible en la comunidad" : "Perfil privado"}
             </button>
             <button onClick={() => setShowInvitar(!showInvitar)} style={{
               display: "flex", alignItems: "center", gap: 5,

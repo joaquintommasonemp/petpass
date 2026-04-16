@@ -6,10 +6,14 @@
   --bg: #F4F6FB;
   --card: #FFFFFF;
   --border: #E2E8F0;
+  --border-soft: #E8EEF6;
   --accent: #2CB8AD;
   --accent-dark: #229E94;
+  --accent-soft: #EAF9F7;
+  --accent-softer: #F5FBFA;
   --text: #1C3557;
   --muted: #64748B;
+  --muted-strong: #475569;
   --radius: 12px;
   --radius-card: 20px;
   --radius-control: 12px;
@@ -31,6 +35,26 @@ body {
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+p {
+  line-height: 1.6;
 }
 
 /* ── Inputs ── */
@@ -67,6 +91,11 @@ a:active { opacity: 0.75; }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+::selection {
+  background: rgba(44, 184, 173, 0.18);
+  color: var(--text);
 }
 
 /* ── Skeleton shimmer ── */
@@ -157,6 +186,17 @@ a:active { opacity: 0.75; }
   justify-content: center;
 }
 
+.dashboard-mobile-header,
+.dashboard-topbar,
+.landing-nav {
+  box-shadow: 0 10px 28px rgba(28,53,87,0.05);
+}
+
+.dashboard-sidebar-actions a,
+.dashboard-sidebar-actions button {
+  min-height: 40px;
+}
+
 /* Mobile content */
 .dashboard-content-pad {
   padding: 16px 16px calc(72px + env(safe-area-inset-bottom, 8px));
@@ -210,6 +250,11 @@ a:active { opacity: 0.75; }
     border-left-color: #B2E8E5 !important;
   }
 
+  .dashboard-sidebar-link {
+    min-height: 60px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.22);
+  }
+
   .dashboard-nav {
     display: none;
   }
@@ -235,11 +280,16 @@ a:active { opacity: 0.75; }
     top: 0;
     z-index: 50;
     height: 68px;
+    box-shadow: 0 10px 24px rgba(28,53,87,0.04);
   }
 
   .dashboard-content-pad {
     padding: 36px 48px 52px;
     animation: fadeUp 0.2s ease both;
+  }
+
+  .dashboard-sidebar-actions {
+    gap: 8px !important;
   }
 }
 
@@ -4190,15 +4240,37 @@ a:active { opacity: 0.75; }
   .admin-page button {
     min-height: 40px;
   }
+
+  .ui-card {
+    border-radius: 18px;
+  }
+
+  .ui-section-header {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .ui-section-header h2 {
+    font-size: 17px;
+  }
 }
 
 /* Shared loading + empty states */
+.ui-card,
 .ui-empty-state,
 .ui-loading-state {
   position: relative;
   overflow: hidden;
 }
 
+.ui-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 28px rgba(28,53,87,0.05);
+}
+
+.ui-card::before,
 .ui-empty-state::before,
 .ui-loading-state::before {
   content: "";
@@ -4206,6 +4278,11 @@ a:active { opacity: 0.75; }
   inset: 0;
   background: linear-gradient(180deg, rgba(255,255,255,0.45), transparent 44%);
   pointer-events: none;
+}
+
+.ui-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .ui-empty-state-icon,
@@ -4232,6 +4309,10 @@ a:active { opacity: 0.75; }
   letter-spacing: 0.01em;
 }
 
+.ui-chip {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.52);
+}
+
 .ui-mini-button:hover:not(:disabled),
 .ui-badge:hover,
 .ui-chip:hover,
@@ -4241,10 +4322,31 @@ a:active { opacity: 0.75; }
 
 .ui-mini-button {
   white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(28,53,87,0.06);
 }
 
 .ui-icon-token {
   box-shadow: inset 0 0 0 1px rgba(226,232,240,0.8);
+}
+
+.ui-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.ui-section-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.ui-section-header p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .care-success-card,
@@ -5669,6 +5771,7 @@ svg {
     min-height: 60px;
     border-radius: 14px !important;
     padding: 7px 4px 8px !important;
+    gap: 3px !important;
   }
 
   .dashboard-mobile-nav-link span:first-child {
@@ -5683,6 +5786,11 @@ svg {
   .dashboard-mobile-nav-link-active {
     background: linear-gradient(180deg, rgba(44, 184, 173, 0.14), rgba(44, 184, 173, 0.06)) !important;
     box-shadow: inset 0 0 0 1px rgba(44, 184, 173, 0.18);
+  }
+
+  .dashboard-sidebar-actions a,
+  .dashboard-sidebar-actions button {
+    min-height: 38px;
   }
 
   .dashboard-pet-switcher {

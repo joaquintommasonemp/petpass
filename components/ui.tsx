@@ -11,11 +11,12 @@ export function UiCard({ children, className = "", style = {} }: UiCardProps) {
     <div
       className={`ui-card${className ? ` ${className}` : ""}`}
       style={{
-        background: "#FFFFFF",
+        background: "linear-gradient(180deg, #FFFFFF 0%, #FCFDFF 100%)",
         border: "1px solid #E2E8F0",
-        borderRadius: 16,
+        borderRadius: 18,
         padding: 16,
         marginBottom: 12,
+        boxShadow: "0 12px 28px rgba(28,53,87,0.05)",
         ...style,
       }}
     >
@@ -48,9 +49,9 @@ export function UiBadge({
         background: color + "22",
         color,
         borderRadius: 20,
-        padding: size === "md" ? "4px 12px" : "2px 10px",
+        padding: size === "md" ? "5px 12px" : "3px 10px",
         fontSize: size === "md" ? Math.max(fontSize, 12) : fontSize,
-        fontWeight: 700,
+        fontWeight: 800,
         border: `1px solid ${color}44`,
         minHeight: size === "md" ? 28 : 24,
         display: "inline-flex",
@@ -83,14 +84,14 @@ export function UiChip({ children, color = "#2CB8AD", className = "", style = {}
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        minHeight: 32,
-        padding: "6px 12px",
+        minHeight: 34,
+        padding: "7px 12px",
         borderRadius: 999,
         background: color + "14",
         border: `1px solid ${color}33`,
         color,
         fontSize: 12,
-        fontWeight: 700,
+        fontWeight: 800,
         ...style,
       }}
     >
@@ -189,10 +190,10 @@ export function UiMiniButton({
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        borderRadius: 10,
-        padding: "6px 12px",
+        borderRadius: 11,
+        padding: "7px 12px",
         fontSize: 12,
-        fontWeight: 700,
+        fontWeight: 800,
         cursor: props.disabled ? "not-allowed" : "pointer",
         ...toneStyles[tone],
         ...style,
@@ -261,7 +262,7 @@ export function LoadingState({
         border: "1px solid #E2E8F0",
         borderRadius: 18,
         color: "#64748B",
-        boxShadow: "0 1px 3px rgba(28,53,87,0.06)",
+        boxShadow: "0 10px 28px rgba(28,53,87,0.06)",
         ...style,
       }}
     >
@@ -283,7 +284,7 @@ type SectionHeaderProps = {
 export function SectionHeader({ title, description, action, className = "", style = {} }: SectionHeaderProps) {
   return (
     <div
-      className={className}
+      className={`ui-section-header${className ? ` ${className}` : ""}`}
       style={{
         display: "flex",
         justifyContent: "space-between",
