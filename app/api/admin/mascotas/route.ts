@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   // Cargar profiles solo de los user_ids de esta página
-  const userIds = [...new Set((mascotas || []).map((m: any) => m.user_id))];
+  const userIds = Array.from(new Set((mascotas || []).map((m: any) => m.user_id)));
   const { data: profiles } = userIds.length > 0
     ? await admin.from("profiles").select("id, full_name, is_premium, is_admin").in("id", userIds)
     : { data: [] };
