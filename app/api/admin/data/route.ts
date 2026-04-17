@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     { data: solDescuento },
     { data: solPremium },
     { data: sugerencias },
+    { data: contactos },
     { data: iaUsageRecent },
     { count: iaTotal },
     { data: profileDates },
@@ -57,6 +58,9 @@ export async function GET(req: NextRequest) {
     admin.from("solicitudes_premium").select("*").order("created_at", { ascending: false }),
     admin.from("comunidad_mensajes").select("*")
       .eq("author_name", "SUGERENCIA")
+      .order("created_at", { ascending: false }),
+    admin.from("comunidad_mensajes").select("*")
+      .eq("author_name", "CONTACTO")
       .order("created_at", { ascending: false }),
     admin.from("ia_usage")
       .select("user_id, is_premium, input_tokens, output_tokens, created_at")
@@ -127,6 +131,7 @@ export async function GET(req: NextRequest) {
     perdidas: perdidas || [],
     solicitudes,
     sugerencias: sugerencias || [],
+    contactos: contactos || [],
     iaUsageRecent: iaUsageRecent || [],
     iaTotal: iaTotal || 0,
     iaProfiles: iaProfiles || [],

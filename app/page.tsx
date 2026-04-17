@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 function CuentaEliminadaBanner() {
   const params = useSearchParams();
@@ -97,6 +97,23 @@ const MOCKUP = (
 );
 
 export default function Home() {
+  const [showContacto, setShowContacto] = useState(false);
+  const [contactForm, setContactForm] = useState({ nombre: "", email: "", mensaje: "" });
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactEnviado, setContactEnviado] = useState(false);
+
+  async function handleContacto() {
+    if (!contactForm.mensaje.trim()) return;
+    setContactLoading(true);
+    await fetch("/api/contacto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contactForm),
+    });
+    setContactEnviado(true);
+    setContactLoading(false);
+  }
+
   return (
     <main className="landing-wrapper">
       <Suspense fallback={null}>
@@ -521,7 +538,7 @@ export default function Home() {
           <div className="landing-footer-links" style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center" }}>
             <Link href="/terminos" className="landing-footer-link" style={{ fontSize: 13, color: "#64748B", textDecoration: "none" }}>T&eacute;rminos y Condiciones</Link>
             <Link href="/privacidad" className="landing-footer-link" style={{ fontSize: 13, color: "#64748B", textDecoration: "none" }}>Pol&iacute;tica de Privacidad</Link>
-            <a href="mailto:petpass.app@gmail.com" className="landing-footer-link" style={{ fontSize: 13, color: "#64748B", textDecoration: "none" }}>Contacto</a>
+            <button onClick={() => { setShowContacto(true); setContactEnviado(false); setContactForm({ nombre: "", email: "", mensaje: "" }); }} className="landing-footer-link" style={{ fontSize: 13, color: "#64748B", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit" }}>Contacto</button>
           </div>
           <div style={{ fontSize: 12, color: "#94A3B8" }}>&copy; 2025 PetPass &middot; Salud animal digital &middot; Argentina</div>
           <div style={{ fontSize: 11, color: "#94A3B8", maxWidth: 520, textAlign: "center", lineHeight: 1.6 }}>
@@ -529,6 +546,65 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Modal de contacto */}
+      {showContacto && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+          onClick={() => setShowContacto(false)}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "32px 28px", width: "100%", maxWidth: 420, boxShadow: "0 12px 48px rgba(28,53,87,0.18)" }}
+            onClick={e => e.stopPropagation()}>
+            {contactEnviado ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 44, marginBottom: 12 }}>✓</div>
+                <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1C3557", marginBottom: 8 }}>Mensaje enviado</h3>
+                <p style={{ color: "#64748B", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+                  Recibimos tu consulta y te respondemos a la brevedad.
+                </p>
+                <button onClick={() => setShowContacto(false)} style={{ background: "linear-gradient(135deg,#2CB8AD,#229E94)", color: "#fff", border: "none", borderRadius: 14, padding: "12px 28px", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1C3557", marginBottom: 4 }}>Contacto</h3>
+                <p style={{ color: "#64748B", fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>
+                  Dejanos tu consulta y te respondemos por email.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <input
+                    placeholder="Tu nombre"
+                    value={contactForm.nombre}
+                    onChange={e => setContactForm(f => ({ ...f, nombre: e.target.value }))}
+                    style={{ width: "100%", boxSizing: "border-box" }}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Tu email"
+                    value={contactForm.email}
+                    onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
+                    style={{ width: "100%", boxSizing: "border-box" }}
+                  />
+                  <textarea
+                    placeholder="¿En qué te podemos ayudar?"
+                    value={contactForm.mensaje}
+                    onChange={e => setContactForm(f => ({ ...f, mensaje: e.target.value }))}
+                    rows={4}
+                    style={{ width: "100%", boxSizing: "border-box", background: "#F4F6FB", border: "1px solid #E2E8F0", borderRadius: 12, padding: "12px 14px", fontSize: 14, resize: "none", fontFamily: "inherit", color: "#1C3557" }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                  <button onClick={() => setShowContacto(false)} style={{ flex: 1, background: "transparent", border: "1px solid #E2E8F0", color: "#64748B", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                    Cancelar
+                  </button>
+                  <button onClick={handleContacto} disabled={contactLoading || !contactForm.mensaje.trim()} style={{ flex: 2, background: "linear-gradient(135deg,#2CB8AD,#229E94)", color: "#fff", border: "none", borderRadius: 12, padding: "11px 0", fontWeight: 800, fontSize: 14, cursor: "pointer", opacity: contactLoading || !contactForm.mensaje.trim() ? 0.6 : 1 }}>
+                    {contactLoading ? "Enviando..." : "Enviar mensaje"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

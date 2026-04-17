@@ -79,6 +79,7 @@ export default function AdminPage() {
   const [perdidas, setPerdidas] = useState<any[]>([]);
   const [solicitudes, setSolicitudes] = useState<any[]>([]);
   const [sugerencias, setSugerencias] = useState<any[]>([]);
+  const [contactos, setContactos] = useState<any[]>([]);
   const [iaUsageRecent, setIaUsageRecent] = useState<any[]>([]);
   const [iaTotal, setIaTotal] = useState(0);
   const [iaProfiles, setIaProfiles] = useState<any[]>([]);
@@ -149,6 +150,7 @@ export default function AdminPage() {
       setIaUsageRecent(data.iaUsageRecent || []);
       setIaTotal(data.iaTotal || 0);
       setIaProfiles(data.iaProfiles || []);
+      setContactos(data.contactos || []);
       setLoading(false);
     }
     load();
@@ -228,8 +230,8 @@ export default function AdminPage() {
             {key === "solicitudes" && solicitudesPendientes.length > 0 && (
               <UiBadge color="#F97316" fontSize={10} style={{ marginLeft: 4 }}>{solicitudesPendientes.length}</UiBadge>
             )}
-            {key === "sugerencias" && sugerencias.length > 0 && (
-              <UiBadge color="#8B5CF6" fontSize={10} style={{ marginLeft: 4 }}>{sugerencias.length}</UiBadge>
+            {key === "sugerencias" && (sugerencias.length + contactos.length) > 0 && (
+              <UiBadge color="#8B5CF6" fontSize={10} style={{ marginLeft: 4 }}>{sugerencias.length + contactos.length}</UiBadge>
             )}
           </button>
         ))}
@@ -343,26 +345,63 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tab: Sugerencias */}
+      {/* Tab: Sugerencias + Contactos */}
       {adminTab === "sugerencias" && (
         <div>
-          {sugerencias.length === 0 && (
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 40, textAlign: "center", color: "#64748B", fontSize: 13 }}>
-              No hay sugerencias todavía.
+          {/* Contactos */}
+          {contactos.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#1C3557", marginBottom: 10 }}>
+                📬 Consultas de contacto ({contactos.length})
+              </div>
+              {contactos.map((c: any) => {
+                let datos: any = {};
+                try { datos = JSON.parse(c.message); } catch {}
+                return (
+                  <div key={c.id} style={{ background: "#FFFFFF", border: "1px solid #BFDBFE", borderRadius: 16, padding: "14px 18px", marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 18 }}>📬</span>
+                        <div>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#1C3557" }}>{datos.nombre || "Anónimo"}</span>
+                          {datos.email && <span style={{ fontSize: 11, color: "#3B82F6", marginLeft: 8 }}>{datos.email}</span>}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 11, color: "#64748B", flexShrink: 0 }}>{new Date(c.created_at).toLocaleDateString("es-AR")}</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6, margin: 0 }}>{datos.mensaje}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
-          {sugerencias.map((s: any) => (
-            <div key={s.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "14px 18px", marginBottom: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>💡</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#8B5CF6" }}>Sugerencia de usuario</span>
-                </div>
-                <span style={{ fontSize: 11, color: "#64748B" }}>{new Date(s.created_at).toLocaleDateString("es-AR")}</span>
+
+          {/* Sugerencias */}
+          {sugerencias.length > 0 && (
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#1C3557", marginBottom: 10 }}>
+                💡 Sugerencias de usuarios ({sugerencias.length})
               </div>
-              <p style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6 }}>{s.message}</p>
+              {sugerencias.map((s: any) => (
+                <div key={s.id} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "14px 18px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 18 }}>💡</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#8B5CF6" }}>Sugerencia de usuario</span>
+                    </div>
+                    <span style={{ fontSize: 11, color: "#64748B" }}>{new Date(s.created_at).toLocaleDateString("es-AR")}</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: "#1C3557", lineHeight: 1.6, margin: 0 }}>{s.message}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+
+          {sugerencias.length === 0 && contactos.length === 0 && (
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 40, textAlign: "center", color: "#64748B", fontSize: 13 }}>
+              No hay sugerencias ni consultas todavía.
+            </div>
+          )}
         </div>
       )}
 
