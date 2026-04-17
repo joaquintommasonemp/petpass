@@ -105,6 +105,16 @@ export default function Home() {
         </div>
       </Suspense>
 
+      {/* Header mobile — solo visible en móvil */}
+      <header className="landing-mobile-nav">
+        <img src="/logo-brand-official.png" alt="PetPass" style={{ height: 36, width: "auto", objectFit: "contain" }} />
+        <Link href="/login" style={{
+          background: "linear-gradient(135deg, #2CB8AD, #229E94)",
+          color: "#fff", borderRadius: 10, padding: "8px 18px",
+          fontSize: 13, fontWeight: 800, textDecoration: "none",
+        }}>Entrar</Link>
+      </header>
+
       <nav className="landing-nav">
         <div className="landing-nav-inner">
           <img className="landing-nav-logo" src="/logo-brand-official.png" alt="PetPass" style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }} />

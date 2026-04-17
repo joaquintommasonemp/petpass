@@ -5888,3 +5888,244 @@ svg {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ═══════════════════════════════════════
+   LANDING — MOBILE NAV
+═══════════════════════════════════════ */
+
+.landing-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .landing-mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #E2E8F0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+}
+
+/* ═══════════════════════════════════════
+   LANDING — MOBILE UX IMPROVEMENTS
+═══════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* Hero */
+  .landing-hero-section {
+    padding-bottom: 0;
+  }
+
+  .landing-hero-grid {
+    padding: 36px 20px 32px;
+  }
+
+  .landing-hero-logo {
+    margin-bottom: 14px !important;
+  }
+
+  .landing-hero-logo img {
+    height: 64px !important;
+  }
+
+  .landing-h1 {
+    font-size: 30px !important;
+    letter-spacing: -0.5px;
+    line-height: 1.15 !important;
+  }
+
+  .landing-hero-copy {
+    font-size: 15px !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* CTAs full-width en mobile */
+  .landing-hero-cta {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100%;
+  }
+
+  .landing-primary-cta {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 16px 20px !important;
+    font-size: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .landing-secondary-cta {
+    text-align: center !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* Trust badges */
+  .landing-trust {
+    gap: 10px 20px !important;
+    margin-top: 20px !important;
+  }
+
+  .landing-trust span {
+    font-size: 11px !important;
+  }
+
+  /* Stats row: 1 columna en pantallas muy chicas, mantener 3 si hay espacio */
+  .landing-stats-row {
+    padding: 20px 16px 0 !important;
+    gap: 8px !important;
+  }
+
+  /* Secciones */
+  .landing-section {
+    padding: 24px 16px 0 !important;
+  }
+
+  .landing-section-title {
+    font-size: 22px !important;
+  }
+
+  /* Mockup standalone */
+  .landing-mockup-standalone {
+    padding: 20px 16px 0 !important;
+  }
+
+  /* Human section */
+  .landing-human-section {
+    padding: 24px 16px !important;
+  }
+
+  .landing-human-card {
+    padding: 24px 18px !important;
+  }
+
+  .landing-human-title {
+    font-size: 20px !important;
+  }
+
+  /* CTA final */
+  .landing-cta {
+    padding: 24px 16px 48px !important;
+    text-align: center;
+  }
+
+  /* Floating cards — ocultar en mobile para no sobreponer */
+  .landing-floating-card-ai,
+  .landing-floating-card-vaccine {
+    display: none !important;
+  }
+
+  /* Footer */
+  .landing-footer {
+    padding: 24px 20px !important;
+  }
+
+  .landing-footer-inner {
+    flex-direction: column !important;
+    gap: 10px !important;
+    text-align: center;
+  }
+
+  .landing-footer-links {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 12px 20px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .landing-h1 {
+    font-size: 26px !important;
+  }
+
+  .landing-stats-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ═══════════════════════════════════════
+   AUTH — MOBILE UX IMPROVEMENTS
+═══════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .auth-wrapper {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 20px max(32px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .auth-form-shell,
+  .auth-register-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+  }
+
+  .auth-card {
+    border-radius: 24px !important;
+    padding: 24px 20px !important;
+    box-shadow: 0 4px 24px rgba(28,53,87,0.10) !important;
+  }
+
+  .auth-card-title {
+    font-size: 22px !important;
+  }
+
+  .auth-form input:not([type="checkbox"]),
+  .auth-form select {
+    min-height: 52px !important;
+    font-size: 16px !important; /* evita zoom automático en iOS */
+    padding: 13px 15px !important;
+  }
+
+  .auth-submit,
+  .auth-link-submit {
+    min-height: 52px !important;
+    font-size: 15px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Logo mobile en auth */
+  .auth-mobile-logo img {
+    height: 52px !important;
+  }
+
+  .auth-mobile-logo {
+    margin-bottom: 20px !important;
+    justify-content: center;
+    display: flex;
+  }
+
+  .auth-switch {
+    margin-top: 18px !important;
+    font-size: 14px !important;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .auth-right {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .auth-card {
+    padding: 20px 16px !important;
+  }
+}
