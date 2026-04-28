@@ -60,13 +60,22 @@ export default function Dashboard() {
     setAuthToken(session.access_token);
     const user = session.user;
     const [{ data: prof }, { data }, { data: familiaRows }, { data: urgs }] = await Promise.all([
-      supabase.from("profiles").select("is_admin, is_premium").eq("id", user.id).single(),
-      supabase.from("mascotas").select("*").eq("user_id", user.id).eq("active", true),
+      supabase.from("profiles").select("is_admin, is_premium, trial_until, mp_subscription_status").eq("id", user.id).single(),
+      supabase.from("mascotas").select("*, familia_token").eq("user_id", user.id).eq("active", true),
       supabase.from("mascota_familia").select("mascota_id").eq("user_id", user.id),
       supabase.from("urgencias_contactos").select("*").eq("user_id", user.id).order("created_at"),
     ]);
     if (prof?.is_admin) setIsAdmin(true);
-    if (prof?.is_premium || prof?.is_admin) setIsPremium(true);
+    const trialExpired = prof?.trial_until && new Date(prof.trial_until) <= new Date() && prof?.mp_subscription_status !== "authorized";
+    if ((prof?.is_premium && !trialExpired) || prof?.is_admin) setIsPremium(true);
+
+    // Activar trial automático para usuarios existentes sin trial
+    if (!prof?.trial_until && !prof?.is_premium && prof?.mp_subscription_status !== "authorized") {
+      fetch("/api/activar-trial", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {});
+    }
     setUrgencias(urgs || []);
     const familiaIds = (familiaRows || []).map((r: any) => r.mascota_id);
     let shared: any[] = [];
@@ -92,7 +101,9 @@ export default function Dashboard() {
   }
 
   function copyFamiliaLink(mascotaId: string) {
-    const url = `${window.location.origin}/acceso/${mascotaId}`;
+    const mascota = mascotas.find(m => m.id === mascotaId);
+    const token = mascota?.familia_token || mascotaId;
+    const url = `${window.location.origin}/acceso/${mascotaId}?t=${token}`;
     navigator.clipboard.writeText(url);
     setCopiedFamilia(true);
     setTimeout(() => setCopiedFamilia(false), 2500);

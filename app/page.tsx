@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 
 function CuentaEliminadaBanner() {
   const params = useSearchParams();
@@ -98,6 +98,11 @@ const MOCKUP = (
 
 export default function Home() {
   const [showContacto, setShowContacto] = useState(false);
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) localStorage.setItem("petpass_ref", ref.toLowerCase().trim());
+  }, []);
   const [contactForm, setContactForm] = useState({ nombre: "", email: "", mensaje: "" });
   const [contactLoading, setContactLoading] = useState(false);
   const [contactEnviado, setContactEnviado] = useState(false);
@@ -253,7 +258,7 @@ export default function Home() {
         {[
           ["\uD83D\uDC3E", "+5.000", "mascotas registradas"],
           ["\uD83E\uDD16", "24/7", "Vet IA disponible"],
-          ["\uD83D\uDC89", "100%", "gratis para empezar"],
+          ["\uD83D\uDC89", "Gratis", "para empezar"],
         ].map(([icon, val, label]) => (
           <div key={String(label)} className="landing-stat-card" style={{
             background: "#FFFFFF",
@@ -346,14 +351,17 @@ export default function Home() {
           <div style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -40, left: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
           <div style={{ fontSize: 36, marginBottom: 12 }}>✨</div>
+          <div style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "6px 18px", fontSize: 13, fontWeight: 800, color: "#fff", display: "inline-block", marginBottom: 14, letterSpacing: 0.3 }}>
+            🎁 Gratis hasta el 31/05 · Sin tarjeta
+          </div>
           <h2 style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 10, letterSpacing: "-0.5px", lineHeight: 1.2 }}>
             Llevá el cuidado al siguiente nivel
           </h2>
           <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, marginBottom: 24, lineHeight: 1.7, maxWidth: 480 }}>
-            Con Premium tenés Vet IA ilimitada, análisis de fotos, recordatorios automáticos de vacunas y descuentos exclusivos. Solo <strong style={{ color: "#fff" }}>$3.000/mes</strong>.
+            Vet IA ilimitada, análisis de fotos, recordatorios de vacunas y descuentos exclusivos. <strong style={{ color: "#fff" }}>Todo gratis hasta el 31/05</strong>, después $3.000/mes.
           </p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 28 }}>
-            {["🤖 Vet IA ilimitada", "📷 Análisis de fotos", "💊 Recordatorios", "🎁 Descuentos"].map(b => (
+            {["🩺 Vet IA ilimitada", "📸 Análisis de fotos", "🔔 Recordatorios", "🏷️ Descuentos"].map(b => (
               <span key={b} style={{
                 background: "rgba(255,255,255,0.15)", color: "#fff",
                 borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 700,
@@ -361,16 +369,16 @@ export default function Home() {
               }}>{b}</span>
             ))}
           </div>
-          <Link href="/premium" style={{
+          <Link href="/registro" style={{
             background: "linear-gradient(135deg, #EC4899, #DB2777)",
             color: "#fff", borderRadius: 14, padding: "14px 36px",
             fontWeight: 900, fontSize: 15, textDecoration: "none",
             boxShadow: "0 4px 20px rgba(236,72,153,0.4)",
             display: "inline-block",
           }}>
-            Ver plan Premium →
+            Empezar gratis →
           </Link>
-          <div style={{ marginTop: 12, color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Cancelás cuando querés</div>
+          <div style={{ marginTop: 12, color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Sin tarjeta · Sin compromiso · Cancelás cuando querés</div>
         </div>
       </div>
 
@@ -399,8 +407,8 @@ export default function Home() {
           }}>
             Empezar ahora &rarr;
           </Link>
-          <div style={{ marginTop: 20, color: "#94A3B8", fontSize: 13, fontWeight: 600 }}>
-            Sin tarjeta para empezar &middot; Pod&eacute;s mejorar tu plan cuando quieras
+          <div style={{ marginTop: 20, color: "#64748B", fontSize: 13, fontWeight: 600 }}>
+            Gratis hasta el 31/05 &middot; Sin tarjeta &middot; Sin compromiso
           </div>
         </div>
       </div>
@@ -415,7 +423,7 @@ export default function Home() {
           {[
             {
               q: "¿Es gratis PetPass?",
-              a: "Sí. Podés registrar tu mascota, llevar el historial clínico, generar el carnet QR y usar la comunidad sin pagar nada. El plan Premium ($3.000/mes) desbloquea la Vet IA ilimitada, análisis de fotos y beneficios exclusivos.",
+              a: "Sí. Durante el lanzamiento (hasta el 31/05) todos los usuarios tienen acceso completo gratis, sin tarjeta. Después podés seguir con el plan gratuito (historial, QR, comunidad) o suscribirte a Premium ($3.000/mes) para Vet IA ilimitada, análisis de fotos y más.",
             },
             {
               q: "¿Qué incluye el plan Premium?",
@@ -423,7 +431,7 @@ export default function Home() {
             },
             {
               q: "¿Puedo tener más de una mascota?",
-              a: "El plan gratuito incluye 1 mascota. Con Premium podés registrar mascotas ilimitadas. Cada una tiene su propio perfil, historial, carnet QR y acceso al Vet IA con su contexto médico.",
+              a: "Con el plan gratuito podés registrar mascotas sin límite. Cada una tiene su propio perfil, historial y carnet QR. El acceso al Vet IA y análisis de fotos requiere Premium.",
             },
             {
               q: "¿Cómo funciona el Vet IA?",
@@ -504,7 +512,7 @@ export default function Home() {
           </h2>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.7, marginBottom: 24 }}>
             La app nativa para iOS y Android está en camino.<br />
-            Todo lo que ya usás, con notificaciones y acceso sin internet.
+            Todo lo que ya usás, con notificaciones push.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             {[

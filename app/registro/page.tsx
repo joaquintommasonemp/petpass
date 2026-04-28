@@ -60,11 +60,16 @@ export default function Registro() {
     });
     if (signUpError) { setError(signUpError.message); setLoading(false); return; }
     if (data.user) {
-      await supabase.from("profiles").insert({
+      const refCode = typeof window !== "undefined" ? localStorage.getItem("petpass_ref") : null;
+      const { error: insertError } = await supabase.from("profiles").insert({
         id: data.user.id,
         full_name: `${form.first_name.trim()} ${form.last_name.trim()}`,
         phone: form.phone.trim(),
+        is_premium: true,
+        trial_until: "2026-05-31T23:59:59.000Z",
+        ...(refCode ? { referred_by: refCode } : {}),
       });
+      if (!insertError && refCode) localStorage.removeItem("petpass_ref");
     }
     if (!data.session) {
       setRegisteredEmail(form.email.trim());
