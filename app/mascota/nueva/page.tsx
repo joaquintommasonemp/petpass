@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import BreedCombobox from "@/components/BreedCombobox";
 
 const RAZAS: Record<string, string[]> = {
   Perro: [
@@ -86,6 +87,20 @@ const RAZAS: Record<string, string[]> = {
     "Otro exótico",
   ],
 };
+
+function sortRazas(razas: string[]): string[] {
+  const top = ["Mestizo", "Mestizo / Común", "Europeo Común", "Criollo Argentino"];
+  const bottom = ["Otro", "Otro exótico"];
+  const pinTop = razas.filter(r => top.includes(r));
+  const pinBottom = razas.filter(r => bottom.includes(r));
+  const middle = razas.filter(r => !top.includes(r) && !bottom.includes(r));
+  middle.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  return [...pinTop, ...middle, ...pinBottom];
+}
+
+const RAZAS_SORTED: Record<string, string[]> = Object.fromEntries(
+  Object.entries(RAZAS).map(([k, v]) => [k, sortRazas(v)])
+);
 
 const MUNICIPIOS_POR_PROVINCIA: Record<string, string[]> = {
   "CABA": [
@@ -660,7 +675,15 @@ export default function NuevaMascota() {
         </div>
 
         {/* Raza */}
-        {form.type && sel("Raza *", "breed", RAZAS[form.type] || [])}
+        {form.type && (
+          <BreedCombobox
+            key={form.type}
+            value={form.breed}
+            onChange={v => update("breed", v)}
+            options={RAZAS_SORTED[form.type] || []}
+            label="Raza *"
+          />
+        )}
 
         {/* Fecha nacimiento */}
         <div>

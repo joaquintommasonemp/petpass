@@ -3,27 +3,39 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import BreedCombobox from "@/components/BreedCombobox";
 
-const RAZAS_COMUNES = [
-  // Perros
-  "Mestizo", "Caniche/Poodle", "Chihuahua", "Dachshund/Teckel", "Yorkshire Terrier",
-  "Maltés", "Pomerania", "Bichón Frisé", "Shih Tzu", "Schnauzer Miniatura",
-  "Pug / Carlino", "Bulldog Francés", "Bulldog Inglés", "Beagle", "Border Collie",
-  "Labradoodle", "Goldendoodle", "Shiba Inu", "Basset Hound", "Whippet",
-  "Corgi Galés Pembroke", "Australian Shepherd / Pastor Australiano", "Labrador",
-  "Golden Retriever", "Pastor Alemán", "Husky Siberiano", "Alaskan Malamute",
-  "Akita Inu", "Rottweiler", "Doberman", "Boxer", "Dálmata", "Gran Danés",
-  "Dogo Argentino", "Cane Corso", "Bull Mastiff", "Malinois / Pastor Belga",
-  "Chow Chow", "Samoyedo", "Bull Terrier", "Rhodesian Ridgeback", "Schnauzer Gigante",
-  // Gatos
-  "Mestizo / Común", "Europeo Común", "Persa", "Angora", "Siamés", "Maine Coon",
-  "Ragdoll", "British Shorthair", "Scottish Fold", "Bengalí", "Sphynx / Esfinge",
-  "Abisinio", "Burmés", "Russian Azul", "Himalayo", "Noruego de los Bosques",
-  "Siberiano", "Exotic Shorthair",
-  // Otros
-  "Conejo", "Cobayo / Guinea pig", "Chinchilla", "Hurón", "Loro / Cotorra",
-  "Canario", "Tortuga de tierra", "Iguana Verde", "Dragón Barbudo", "Otro",
-];
+const RAZAS_COMUNES = (() => {
+  const top = ["Mestizo", "Mestizo / Común", "Europeo Común"];
+  const bottom = ["Otro"];
+  const all = [
+    "Mestizo", "Mestizo / Común", "Europeo Común",
+    // Perros
+    "Abisinio", "Affenpinscher", "Akita Americano", "Akita Inu", "Alaskan Malamute",
+    "American Staffordshire / Pitbull", "Australian Shepherd / Pastor Australiano",
+    "Basset Hound", "Beagle", "Bengalí", "Bichón Frisé", "Border Collie", "Boxer",
+    "British Shorthair", "Bulldog Francés", "Bulldog Inglés", "Bull Mastiff",
+    "Bull Terrier", "Burmés", "Caniche/Poodle", "Cane Corso", "Canario", "Chihuahua",
+    "Chinchilla", "Chow Chow", "Cobayo / Guinea pig", "Cockapoo", "Cocker Spaniel Inglés",
+    "Collie / Lassie", "Conejo", "Corgi Galés Pembroke", "Dachshund/Teckel", "Dálmata",
+    "Doberman", "Dogo Argentino", "Dragón Barbudo", "Exotic Shorthair", "Galgo Español",
+    "Golden Retriever", "Goldendoodle", "Gran Danés", "Himalayo", "Husky Siberiano",
+    "Hurón", "Iguana Verde", "Jack Russell Terrier", "Labradoodle", "Labrador",
+    "Lhasa Apso", "Loro / Cotorra", "Maine Coon", "Malinois / Pastor Belga",
+    "Maltés", "Maltipoo", "Mastín Napolitano", "Noruego de los Bosques",
+    "Pastor Alemán", "Persa", "Pinscher Miniatura", "Pomerania", "Pug / Carlino",
+    "Ragdoll", "Rhodesian Ridgeback", "Rottweiler", "Russian Azul", "Samoyedo",
+    "Schnauzer Gigante", "Schnauzer Mediano", "Schnauzer Miniatura", "Scottish Fold",
+    "Setter Inglés", "Shar Pei", "Shetland Sheepdog / Sheltie", "Shiba Inu",
+    "Shih Tzu", "Siamés", "Siberiano", "Silky Terrier", "Spitz Alemán",
+    "Sphynx / Esfinge", "Staffordshire Bull Terrier", "Terranova / Newfoundland",
+    "Tortuga de tierra", "Vizsla / Braco Húngaro", "Weimaraner", "West Highland Terrier",
+    "Whippet", "Yorkshire Terrier", "Otro",
+  ];
+  const middle = all.filter(r => !top.includes(r) && !bottom.includes(r));
+  middle.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  return [...top, ...middle, ...bottom];
+})();
 
 const OBRAS_SOCIALES = [
   "OSPAN", "Vetify", "Iké Mascotas", "Companion", "HolaVet",
@@ -359,17 +371,12 @@ export default function EditarMascota() {
             {/* Raza */}
             <div>
               <label style={labelStyle}>Raza</label>
-              <input
-                type="text"
-                list="razas-list"
+              <BreedCombobox
                 value={form.breed}
-                onChange={e => update("breed", e.target.value)}
-                placeholder="Ej: Labrador, Siamés..."
-                style={inputStyle}
+                onChange={v => update("breed", v)}
+                options={RAZAS_COMUNES}
+                placeholder="Buscá o seleccioná una raza..."
               />
-              <datalist id="razas-list">
-                {RAZAS_COMUNES.map(r => <option key={r} value={r} />)}
-              </datalist>
             </div>
 
             {/* Sexo */}
