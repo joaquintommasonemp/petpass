@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | PetPass",
   },
   description:
-    "La app para el día a día de tu mascota. Historial clínico, vacunas, Vet IA 24/7, alertas de mascotas perdidas y mucho más.",
+    "Gratis hasta el 31/05 · La app para el día a día de tu mascota. Historial clínico, vacunas, Vet IA 24/7, carnet QR y mucho más.",
   keywords: [
     "mascota",
     "veterinaria",
@@ -41,17 +41,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "PetPass",
-    title: "PetPass — La app para el día a día de tu mascota",
+    title: "PetPass 🐾 — Gratis hasta el 31/05 · Sin tarjeta",
     description:
-      "La app para el día a día de tu mascota. Historial clínico, vacunas, Vet IA 24/7 y alertas de mascotas perdidas.",
+      "La app para el día a día de tu mascota. Historial clínico, Vet IA 24/7, carnet QR y más. Gratis hasta el 31/05, sin tarjeta.",
     images: [{ url: "/og-image.png", width: 1024, height: 1024, alt: "PetPass — El pasaporte digital de tu mascota" }],
     locale: "es_AR",
     url: BASE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "PetPass 🐾 — La app para el día a día de tu mascota",
-    description: "La app para el día a día de tu mascota. Historial, vacunas, Vet IA 24/7 y más.",
+    title: "PetPass 🐾 — Gratis hasta el 31/05 · Sin tarjeta",
+    description: "La app para el día a día de tu mascota. Historial, Vet IA 24/7, carnet QR y más. Gratis hasta el 31/05.",
     images: ["/og-image.png"],
   },
   manifest: "/manifest.json",

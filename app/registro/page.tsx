@@ -104,9 +104,12 @@ export default function Registro() {
                 Te enviamos un link de confirmaci&oacute;n a<br />
                 <strong style={{ color: "#1C3557" }}>{registeredEmail}</strong>
               </p>
-              <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>
-                Hac&eacute; clic en el link del email para activar tu cuenta. Despu&eacute;s pod&eacute;s iniciar sesi&oacute;n normalmente.
+              <p style={{ color: "#64748B", fontSize: 13, lineHeight: 1.6, marginBottom: 8 }}>
+                Hac&eacute; clic en el link del email para activar tu cuenta.
               </p>
+              <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "#92400E", marginBottom: 20, lineHeight: 1.6 }}>
+                &#128204; Si no ves el mail, revis&aacute; la carpeta de <strong>spam o correo no deseado</strong>.
+              </div>
               {resent ? (
                 <div className="auth-success-feedback" style={{ background: "#E5F7F6", border: "1px solid #B2E8E5", borderRadius: 10, padding: "10px 16px", color: "#2CB8AD", fontSize: 13, fontWeight: 700, marginBottom: 16 }}>
                   Te reenviamos el email.
